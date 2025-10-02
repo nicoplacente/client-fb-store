@@ -7,13 +7,14 @@ import { socket } from "../libs/socket";
 import { envConfig } from "@/config";
 import { useRef } from "react";
 import { handleLogin } from "../hooks/login";
-import useUsername from "../hooks/use-username";
+import { AuthContext } from "@/context/auth-context/auth-context";
+import useAppContext from "@/context/use-app-context";
 
 export default function LoginModal({ onClose }) {
   const [token, setToken] = useState("");
   const [copied, setCopied] = useState(false);
 
-  const { setUsername } = useUsername();
+  const { setUsername } = useAppContext(AuthContext);
 
   const hasRun = useRef(false);
 
@@ -85,7 +86,7 @@ export default function LoginModal({ onClose }) {
           </code>
           <button
             onClick={handleCopy}
-            className="text-white hover:text-green-400 transition ml-2"
+            className="text-white hover:text-green-400 transition ml-2 cursor-pointer"
             title="Copiar comando"
           >
             <FaRegCopy />

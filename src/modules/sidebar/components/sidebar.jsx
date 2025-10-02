@@ -1,20 +1,18 @@
 "use client";
 import { menuItems } from "@/modules/sidebar/libs/menu-items";
 import { IconLogout, IconPin } from "@tabler/icons-react";
-import { useState } from "react";
 import { usePathname } from "next/navigation";
-import Header from "../../header/components/header";
 import Link from "next/link";
 import { handleLogout } from "@/modules/auth/hooks/logout";
-import useUsername from "@/modules/auth/hooks/use-username";
+import useAppContext from "@/context/use-app-context";
+import { AuthContext } from "@/context/auth-context/auth-context";
+import { SidebarContext } from "@/context/sidebar-context/sidebar-context";
 
-export default function Sidebar({ children }) {
-  const [expanded, setExpanded] = useState(false);
-  const [hovered, setHovered] = useState(false);
+export default function Sidebar() {
+  const { expanded, setExpanded, setHovered, isOpen } = useAppContext(SidebarContext);
   const pathname = usePathname();
-  const { username, setUsername } = useUsername();
+  const { username, setUsername } = useAppContext(AuthContext);
 
-  const isOpen = expanded || hovered;
 
   return (
     <aside
@@ -24,10 +22,10 @@ export default function Sidebar({ children }) {
       onMouseLeave={() => !expanded && setHovered(false)}
     >
       <button
-        className={`absolute transition-all duration-300 hover:scale-110 hover:shadow-[inset_0px_1px_5px_#f005] -right-3 top-6 w-6 h-6 flex items-center justify-center bg-neutral-900 rounded-full border border-neutral-800 z-30 ${
+        className={`absolute transition-all duration-300 hover:scale-110 cursor-pointer hover:shadow-[inset_0px_1px_5px_#f005] -right-3 top-6 w-6 h-6 flex items-center justify-center bg-neutral-900 rounded-full border border-neutral-800 z-30 ${
           expanded ? "rotate-12" : "-rotate-45"
         }`}
-        aria-label={expanded ? "Cerrar sidebar" : "Abrir sidebar"}
+        aria-label={expanded ? "Desfijar sidebar" : "Fijar sidebar"}
         onClick={() => setExpanded(!expanded)}
       >
         <IconPin size={16} />
