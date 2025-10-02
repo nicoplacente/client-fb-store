@@ -2,6 +2,9 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Sidebar from "@/modules/sidebar/components/sidebar";
 import Header from "@/modules/header/components/header";
+import { AuthProvider } from "@/context/auth-context/auth-context";
+import { SidebarProvider } from "@/context/sidebar-context/sidebar-context";
+import ContentWrapper from "@/context/content-wrapper";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -14,17 +17,17 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className={`${montserrat.className} antialiased flex flex-col`}>
-        <div className="min-h-screen w-full text-gray-100">
-          <Header />
-          <Sidebar />
-          <main
-            className={`transition-all duration-300 pt-20 ${
-              isOpen ? "ml-72" : "ml-16"
-            } p-6`}
-          >
-            {children}
-          </main>
-        </div>
+        <AuthProvider>
+          <SidebarProvider>
+          <div className="min-h-screen w-full text-gray-100">
+            <Header />
+            <Sidebar />
+            <ContentWrapper>
+              {children}
+            </ContentWrapper>
+          </div>
+          </SidebarProvider>
+        </AuthProvider>
       </body>
     </html>
   );
