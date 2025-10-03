@@ -19,7 +19,7 @@ export default function RankingPage() {
 
   const loadRanking = async () => {
     try {
-      const res = await fetch(`${envConfig.SERVER_URL}/ranking`);
+      const res = await fetch(`${envConfig.API_RANKING}`);
       if (!res.ok) throw new Error("Error al cargar ranking");
       const data = await res.json();
       setRanking(data);
