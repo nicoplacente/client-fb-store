@@ -9,10 +9,10 @@ import { AuthContext } from "@/context/auth-context/auth-context";
 import { SidebarContext } from "@/context/sidebar-context/sidebar-context";
 
 export default function Sidebar() {
-  const { expanded, setExpanded, setHovered, isOpen } = useAppContext(SidebarContext);
+  const { expanded, setExpanded, setHovered, isOpen } =
+    useAppContext(SidebarContext);
   const pathname = usePathname();
-  const { username, setUsername } = useAppContext(AuthContext);
-
+  const { user, logout } = useAppContext(AuthContext); // usamos user y logout
 
   return (
     <aside
@@ -62,10 +62,10 @@ export default function Sidebar() {
           })}
         </nav>
 
-        {username && (
+        {user && (
           <button
             aria-label="Cerrar sesión"
-            onClick={() => handleLogout(setUsername)}
+            onClick={logout}
             className="space-y-2 border-t border-gray-800 pt-2 cursor-pointer"
           >
             <div className="flex items-center px-3 py-2 rounded-md bg-red-800/50 hover:bg-red-800/70 transition-colors duration-300">
