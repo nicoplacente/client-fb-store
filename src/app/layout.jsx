@@ -5,6 +5,8 @@ import Header from "@/modules/header/components/header";
 import { AuthProvider } from "@/context/auth-context/auth-context";
 import { SidebarProvider } from "@/context/sidebar-context/sidebar-context";
 import ContentWrapper from "@/context/content-wrapper";
+import { getUserFromSession } from "@/modules/auth/libs/auth";
+import { cookies } from "next/headers";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -13,19 +15,20 @@ export const metadata = {
   description: "FrancoBertello74 Store",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const cookieStore = cookies();
+  const user = await getUserFromSession(cookieStore);
+
   return (
     <html lang="es">
       <body className={`${montserrat.className} antialiased flex flex-col`}>
-        <AuthProvider>
+        <AuthProvider initialUser={user}>
           <SidebarProvider>
-          <div className="min-h-screen w-full text-gray-100">
-            <Header />
-            <Sidebar />
-            <ContentWrapper>
-              {children}
-            </ContentWrapper>
-          </div>
+            <div className="min-h-screen w-full text-gray-100">
+              <Header />
+              <Sidebar />
+              <ContentWrapper>{children}</ContentWrapper>
+            </div>
           </SidebarProvider>
         </AuthProvider>
       </body>
