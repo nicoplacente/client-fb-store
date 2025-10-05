@@ -1,5 +1,5 @@
-const SERVER_URL = "http://localhost:3001";
-// const SERVER_URL = "https://server-fb-store.onrender.com";
+// const SERVER_URL = "http://localhost:3001";
+const SERVER_URL = "https://server-fb-store.onrender.com";
 
 export const envConfig = {
   SERVER_URL,
