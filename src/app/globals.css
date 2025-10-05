@@ -1,7 +1,19 @@
 @import "tailwindcss";
+@import "swiper/css";
+@import "swiper/css/effect-coverflow";
+@import "swiper/css/autoplay";
 
 @theme {
   --color-primary: #f00;
+  --color-gradient: "bg-gradient-to-br from-neutral-800 via-neutral-900 to-primary";
+}
+
+html,
+body {
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+  scrollbar-color: #500 #000;
+  color-scheme: dark;
 }
 
 body {
@@ -10,5 +22,4 @@ body {
       no-repeat center center;
   background-size: cover;
   color: var(--color-primary-text);
-  color-scheme: dark;
 }

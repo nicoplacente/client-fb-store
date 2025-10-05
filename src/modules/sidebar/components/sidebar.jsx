@@ -1,18 +1,17 @@
 "use client";
 import { menuItems } from "@/modules/sidebar/libs/menu-items";
-import { IconLogout, IconPin } from "@tabler/icons-react";
+import { IconPin, IconPower } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
-import Link from "next/link";
-import { handleLogout } from "@/modules/auth/hooks/logout";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import { SidebarContext } from "@/context/sidebar-context/sidebar-context";
+import LinkSidebar from "../ui/link-sidebar";
 
 export default function Sidebar() {
   const { expanded, setExpanded, setHovered, isOpen } =
     useAppContext(SidebarContext);
   const pathname = usePathname();
-  const { user, logout } = useAppContext(AuthContext); // usamos user y logout
+  const { user, logout } = useAppContext(AuthContext);
 
   return (
     <aside
@@ -37,27 +36,13 @@ export default function Sidebar() {
             const isActive = pathname === item.href;
 
             return (
-              <Link
+              <LinkSidebar
+                item={item}
                 key={idx}
-                href={item.href}
-                className={`flex items-center px-3 py-2 rounded-md transition-colors
-                    ${
-                      isActive
-                        ? "bg-gradient-to-br from-neutral-800 via-neutral-900 to-primary text-white"
-                        : "hover:bg-neutral-900"
-                    }`}
-              >
-                <div className="w-6 flex items-center justify-center">
-                  {item.icon}
-                </div>
-                <span
-                  className={`whitespace-nowrap transition-all duration-300 ${
-                    isOpen ? "opacity-100 ml-3" : "opacity-0 -ml-10"
-                  }`}
-                >
-                  {item.name}
-                </span>
-              </Link>
+                isActive={isActive}
+                idx={idx}
+                isOpen={isOpen}
+              />
             );
           })}
         </nav>
@@ -70,7 +55,7 @@ export default function Sidebar() {
           >
             <div className="flex items-center px-3 py-2 rounded-md bg-red-800/50 hover:bg-red-800/70 transition-colors duration-300">
               <div className="w-6 flex items-center justify-center">
-                <IconLogout size={20} />
+                <IconPower size={20} />
               </div>
               <div
                 className={`whitespace-nowrap  transition-all duration-300 ${

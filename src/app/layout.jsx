@@ -7,6 +7,7 @@ import { SidebarProvider } from "@/context/sidebar-context/sidebar-context";
 import ContentWrapper from "@/context/content-wrapper";
 import { getUserFromSession } from "@/modules/auth/libs/auth";
 import { cookies } from "next/headers";
+import { Toaster } from "sonner";
 
 const montserrat = Montserrat({ subsets: ["latin"] });
 
@@ -29,6 +30,7 @@ export default async function RootLayout({ children }) {
               <Sidebar />
               <ContentWrapper>{children}</ContentWrapper>
             </div>
+            <Toaster position="bottom-right" richColors closeButton />
           </SidebarProvider>
         </AuthProvider>
       </body>

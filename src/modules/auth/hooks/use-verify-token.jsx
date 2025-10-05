@@ -5,7 +5,6 @@ import { envConfig } from "@/config";
 
 export default function useVerifyToken() {
   const [token, setToken] = useState("");
-  const [copied, setCopied] = useState(false);
   const [error, setError] = useState(null);
   const hasRun = useRef(false);
 
@@ -28,12 +27,6 @@ export default function useVerifyToken() {
     }
   }
 
-  function handleCopy() {
-    navigator.clipboard.writeText(`!verify ${token}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
-  }
-
   useEffect(() => {
     if (hasRun.current) return;
     hasRun.current = true;
@@ -43,5 +36,5 @@ export default function useVerifyToken() {
     return () => clearInterval(interval);
   }, []);
 
-  return { token, copied, handleCopy, error };
+  return { token, error };
 }

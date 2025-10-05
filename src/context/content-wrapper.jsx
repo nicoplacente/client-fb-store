@@ -7,7 +7,7 @@ export default function ContentWrapper({ children }) {
 
   return (
     <main
-      className={`transition-all duration-300 pt-20 ${
+      className={`transition-discrete space-y-96 duration-300 pt-20 ${
         isOpen ? "ml-72" : "ml-16"
       } p-6`}
     >
