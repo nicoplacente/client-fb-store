@@ -1,12 +1,14 @@
 "use client";
 import { envConfig } from "@/config";
 import { createContext, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export const AuthContext = createContext(null);
 
 export function AuthProvider({ children, initialUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(!initialUser);
+  const router = useRouter();
 
   useEffect(() => {
     if (initialUser) {
@@ -49,8 +51,10 @@ export function AuthProvider({ children, initialUser }) {
       });
     } catch (err) {
       console.error("Error en logout:", err);
+    } finally {
+      setUser(null);
+      router.replace("/");
     }
-    setUser(null);
   };
 
   const refreshUser = async () => {

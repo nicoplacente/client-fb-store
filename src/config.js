@@ -10,4 +10,5 @@ export const envConfig = {
   API_REFRESH_USER: `${SERVER_URL}/api/refresh`,
   API_COMPLETE_VERIFY: `${SERVER_URL}/api/complete-verify`,
   API_REQUEST_TOKEN: `${SERVER_URL}/api/request-token`,
+  API_REFRESH_TOKEN: `${SERVER_URL}/api/refresh-token`,
 };
