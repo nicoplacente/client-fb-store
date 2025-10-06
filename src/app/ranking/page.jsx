@@ -53,10 +53,11 @@ export default function RankingPage() {
 
   return (
     <SectionContainer>
-      <h1 className="text-center mb-5 text-2xl font-bold mt-5">Ranking</h1>
-
-      <table className="w-2/3 mx-auto bg-[#1c1c1c]">
-        <thead>
+      <table
+        className="max-w-5xl w-full mx-auto table border-separate rounded-xl overflow-hidden shadow-2xl"
+        style={{ borderSpacing: "0 4px" }}
+      >
+        <thead className="bg-neutral-900">
           <tr>
             <TH>
               <RankingSearchBar onSearch={setSearchTerm} />
@@ -69,16 +70,16 @@ export default function RankingPage() {
             <TH>Rec. Chat</TH>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="">
           {!ranking ? (
             <tr>
-              <td colSpan={7} className="p-3 text-center">
+              <td colSpan={7} className="p-2 text-center">
                 Cargando...
               </td>
             </tr>
           ) : filteredRanking.length === 0 ? (
             <tr>
-              <td colSpan={7} className="p-3 text-center">
+              <td colSpan={7} className="p-2 text-center">
                 No se encontraron usuarios
               </td>
             </tr>
@@ -93,21 +94,32 @@ export default function RankingPage() {
               return (
                 <tr
                   key={user.username}
-                  className="even:bg-[#181818] border-b border-[#333]"
+                  className={`bg-gradient-to-r w-full from-neutral-800/90 to-neutral-900/70 text-sm backdrop-blur-3xl shadow-2xl [&>td]:text-center [&>td]:px-2  ${
+                    index > 2 ? "[&>td]:py-1.5" : "[&>td]:py-5"
+                  }  `}
                 >
-                  <td className="flex gap-2 items-center p-3">
-                    <span className="text-yellow-400 font-bold">
-                      {startIndex + index + 1}
+                  <td className="flex gap-2 items-center">
+                    <span className="text-neutral-500 font-bold">
+                      {index > 2 ? (
+                        <span className="w-9 block text-center">
+                          {startIndex + index + 1}
+                        </span>
+                      ) : (
+                        <span className="w-9 block text-center">
+                          {rankIcon}
+                        </span>
+                      )}
                     </span>
-                    {rankIcon && <span>{rankIcon}</span>}
-                    <span className="w-full">{user.username}</span>
+                    <span className="w-full text-start font-semibold">
+                      {user.username}
+                    </span>
                   </td>
-                  <td className="p-3">{`${hours}h ${minutes}m`}</td>
-                  <td className="p-3">{user.totalPoints}</td>
-                  <td className="p-3">{user.chests}</td>
-                  <td className="p-3">{user.streak}</td>
-                  <td className="p-3">{user.totalMessages}</td>
-                  <td className="p-3">{user.recChat}</td>
+                  <td>{`${hours}h ${minutes}m`}</td>
+                  <td>{user.totalPoints}</td>
+                  <td>{user.chests}</td>
+                  <td>{user.streak}</td>
+                  <td>{user.totalMessages}</td>
+                  <td>{user.recChat}</td>
                 </tr>
               );
             })
@@ -116,7 +128,7 @@ export default function RankingPage() {
       </table>
 
       {ranking && ranking.length > ITEMS_PER_PAGE && (
-        <div className="flex w-2/3 mx-auto justify-between items-center gap-3 mt-4 p-2">
+        <div className="flex mx-auto justify-between items-center gap-3 mt-4 p-2">
           <div>
             <span className="text-sm">
               Página {currentPage} de {totalPages}
