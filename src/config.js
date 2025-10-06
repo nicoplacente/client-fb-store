@@ -1,5 +1,6 @@
 // const SERVER_URL = "http://localhost:3001";
 const SERVER_URL = "https://server-fb-store.onrender.com";
+const { JWT_SECRET, NODE_ENV } = process.env;
 
 export const envConfig = {
   SERVER_URL,
@@ -11,4 +12,6 @@ export const envConfig = {
   API_COMPLETE_VERIFY: `${SERVER_URL}/api/complete-verify`,
   API_REQUEST_TOKEN: `${SERVER_URL}/api/request-token`,
   API_REFRESH_TOKEN: `${SERVER_URL}/api/refresh-token`,
+  JWT_SECRET,
+  NODE_ENV,
 };

@@ -9,8 +9,9 @@ export async function getUserFromSession() {
 
   const res = await fetch(`${envConfig.API_USER}`, {
     headers: {
-      cookie: `accessToken=${accessToken}`, 
+      cookie: `accessToken=${accessToken}`,
     },
+    credentials: "include",
     cache: "no-store",
   });
 

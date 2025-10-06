@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import { jwtVerify } from "jose";
 import { envConfig } from "./config";
 
+const isProd = envConfig.NODE_ENV === "production";
 
 async function verifyJWT(token) {
   try {
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET);
+    const secret = new TextEncoder().encode(envConfig.JWT_SECRET);
     return await jwtVerify(token, secret);
   } catch (err) {
     return null;
@@ -32,6 +33,7 @@ export async function middleware(request) {
       try {
         const res = await fetch(`${envConfig.API_REFRESH_TOKEN}`, {
           method: "POST",
+          credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ refreshToken }),
         });
@@ -42,8 +44,14 @@ export async function middleware(request) {
           const response = NextResponse.next();
           response.cookies.set("accessToken", data.accessToken, {
             httpOnly: true,
-            secure: true,
-            sameSite: "strict",
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
+            path: "/",
+          });
+          response.cookies.set("refreshToken", data.refreshToken, {
+            httpOnly: true,
+            secure: isProd,
+            sameSite: isProd ? "none" : "lax",
             path: "/",
           });
 
