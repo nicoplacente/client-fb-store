@@ -12,6 +12,7 @@ export default function useVerifyToken() {
     try {
       const res = await fetch(`${envConfig.API_REQUEST_TOKEN}`, {
         method: "POST",
+        credentials: "include",
       });
       const data = await res.json();
       if (data.error) {
