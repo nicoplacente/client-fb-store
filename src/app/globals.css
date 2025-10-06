@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@import "swiper/css";
-@import "swiper/css/effect-coverflow";
-@import "swiper/css/autoplay";
 
 @theme {
   --color-primary: #f00;

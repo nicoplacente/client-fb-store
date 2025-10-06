@@ -2,6 +2,11 @@
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import { EffectCoverflow, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/effect-coverflow";
+import "swiper/css/autoplay";
+import coins from "@/assets/coins.webp";
+import Image from "next/image";
 
 export default function SpreenCarrousel() {
   const items = [
@@ -81,23 +86,23 @@ export default function SpreenCarrousel() {
 
   return (
     <Swiper
-      className="w-full"
+      className="w-full [mask-image:linear-gradient(to_right,transparent_0%,black_10%,black_90%,transparent_100%)]"
       modules={[EffectCoverflow, Autoplay]}
       effect="coverflow"
       grabCursor={true}
       centeredSlides={true}
       slidesPerView="auto"
-      loop={true} // Loop infinito real
-      speed={1000} // Velocidad de transición
+      loop={true}
+      speed={1000}
       autoplay={{
-        delay: 5000, // Tiempo entre slides
+        delay: 5000,
         disableOnInteraction: false,
-        pauseOnMouseEnter: true, // Pausa al pasar mouse
+        pauseOnMouseEnter: true,
       }}
       coverflowEffect={{
-        rotate: 0, // Rotación leve si querés
-        stretch: 0, // Sin superposición
-        depth: 200, // Profundidad 3D
+        rotate: -9,
+        stretch: 0,
+        depth: 200,
         modifier: 2,
         slideShadows: true,
       }}
@@ -106,7 +111,7 @@ export default function SpreenCarrousel() {
       {items.map((item, i) => (
         <SwiperSlide
           key={i}
-          className="!flex !flex-col !gap-6 py-6 !items-center !justify-between bg-[#1119] backdrop-blur-3xl rounded-2xl !w-1/4 !h-[500px]  text-white shadow-lg"
+          className="!flex !flex-col py-9 !items-center !justify-between bg-[#111a] backdrop-blur-3xl rounded-2xl !w-[425px] !h-[500px]  text-white shadow-lg"
         >
           <div className="!flex !flex-col gap-6 ">
             <img
@@ -116,15 +121,16 @@ export default function SpreenCarrousel() {
               height={150}
               className="rounded-xl mx-auto object-cover aspect-square"
             />
-            <h3 className="font-semibold text-3xl text-center font-mono text-balance">
+            <h3 className="font-bold text-4xl text-center font-mono text-balance">
               {item.title}
             </h3>
           </div>
           <div className="!flex !flex-col gap-6 !justify-end">
-            <p className="text-yellow-400 font-extrabold text-4xl text-center">
-              🪙 {item.price.toLocaleString()}
+            <p className="text-yellow-400 font-extrabold text-4xl text-center flex items-center gap-2">
+              <Image src={coins} alt="Coins" className="size-8" />
+              {item.price.toLocaleString()}
             </p>
-            <p className="text-neutral-700 font-normal text-center">
+            <p className="text-neutral-500 font-normal text-center">
               {item.stock} restantes
             </p>
           </div>
