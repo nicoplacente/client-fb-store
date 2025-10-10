@@ -85,9 +85,8 @@ export default function RankingPage() {
             </tr>
           ) : (
             paginatedRanking.map((user, index) => {
-              const totalMinutes = Math.floor((user.watchTimePoints / 48) * 10);
-              const hours = Math.floor(totalMinutes / 60);
-              const minutes = totalMinutes % 60;
+              const hours = Math.floor(user.watchTimePoints / 60);
+              const minutes = user.watchTimePoints % 60;
 
               const rankIcon = getRankIcon(startIndex + index);
 
