@@ -1,6 +1,5 @@
-// const SERVER_URL = "http://localhost:3001";
-const SERVER_URL = "https://server-fb-store.onrender.com";
-const { JWT_SECRET, NODE_ENV } = process.env;
+process.loadEnvFile()
+const { JWT_SECRET, NODE_ENV, SERVER_URL } = process.env;
 
 export const envConfig = {
   SERVER_URL,
