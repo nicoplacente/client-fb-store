@@ -1,14 +1,18 @@
 "use client";
 
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import {
   IconDeviceFloppy,
   IconEdit,
   IconGift,
+  IconBell,
   IconCoins,
+  IconMessageCircle,
   IconPackage,
   IconPlus,
   IconRefresh,
+  IconSend,
+  IconShoppingBag,
   IconTicket,
   IconTrash,
   IconX,
@@ -40,6 +44,7 @@ import {
 } from "@/modules/giveaways/libs/giveaway-api";
 import {
   deleteSupportTicket,
+  createSupportMessage,
   getSupportTickets,
   normalizeTicket,
   updateSupportTicket,
@@ -49,6 +54,7 @@ const tabs = [
   { id: "products", label: "Productos", icon: IconPackage },
   { id: "credits", label: "Creditos", icon: IconCoins },
   { id: "giveaways", label: "Sorteos", icon: IconGift },
+  { id: "redemptions", label: "Canjes", icon: IconShoppingBag },
   { id: "support", label: "Soporte", icon: IconTicket },
 ];
 
@@ -88,6 +94,25 @@ function formatDateInput(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 16);
+}
+
+function formatDateTime(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function formatProductStatus(status) {
+  if (status === "active") return "Activo";
+  if (status === "disabled") return "Deshabilitado";
+  if (status === "hidden") return "Fuera de tienda";
+  return status || "Activo";
 }
 
 function productToForm(product) {
@@ -177,9 +202,16 @@ export default function DashboardPage() {
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedCreditPackageId, setSelectedCreditPackageId] = useState(null);
   const [selectedGiveawayId, setSelectedGiveawayId] = useState(null);
+  const [productModalOpen, setProductModalOpen] = useState(false);
+  const [creditPackageModalOpen, setCreditPackageModalOpen] = useState(false);
+  const [giveawayModalOpen, setGiveawayModalOpen] = useState(false);
+  const [supportReplies, setSupportReplies] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const knownPurchaseTicketsRef = useRef(new Set());
+  const knownSupportTicketsRef = useRef(new Set());
+  const dashboardLoadedRef = useRef(false);
 
   const normalizedProducts = useMemo(
     () => products.map(normalizeProduct).filter((product) => product.id),
@@ -204,25 +236,66 @@ export default function DashboardPage() {
     [tickets]
   );
 
+  const redemptionTickets = useMemo(
+    () => normalizedTickets.filter((ticket) => ticket.category === "market"),
+    [normalizedTickets]
+  );
+
+  const openSupportTickets = useMemo(
+    () =>
+      normalizedTickets.filter(
+        (ticket) => ticket.category !== "market" && ticket.status !== "closed"
+      ),
+    [normalizedTickets]
+  );
+
   const stats = useMemo(
     () => ({
       products: normalizedProducts.length,
       credits: normalizedCreditPackages.length,
       giveaways: normalizedGiveaways.length,
-      tickets: normalizedTickets.filter((ticket) => ticket.status !== "closed")
+      tickets: openSupportTickets.length,
+      purchases: redemptionTickets.filter((ticket) => ticket.status !== "closed")
         .length,
     }),
     [
       normalizedProducts,
       normalizedCreditPackages,
       normalizedGiveaways,
-      normalizedTickets,
+      openSupportTickets,
+      redemptionTickets,
     ]
   );
 
-  async function loadDashboard() {
+  function trackDashboardNotifications(ticketData) {
+    const purchases = ticketData.filter((ticket) => ticket.category === "market");
+    const support = ticketData.filter((ticket) => ticket.category !== "market");
+
+    if (dashboardLoadedRef.current) {
+      const newPurchases = purchases.filter(
+        (ticket) => !knownPurchaseTicketsRef.current.has(ticket.id)
+      );
+      const newSupport = support.filter(
+        (ticket) => !knownSupportTicketsRef.current.has(ticket.id)
+      );
+
+      if (newPurchases.length > 0) {
+        toast.info(`${newPurchases.length} compra nueva en dashboard`);
+      }
+
+      if (newSupport.length > 0) {
+        toast.info(`${newSupport.length} consulta nueva en soporte`);
+      }
+    }
+
+    knownPurchaseTicketsRef.current = new Set(purchases.map((ticket) => ticket.id));
+    knownSupportTicketsRef.current = new Set(support.map((ticket) => ticket.id));
+    dashboardLoadedRef.current = true;
+  }
+
+  async function loadDashboard({ showLoading = true } = {}) {
     try {
-      setLoading(true);
+      if (showLoading) setLoading(true);
       setError("");
 
       const [productData, creditPackageData, giveawayData, ticketData] =
@@ -237,10 +310,11 @@ export default function DashboardPage() {
       setCreditPackages(creditPackageData);
       setGiveaways(giveawayData);
       setTickets(ticketData);
+      trackDashboardNotifications(ticketData);
     } catch (err) {
       setError(err.message || "No se pudo cargar el dashboard");
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
   }
 
@@ -253,21 +327,31 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!canManageDashboard) return;
     loadDashboard();
+    const intervalId = window.setInterval(() => {
+      loadDashboard({ showLoading: false });
+    }, 30000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
   }, [canManageDashboard]);
 
   function resetProductForm() {
     setSelectedProductId(null);
     setProductForm(emptyProduct);
+    setProductModalOpen(false);
   }
 
   function resetCreditPackageForm() {
     setSelectedCreditPackageId(null);
     setCreditPackageForm(emptyCreditPackage);
+    setCreditPackageModalOpen(false);
   }
 
   function resetGiveawayForm() {
     setSelectedGiveawayId(null);
     setGiveawayForm(emptyGiveaway);
+    setGiveawayModalOpen(false);
   }
 
   function submitProduct(event) {
@@ -432,6 +516,26 @@ export default function DashboardPage() {
     });
   }
 
+  function replyToTicket(ticket) {
+    const message = String(supportReplies[ticket.id] || "").trim();
+
+    if (!message) {
+      toast.error("Escribi una respuesta");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        await createSupportMessage(ticket.id, message);
+        setSupportReplies((current) => ({ ...current, [ticket.id]: "" }));
+        toast.success("Respuesta enviada");
+        await loadDashboard();
+      } catch (err) {
+        toast.error(err.message || "No se pudo responder");
+      }
+    });
+  }
+
   function removeTicket(ticket) {
     if (!window.confirm(`Eliminar ticket "${ticket.subject}"?`)) return;
 
@@ -497,10 +601,11 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-5">
         <Stat label="Productos" value={stats.products} />
         <Stat label="Packs de creditos" value={stats.credits} />
         <Stat label="Sorteos" value={stats.giveaways} />
+        <Stat label="Compras pendientes" value={stats.purchases} />
         <Stat label="Tickets abiertos" value={stats.tickets} />
       </div>
 
@@ -540,11 +645,18 @@ export default function DashboardPage() {
           loading={loading}
           isPending={isPending}
           selectedId={selectedProductId}
+          isFormOpen={productModalOpen}
+          onCreate={() => {
+            setSelectedProductId(null);
+            setProductForm(emptyProduct);
+            setProductModalOpen(true);
+          }}
           onSubmit={submitProduct}
           onCancel={resetProductForm}
           onEdit={(product) => {
             setSelectedProductId(product.id);
             setProductForm(productToForm(product));
+            setProductModalOpen(true);
           }}
           onDelete={removeProduct}
         />
@@ -558,11 +670,18 @@ export default function DashboardPage() {
           loading={loading}
           isPending={isPending}
           selectedId={selectedCreditPackageId}
+          isFormOpen={creditPackageModalOpen}
+          onCreate={() => {
+            setSelectedCreditPackageId(null);
+            setCreditPackageForm(emptyCreditPackage);
+            setCreditPackageModalOpen(true);
+          }}
           onSubmit={submitCreditPackage}
           onCancel={resetCreditPackageForm}
           onEdit={(creditPackage) => {
             setSelectedCreditPackageId(creditPackage.id);
             setCreditPackageForm(creditPackageToForm(creditPackage));
+            setCreditPackageModalOpen(true);
           }}
         />
       ) : null}
@@ -575,11 +694,18 @@ export default function DashboardPage() {
           loading={loading}
           isPending={isPending}
           selectedId={selectedGiveawayId}
+          isFormOpen={giveawayModalOpen}
+          onCreate={() => {
+            setSelectedGiveawayId(null);
+            setGiveawayForm(emptyGiveaway);
+            setGiveawayModalOpen(true);
+          }}
           onSubmit={submitGiveaway}
           onCancel={resetGiveawayForm}
           onEdit={(giveaway) => {
             setSelectedGiveawayId(giveaway.id);
             setGiveawayForm(giveawayToForm(giveaway));
+            setGiveawayModalOpen(true);
           }}
           onDelete={removeGiveaway}
         />
@@ -587,10 +713,26 @@ export default function DashboardPage() {
 
       {activeTab === "support" ? (
         <SupportPanel
-          tickets={normalizedTickets}
+          tickets={openSupportTickets}
+          replies={supportReplies}
+          setReplies={setSupportReplies}
           loading={loading}
           isPending={isPending}
           onStatusChange={updateTicketStatus}
+          onReply={replyToTicket}
+          onDelete={removeTicket}
+        />
+      ) : null}
+
+      {activeTab === "redemptions" ? (
+        <RedemptionsPanel
+          tickets={redemptionTickets}
+          replies={supportReplies}
+          setReplies={setSupportReplies}
+          loading={loading}
+          isPending={isPending}
+          onStatusChange={updateTicketStatus}
+          onReply={replyToTicket}
           onDelete={removeTicket}
         />
       ) : null}
@@ -614,134 +756,31 @@ function ProductsPanel({
   loading,
   isPending,
   selectedId,
+  isFormOpen,
+  onCreate,
   onSubmit,
   onCancel,
   onEdit,
   onDelete,
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
-      <form
-        onSubmit={onSubmit}
-        className="h-fit rounded-lg border border-white/10 bg-neutral-950/80 p-5"
-      >
-        <PanelHeader
-          title={selectedId ? "Editar producto" : "Nuevo producto"}
-          subtitle="Market y carousel"
-          canCancel={Boolean(selectedId)}
-          onCancel={onCancel}
-        />
-
-        <div className="grid gap-4">
-          <Field label="Nombre">
-            <TextInput
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, title: event.target.value }))
-              }
-              required
-            />
-          </Field>
-          <Field label="Descripcion">
-            <TextArea
-              value={form.description}
-              rows={4}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Precio">
-              <TextInput
-                type="number"
-                min="0"
-                value={form.price}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    price: event.target.value,
-                  }))
-                }
-                required
-              />
-            </Field>
-            <Field label="Stock">
-              <TextInput
-                type="number"
-                min="0"
-                value={form.stock}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    stock: event.target.value,
-                  }))
-                }
-                required
-              />
-            </Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Categoria">
-              <TextInput
-                value={form.category}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    category: event.target.value,
-                  }))
-                }
-              />
-            </Field>
-            <Field label="Estado">
-              <SelectInput
-                value={form.status}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    status: event.target.value,
-                  }))
-                }
-              >
-                <option value="active">Activo</option>
-                <option value="draft">Borrador</option>
-                <option value="archived">Archivado</option>
-              </SelectInput>
-            </Field>
-          </div>
-          <Field label="Imagen">
-            <TextInput
-              value={form.imageUrl}
-              placeholder="https://..."
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  imageUrl: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <label className="flex items-center gap-3 text-sm font-medium text-neutral-300">
-            <input
-              type="checkbox"
-              checked={form.featured}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  featured: event.target.checked,
-                }))
-              }
-              className="size-4 accent-red-500"
-            />
-            Mostrar como destacado
-          </label>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Productos</h2>
+          <p className="text-sm text-neutral-500">
+            Gestiona visibilidad, stock y destacados del market.
+          </p>
         </div>
-
-        <SubmitButton isPending={isPending} selectedId={selectedId} />
-      </form>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+        >
+          <IconPlus size={18} />
+          Crear nuevo producto
+        </button>
+      </div>
 
       <ItemsGrid
         loading={loading}
@@ -752,14 +791,146 @@ function ProductsPanel({
             key={product.id}
             title={product.title}
             meta={`${product.price.toLocaleString()} creditos`}
-            detail={`${product.stock} disponibles - ${product.status}`}
+            detail={`${
+              product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
+            } - ${formatProductStatus(product.status)}`}
             imageUrl={product.imageUrl}
+            featured={product.featured}
+            unavailable={product.stock <= 0 || product.status !== "active"}
             icon={<IconPackage size={42} />}
             onEdit={() => onEdit(product)}
             onDelete={() => onDelete(product)}
           />
         )}
       />
+
+      {isFormOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={onSubmit}
+            role="dialog"
+            aria-modal="true"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black"
+          >
+            <PanelHeader
+              title={selectedId ? "Editar producto" : "Nuevo producto"}
+              subtitle="Market y carousel"
+              canCancel
+              onCancel={onCancel}
+            />
+
+            <div className="grid gap-4">
+              <Field label="Nombre">
+                <TextInput
+                  value={form.title}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, title: event.target.value }))
+                  }
+                  required
+                />
+              </Field>
+              <Field label="Descripcion">
+                <TextArea
+                  value={form.description}
+                  rows={4}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Precio">
+                  <TextInput
+                    type="number"
+                    min="0"
+                    value={form.price}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        price: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </Field>
+                <Field label="Stock">
+                  <TextInput
+                    type="number"
+                    min="0"
+                    value={form.stock}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        stock: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Categoria">
+                  <TextInput
+                    value={form.category}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        category: event.target.value,
+                      }))
+                    }
+                  />
+                </Field>
+                <Field label="Estado">
+                  <SelectInput
+                    value={form.status}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        status: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="active">Activo / habilitado</option>
+                    <option value="disabled">Deshabilitado</option>
+                    <option value="hidden">Quitar de la tienda</option>
+                  </SelectInput>
+                </Field>
+              </div>
+              <Field label="Imagen">
+                <TextInput
+                  value={form.imageUrl}
+                  placeholder="https://..."
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      imageUrl: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <label className="flex items-center gap-3 text-sm font-medium text-neutral-300">
+                <input
+                  type="checkbox"
+                  checked={form.featured}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      featured: event.target.checked,
+                    }))
+                  }
+                  className="size-4 accent-red-500"
+                />
+                Mostrar como destacado
+              </label>
+            </div>
+
+            <SubmitButton isPending={isPending} selectedId={selectedId} />
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -771,109 +942,30 @@ function CreditPackagesPanel({
   loading,
   isPending,
   selectedId,
+  isFormOpen,
+  onCreate,
   onSubmit,
   onCancel,
   onEdit,
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
-      <form
-        onSubmit={onSubmit}
-        className="h-fit rounded-lg border border-white/10 bg-neutral-950/80 p-5"
-      >
-        <PanelHeader
-          title={selectedId ? "Editar pack" : "Nuevo pack"}
-          subtitle="Creditos comprados con puntos"
-          canCancel={Boolean(selectedId)}
-          onCancel={onCancel}
-        />
-
-        <div className="grid gap-4">
-          <Field label="Nombre">
-            <TextInput
-              value={form.name}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, name: event.target.value }))
-              }
-              required
-            />
-          </Field>
-          <Field label="Descripcion">
-            <TextArea
-              value={form.description}
-              rows={4}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Creditos que recibe">
-              <TextInput
-                type="number"
-                min="1"
-                value={form.credits}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    credits: event.target.value,
-                  }))
-                }
-                required
-              />
-            </Field>
-            <Field label="Costo en puntos">
-              <TextInput
-                type="number"
-                min="1"
-                step="0.01"
-                value={form.pointsCost}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    pointsCost: event.target.value,
-                  }))
-                }
-                required
-              />
-            </Field>
-          </div>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Orden">
-              <TextInput
-                type="number"
-                value={form.sortOrder}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    sortOrder: event.target.value,
-                  }))
-                }
-              />
-            </Field>
-            <Field label="Estado">
-              <SelectInput
-                value={form.status}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    status: event.target.value,
-                  }))
-                }
-              >
-                <option value="active">Activo</option>
-                <option value="draft">Borrador</option>
-                <option value="archived">Archivado</option>
-              </SelectInput>
-            </Field>
-          </div>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Creditos</h2>
+          <p className="text-sm text-neutral-500">
+            Gestiona packs de creditos comprados con puntos.
+          </p>
         </div>
-
-        <SubmitButton isPending={isPending} selectedId={selectedId} />
-      </form>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+        >
+          <IconPlus size={18} />
+          Crear nuevo pack
+        </button>
+      </div>
 
       <ItemsGrid
         loading={loading}
@@ -890,6 +982,110 @@ function CreditPackagesPanel({
           />
         )}
       />
+
+      {isFormOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={onSubmit}
+            role="dialog"
+            aria-modal="true"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black"
+          >
+            <PanelHeader
+              title={selectedId ? "Editar pack" : "Nuevo pack"}
+              subtitle="Creditos comprados con puntos"
+              canCancel
+              onCancel={onCancel}
+            />
+
+            <div className="grid gap-4">
+              <Field label="Nombre">
+                <TextInput
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, name: event.target.value }))
+                  }
+                  required
+                />
+              </Field>
+              <Field label="Descripcion">
+                <TextArea
+                  value={form.description}
+                  rows={4}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Creditos que recibe">
+                  <TextInput
+                    type="number"
+                    min="1"
+                    value={form.credits}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        credits: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </Field>
+                <Field label="Costo en puntos">
+                  <TextInput
+                    type="number"
+                    min="1"
+                    step="0.01"
+                    value={form.pointsCost}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        pointsCost: event.target.value,
+                      }))
+                    }
+                    required
+                  />
+                </Field>
+              </div>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Orden">
+                  <TextInput
+                    type="number"
+                    value={form.sortOrder}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        sortOrder: event.target.value,
+                      }))
+                    }
+                  />
+                </Field>
+                <Field label="Estado">
+                  <SelectInput
+                    value={form.status}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        status: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="active">Activo</option>
+                    <option value="draft">Borrador</option>
+                    <option value="archived">Archivado</option>
+                  </SelectInput>
+                </Field>
+              </div>
+            </div>
+
+            <SubmitButton isPending={isPending} selectedId={selectedId} />
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -901,128 +1097,31 @@ function GiveawaysPanel({
   loading,
   isPending,
   selectedId,
+  isFormOpen,
+  onCreate,
   onSubmit,
   onCancel,
   onEdit,
   onDelete,
 }) {
   return (
-    <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
-      <form
-        onSubmit={onSubmit}
-        className="h-fit rounded-lg border border-white/10 bg-neutral-950/80 p-5"
-      >
-        <PanelHeader
-          title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
-          subtitle="Premios y participacion"
-          canCancel={Boolean(selectedId)}
-          onCancel={onCancel}
-        />
-
-        <div className="grid gap-4">
-          <Field label="Titulo">
-            <TextInput
-              value={form.title}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, title: event.target.value }))
-              }
-              required
-            />
-          </Field>
-          <Field label="Premio">
-            <TextInput
-              value={form.prize}
-              onChange={(event) =>
-                setForm((current) => ({ ...current, prize: event.target.value }))
-              }
-              required
-            />
-          </Field>
-          <Field label="Costo para participar (creditos)">
-            <TextInput
-              type="number"
-              min="0"
-              step="1"
-              value={form.entryCost}
-              placeholder="0"
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  entryCost: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Descripcion">
-            <TextArea
-              value={form.description}
-              rows={4}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  description: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <Field label="Imagen">
-            <TextInput
-              value={form.imageUrl}
-              placeholder="https://..."
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  imageUrl: event.target.value,
-                }))
-              }
-            />
-          </Field>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Field label="Estado">
-              <SelectInput
-                value={form.status}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    status: event.target.value,
-                  }))
-                }
-              >
-                <option value="active">Activo</option>
-                <option value="draft">Borrador</option>
-                <option value="closed">Cerrado</option>
-                <option value="archived">Archivado</option>
-              </SelectInput>
-            </Field>
-            <Field label="Inicio">
-              <TextInput
-                type="datetime-local"
-                value={form.startsAt}
-                onChange={(event) =>
-                  setForm((current) => ({
-                    ...current,
-                    startsAt: event.target.value,
-                  }))
-                }
-              />
-            </Field>
-          </div>
-          <Field label="Fin">
-            <TextInput
-              type="datetime-local"
-              value={form.endsAt}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  endsAt: event.target.value,
-                }))
-              }
-            />
-          </Field>
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-semibold text-white">Sorteos</h2>
+          <p className="text-sm text-neutral-500">
+            Gestiona premios, fechas y participacion.
+          </p>
         </div>
-
-        <SubmitButton isPending={isPending} selectedId={selectedId} />
-      </form>
+        <button
+          type="button"
+          onClick={onCreate}
+          className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+        >
+          <IconPlus size={18} />
+          Crear nuevo sorteo
+        </button>
+      </div>
 
       <ItemsGrid
         loading={loading}
@@ -1045,62 +1144,368 @@ function GiveawaysPanel({
           />
         )}
       />
+
+      {isFormOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+          <form
+            onSubmit={onSubmit}
+            role="dialog"
+            aria-modal="true"
+            className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black"
+          >
+            <PanelHeader
+              title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
+              subtitle="Premios y participacion"
+              canCancel
+              onCancel={onCancel}
+            />
+
+            <div className="grid gap-4">
+              <Field label="Titulo">
+                <TextInput
+                  value={form.title}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, title: event.target.value }))
+                  }
+                  required
+                />
+              </Field>
+              <Field label="Premio">
+                <TextInput
+                  value={form.prize}
+                  onChange={(event) =>
+                    setForm((current) => ({ ...current, prize: event.target.value }))
+                  }
+                  required
+                />
+              </Field>
+              <Field label="Costo para participar (creditos)">
+                <TextInput
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={form.entryCost}
+                  placeholder="0"
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      entryCost: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <Field label="Descripcion">
+                <TextArea
+                  value={form.description}
+                  rows={4}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      description: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <Field label="Imagen">
+                <TextInput
+                  value={form.imageUrl}
+                  placeholder="https://..."
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      imageUrl: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Estado">
+                  <SelectInput
+                    value={form.status}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        status: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="active">Activo</option>
+                    <option value="draft">Borrador</option>
+                    <option value="closed">Cerrado</option>
+                    <option value="archived">Archivado</option>
+                  </SelectInput>
+                </Field>
+                <Field label="Inicio">
+                  <TextInput
+                    type="datetime-local"
+                    value={form.startsAt}
+                    onChange={(event) =>
+                      setForm((current) => ({
+                        ...current,
+                        startsAt: event.target.value,
+                      }))
+                    }
+                  />
+                </Field>
+              </div>
+              <Field label="Fin">
+                <TextInput
+                  type="datetime-local"
+                  value={form.endsAt}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      endsAt: event.target.value,
+                    }))
+                  }
+                />
+              </Field>
+            </div>
+
+            <SubmitButton isPending={isPending} selectedId={selectedId} />
+          </form>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function SupportPanel({ tickets, loading, isPending, onStatusChange, onDelete }) {
+function SupportPanel({
+  tickets,
+  replies,
+  setReplies,
+  loading,
+  isPending,
+  onStatusChange,
+  onReply,
+  onDelete,
+}) {
   return (
-    <div className="rounded-lg border border-white/10 bg-neutral-950/70 p-5">
+    <div className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-5">
       {loading ? (
         <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
           Cargando tickets...
         </p>
       ) : tickets.length === 0 ? (
         <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
-          No hay tickets para mostrar.
+          No hay consultas abiertas.
+        </p>
+      ) : (
+        <TicketGroup
+          title="Consultas abiertas"
+          icon={<IconMessageCircle size={19} />}
+          emptyText="No hay consultas abiertas."
+          tickets={tickets}
+          replies={replies}
+          setReplies={setReplies}
+          isPending={isPending}
+          onStatusChange={onStatusChange}
+          onReply={onReply}
+          onDelete={onDelete}
+        />
+      )}
+    </div>
+  );
+}
+
+function RedemptionsPanel({
+  tickets,
+  replies,
+  setReplies,
+  loading,
+  isPending,
+  onStatusChange,
+  onReply,
+  onDelete,
+}) {
+  return (
+    <div className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-5">
+      {loading ? (
+        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
+          Cargando canjes...
+        </p>
+      ) : tickets.length === 0 ? (
+        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
+          No hay canjes para mostrar.
+        </p>
+      ) : (
+        <TicketGroup
+          title="Canjes de productos"
+          icon={<IconShoppingBag size={19} />}
+          emptyText="No hay canjes para mostrar."
+          tickets={tickets}
+          replies={replies}
+          setReplies={setReplies}
+          isPending={isPending}
+          onStatusChange={onStatusChange}
+          onReply={onReply}
+          onDelete={onDelete}
+        />
+      )}
+    </div>
+  );
+}
+
+function TicketGroup({
+  title,
+  icon,
+  emptyText,
+  tickets,
+  replies,
+  setReplies,
+  isPending,
+  onStatusChange,
+  onReply,
+  onDelete,
+}) {
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-3">
+        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-white">
+          {icon}
+          {title}
+        </h2>
+        <span className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-neutral-900 px-2 py-1 text-xs text-neutral-400">
+          <IconBell size={14} />
+          {tickets.filter((ticket) => ticket.status !== "closed").length}
+        </span>
+      </div>
+      {tickets.length === 0 ? (
+        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-5 text-sm text-neutral-400">
+          {emptyText}
         </p>
       ) : (
         <div className="grid gap-3">
           {tickets.map((ticket) => (
-            <article
+            <TicketCard
               key={ticket.id}
-              className="grid gap-4 rounded-lg border border-white/10 bg-neutral-900/60 p-4 lg:grid-cols-[1fr_220px_auto]"
-            >
-              <div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="font-semibold text-white">{ticket.subject}</h3>
-                  <span className="rounded-md bg-white/5 px-2 py-1 text-xs text-neutral-400">
-                    {ticket.category}
-                  </span>
-                  <span className="text-xs text-neutral-500">
-                    {ticket.username}
-                  </span>
-                </div>
-                <p className="mt-2 text-sm text-neutral-400">{ticket.message}</p>
-              </div>
-              <SelectInput
-                value={ticket.status}
-                disabled={isPending}
-                onChange={(event) => onStatusChange(ticket, event.target.value)}
-              >
-                <option value="open">Abierto</option>
-                <option value="in_progress">En proceso</option>
-                <option value="closed">Cerrado</option>
-              </SelectInput>
-              <button
-                onClick={() => onDelete(ticket)}
-                disabled={isPending}
-                className="inline-flex size-10 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20 disabled:opacity-50"
-                aria-label={`Eliminar ticket ${ticket.subject}`}
-              >
-                <IconTrash size={17} />
-              </button>
-            </article>
+              ticket={ticket}
+              reply={replies[ticket.id] || ""}
+              setReply={(value) =>
+                setReplies((current) => ({ ...current, [ticket.id]: value }))
+              }
+              isPending={isPending}
+              onStatusChange={onStatusChange}
+              onReply={onReply}
+              onDelete={onDelete}
+            />
           ))}
         </div>
       )}
-    </div>
+    </section>
+  );
+}
+
+function TicketCard({
+  ticket,
+  reply,
+  setReply,
+  isPending,
+  onStatusChange,
+  onReply,
+  onDelete,
+}) {
+  const hasInitialMessage = ticket.messages.some(
+    (message) => message.senderRole === "user" && message.message === ticket.message
+  );
+  const messages = hasInitialMessage
+    ? ticket.messages
+    : [
+        {
+          id: `${ticket.id}-initial`,
+          senderRole: "user",
+          message: ticket.message,
+          username: ticket.username,
+          createdAt: ticket.createdAt,
+        },
+        ...ticket.messages,
+      ];
+
+  return (
+    <article className="grid gap-4 rounded-lg border border-white/10 bg-neutral-900/60 p-4">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-semibold text-white">{ticket.subject}</h3>
+            <span className="rounded-md bg-white/5 px-2 py-1 text-xs text-neutral-400">
+              {ticket.category}
+            </span>
+            <span className="text-xs text-neutral-500">{ticket.username}</span>
+            {ticket.createdAt ? (
+              <span className="text-xs text-neutral-600">
+                {formatDateTime(ticket.createdAt)}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 text-sm text-neutral-500">
+            Estado actual: {ticket.status}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <SelectInput
+            value={ticket.status}
+            disabled={isPending}
+            onChange={(event) => onStatusChange(ticket, event.target.value)}
+          >
+            <option value="open">Abierto</option>
+            <option value="in_progress">En proceso</option>
+            <option value="closed">Cerrado</option>
+          </SelectInput>
+          <button
+            onClick={() => onDelete(ticket)}
+            disabled={isPending}
+            className="inline-flex size-10 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20 disabled:opacity-50"
+            aria-label={`Eliminar ticket ${ticket.subject}`}
+          >
+            <IconTrash size={17} />
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-2 rounded-md border border-white/10 bg-neutral-950/60 p-3">
+        {messages.map((message) => {
+          const fromAdmin = message.senderRole === "admin";
+          return (
+            <div
+              key={message.id}
+              className={`rounded-md border p-3 ${
+                fromAdmin
+                  ? "ml-auto border-red-400/20 bg-red-500/10"
+                  : "border-white/10 bg-neutral-900/80"
+              } max-w-[86%]`}
+            >
+              <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
+                <span className={fromAdmin ? "text-red-200" : "text-neutral-300"}>
+                  {fromAdmin ? "Dashboard" : message.username}
+                </span>
+                {message.createdAt ? <span>{formatDateTime(message.createdAt)}</span> : null}
+              </div>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-300">
+                {message.message}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
+        <TextArea
+          value={reply}
+          rows={3}
+          placeholder="Responder consulta"
+          disabled={isPending}
+          onChange={(event) => setReply(event.target.value)}
+        />
+        <button
+          onClick={() => onReply(ticket)}
+          disabled={isPending || !reply.trim()}
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        >
+          <IconSend size={17} />
+          Responder
+        </button>
+      </div>
+    </article>
   );
 }
 
@@ -1150,21 +1555,47 @@ function ItemsGrid({ loading, emptyText, items, renderItem }) {
           {emptyText}
         </div>
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2">{items.map(renderItem)}</div>
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+          {items.map(renderItem)}
+        </div>
       )}
     </div>
   );
 }
 
-function AdminCard({ title, meta, detail, imageUrl, icon, onEdit, onDelete }) {
+function AdminCard({
+  title,
+  meta,
+  detail,
+  imageUrl,
+  featured = false,
+  unavailable = false,
+  icon,
+  onEdit,
+  onDelete,
+}) {
   return (
-    <article className="overflow-hidden rounded-lg border border-white/10 bg-neutral-900/60">
-      <div className="aspect-[4/3] bg-neutral-900">
+    <article
+      className={`overflow-hidden rounded-lg border bg-neutral-900/60 ${
+        featured ? "border-yellow-300/40" : "border-white/10"
+      } ${unavailable ? "opacity-75" : ""}`}
+    >
+      <div className="relative aspect-[5/3] bg-neutral-900">
+        {featured ? (
+          <span className="absolute left-3 top-3 z-10 rounded-md border border-yellow-300/40 bg-yellow-300/15 px-2 py-1 text-xs font-bold text-yellow-200">
+            Destacado
+          </span>
+        ) : null}
+        {unavailable ? (
+          <span className="absolute right-3 top-3 z-10 rounded-md border border-neutral-500/40 bg-neutral-950/80 px-2 py-1 text-xs font-bold uppercase text-neutral-300">
+            No disponible
+          </span>
+        ) : null}
         {imageUrl ? (
           <img
             src={imageUrl}
             alt={title}
-            className="h-full w-full object-cover"
+            className={`h-full w-full object-cover ${unavailable ? "grayscale" : ""}`}
             loading="lazy"
             decoding="async"
           />
@@ -1174,9 +1605,9 @@ function AdminCard({ title, meta, detail, imageUrl, icon, onEdit, onDelete }) {
           </div>
         )}
       </div>
-      <div className="space-y-3 p-4">
+      <div className="space-y-3 p-3">
         <div>
-          <h3 className="font-semibold text-white">{title}</h3>
+          <h3 className="line-clamp-1 font-semibold text-white">{title}</h3>
           <p className="mt-1 text-sm text-neutral-400">{meta}</p>
           <p className="mt-1 text-xs text-neutral-500">{detail}</p>
         </div>

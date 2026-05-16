@@ -23,6 +23,19 @@ export async function updateSupportTicket(ticketId, ticket) {
   });
 }
 
+export async function createSupportMessage(ticketId, message, options = {}) {
+  return apiRequest(
+    `${buildResourceUrl(envConfig.API_SUPPORT_TICKETS, ticketId)}/messages`,
+    {
+      method: "POST",
+      body: {
+        message,
+        senderRole: options.senderRole,
+      },
+    }
+  );
+}
+
 export async function deleteSupportTicket(ticketId) {
   return apiRequest(buildResourceUrl(envConfig.API_SUPPORT_TICKETS, ticketId), {
     method: "DELETE",
@@ -38,5 +51,17 @@ export function normalizeTicket(ticket) {
     category: ticket.category || "General",
     username: ticket.user?.username || ticket.username || "Sin usuario",
     createdAt: ticket.createdAt || ticket.date || "",
+    messages: Array.isArray(ticket.messages)
+      ? ticket.messages.map((message) => ({
+          id: message.id || `${ticket.id}-${message.createdAt}`,
+          senderRole: message.senderRole || "user",
+          message: message.message || "",
+          createdAt: message.createdAt || "",
+          username:
+            message.user?.username ||
+            (message.senderRole === "admin" ? "Soporte" : ticket.user?.username) ||
+            "Usuario",
+        }))
+      : [],
   };
 }

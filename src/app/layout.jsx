@@ -8,8 +8,35 @@ import { getUserFromSession } from "@/modules/auth/libs/auth";
 import { Toaster } from "sonner";
 
 export const metadata = {
-  title: "FrancoBertello74 Store",
-  description: "FrancoBertello74 Store",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://francobertello74.store"
+  ),
+  title: {
+    default: "FrancoBertello74 Store",
+    template: "%s | FrancoBertello74 Store",
+  },
+  description:
+    "Tienda de la comunidad de FrancoBertello74 para canjear creditos, participar en sorteos y gestionar soporte.",
+  keywords: [
+    "FrancoBertello74",
+    "Kick",
+    "tienda",
+    "creditos",
+    "sorteos",
+    "canjes",
+  ],
+  applicationName: "FrancoBertello74 Store",
+  openGraph: {
+    title: "FrancoBertello74 Store",
+    description:
+      "Canjea creditos, participa en sorteos y revisa tus compras de la comunidad.",
+    type: "website",
+    locale: "es_AR",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default async function RootLayout({ children }) {

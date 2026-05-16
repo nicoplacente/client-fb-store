@@ -46,8 +46,15 @@ export function normalizeGiveaway(giveaway) {
     entryCost: Number(giveaway.entryCost || giveaway.price || giveaway.cost || 0),
     hasJoined: Boolean(giveaway.hasJoined || giveaway.currentUserEntry),
     currentUserEntry: giveaway.currentUserEntry || null,
+    winner: giveaway.winner || null,
+    winnerUsername:
+      giveaway.winner?.username ||
+      giveaway.winnerUsername ||
+      giveaway.winnerUser?.username ||
+      "",
     participants: Number(giveaway.participants || giveaway.participantsCount || 0),
     startsAt: giveaway.startsAt || giveaway.startDate || "",
     endsAt: giveaway.endsAt || giveaway.endDate || "",
+    finalizedAt: giveaway.finalizedAt || "",
   };
 }

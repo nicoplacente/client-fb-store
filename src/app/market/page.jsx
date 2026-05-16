@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useDeferredValue,
   useEffect,
   useMemo,
@@ -10,9 +11,11 @@ import {
 import {
   IconBrandKick,
   IconCoins,
+  IconLock,
   IconPackage,
   IconSearch,
   IconShoppingCart,
+  IconStarFilled,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
@@ -33,6 +36,27 @@ import Image from "next/image";
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
+}
+
+function saveLocalRedemption(redemption) {
+  if (typeof window === "undefined" || !redemption?.id) return;
+
+  try {
+    const current = JSON.parse(
+      window.localStorage.getItem("fbStoreLocalRedemptions") || "[]"
+    );
+    const next = [
+      redemption,
+      ...current.filter((item) => String(item.id) !== String(redemption.id)),
+    ].slice(0, 30);
+
+    window.localStorage.setItem("fbStoreLocalRedemptions", JSON.stringify(next));
+  } catch {
+    window.localStorage.setItem(
+      "fbStoreLocalRedemptions",
+      JSON.stringify([redemption])
+    );
+  }
 }
 
 function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
@@ -70,7 +94,8 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
       <button
         disabled={disabled || creditPackage.status !== "active"}
         onClick={() => onPurchase(creditPackage)}
-        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-md bg-yellow-500 px-4 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 cursor-pointer"
+        aria-label={`Comprar pack ${creditPackage.name}`}
+        className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-500 px-4 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
       >
         <IconShoppingCart size={18} />
         Comprar creditos
@@ -80,14 +105,37 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
 }
 
 function ProductCard({ product, onRedeem, disabled }) {
+  const outOfStock = product.stock <= 0;
+  const isDisabled = product.status === "disabled";
+  const unavailable = product.status !== "active" || outOfStock;
+
   return (
-    <article className="overflow-hidden rounded-lg border border-white/10 bg-neutral-950/75">
-      <div className="aspect-[4/3] bg-neutral-900">
+    <article
+      className={`relative overflow-hidden rounded-lg border bg-neutral-950/75 transition ${
+        product.featured
+          ? "border-yellow-300/50 shadow-[0_0_0_1px_rgba(250,204,21,0.18)]"
+          : "border-white/10"
+      } ${outOfStock ? "opacity-75" : ""}`}
+    >
+      {product.featured ? (
+        <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-md border border-yellow-300/40 bg-yellow-300/15 px-2 py-1 text-xs font-bold text-yellow-200 backdrop-blur">
+          <IconStarFilled size={13} />
+          Destacado
+        </div>
+      ) : null}
+
+      {outOfStock || isDisabled ? (
+        <div className="absolute right-3 top-3 z-10 rounded-md border border-neutral-500/40 bg-neutral-950/80 px-2 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
+          {outOfStock ? "Agotado" : "Deshabilitado"}
+        </div>
+      ) : null}
+
+      <div className="relative aspect-[4/3] bg-neutral-900">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
-            alt={product.title}
-            className="h-full w-full object-cover"
+            alt={`Imagen del producto ${product.title}`}
+            className={`h-full w-full object-cover ${outOfStock ? "grayscale" : ""}`}
             loading="lazy"
             decoding="async"
           />
@@ -101,7 +149,13 @@ function ProductCard({ product, onRedeem, disabled }) {
         <div>
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-lg font-bold text-white">{product.title}</h2>
-            <span className="rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-400">
+            <span
+              className={`rounded-md border px-2 py-1 text-xs ${
+                product.featured
+                  ? "border-yellow-300/30 bg-yellow-300/10 text-yellow-200"
+                  : "border-white/10 text-neutral-400"
+              }`}
+            >
               {product.category}
             </span>
           </div>
@@ -119,20 +173,29 @@ function ProductCard({ product, onRedeem, disabled }) {
             </p>
           </div>
           <div className="text-right text-sm text-neutral-500">
-            <p>{product.stock} restantes</p>
-            <p className={product.status === "active" ? "text-green-300" : "text-neutral-500"}>
-              {product.status === "active" ? "Activo" : "No disponible"}
+            <p className={outOfStock ? "font-semibold text-red-200" : ""}>
+              {outOfStock ? "Sin stock" : `${product.stock} restantes`}
+            </p>
+            <p className={unavailable ? "text-neutral-500" : "text-green-300"}>
+              {outOfStock
+                ? "Agotado"
+                : isDisabled
+                  ? "Deshabilitado"
+                  : product.status === "active"
+                    ? "Activo"
+                    : "Fuera de tienda"}
             </p>
           </div>
         </div>
 
         <button
-          disabled={disabled || product.status !== "active" || product.stock <= 0}
+          disabled={disabled || unavailable}
           onClick={() => onRedeem(product)}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          aria-label={`Canjear producto ${product.title}`}
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
-          <IconShoppingCart size={18} />
-          Canjear
+          {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
+          {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}
         </button>
       </div>
     </article>
@@ -154,7 +217,7 @@ export default function MarketPage() {
     () =>
       products
         .map(normalizeProduct)
-        .filter((product) => product.id && product.status !== "archived"),
+        .filter((product) => product.id && product.status !== "hidden"),
     [products]
   );
 
@@ -182,50 +245,57 @@ export default function MarketPage() {
         product.description.toLowerCase().includes(term);
 
       return matchesCategory && matchesQuery;
-    });
+    }).toSorted((a, b) => Number(b.featured) - Number(a.featured));
   }, [category, deferredQuery, normalizedProducts]);
 
-  useEffect(() => {
-    let cancelled = false;
+  const loadMarket = useCallback(async ({ showLoading = true } = {}) => {
+    try {
+      if (showLoading) setLoading(true);
+      setError("");
+      const [productData, creditPackageData] = await Promise.all([
+        getProducts(),
+        getCreditPackages(),
+      ]);
 
-    async function loadMarket() {
-      try {
-        setLoading(true);
-        setError("");
-        const [productData, creditPackageData] = await Promise.all([
-          getProducts(),
-          getCreditPackages(),
-        ]);
-
-        if (!cancelled) {
-          setProducts(productData);
-          setCreditPackages(creditPackageData);
-        }
-      } catch (err) {
-        if (!cancelled) {
-          setError(err.message || "No se pudo cargar el market");
-          setProducts([]);
-          setCreditPackages([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
+      setProducts(productData);
+      setCreditPackages(creditPackageData);
+    } catch (err) {
+      setError(err.message || "No se pudo cargar el market");
+      setProducts([]);
+      setCreditPackages([]);
+    } finally {
+      if (showLoading) setLoading(false);
     }
-
-    loadMarket();
-    return () => {
-      cancelled = true;
-    };
   }, []);
+
+  useEffect(() => {
+    loadMarket();
+  }, [loadMarket]);
 
   function handleRedeem(product) {
     startTransition(async () => {
       try {
-        await redeemProduct(product.id);
+        const result = await redeemProduct(product.id);
+        if (result?.redemption) {
+          saveLocalRedemption({
+            ...result.redemption,
+            product: result.product || product,
+          });
+        }
+        if (result?.product) {
+          setProducts((current) =>
+            current.map((item) =>
+              Number(item.id) === Number(result.product.id) ? result.product : item
+            )
+          );
+        } else {
+          await loadMarket({ showLoading: false });
+        }
         toast.success("Canje solicitado");
         await refreshUser?.();
       } catch (err) {
         toast.error(err.message || "No se pudo solicitar el canje");
+        await loadMarket({ showLoading: false });
       }
     });
   }
@@ -289,12 +359,14 @@ export default function MarketPage() {
               value={query}
               onChange={(event) => setQuery(event.target.value)}
               placeholder="Buscar producto"
+              aria-label="Buscar producto"
               className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
             />
           </label>
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
+            aria-label="Filtrar productos por categoria"
             className="rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-sm text-white outline-none"
           >
             {categories.map((item) => (

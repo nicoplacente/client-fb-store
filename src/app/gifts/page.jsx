@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
 import Image from "next/image";
-import { IconGift, IconTicket, IconUsers } from "@tabler/icons-react";
+import {
+  IconGift,
+  IconTicket,
+  IconTrophy,
+  IconUsers,
+  IconX,
+} from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
 import { AuthContext } from "@/context/auth-context/auth-context";
@@ -39,6 +45,7 @@ export default function GiftsPage() {
   const [giveaways, setGiveaways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [resultGiveaway, setResultGiveaway] = useState(null);
   const [isPending, startTransition] = useTransition();
 
   const normalizedGiveaways = useMemo(
@@ -109,23 +116,38 @@ export default function GiftsPage() {
             <GiveawayCard
               key={giveaway.id}
               giveaway={giveaway}
+              onOpenResult={setResultGiveaway}
               isPending={isPending}
               onJoin={handleJoin}
             />
           ))}
         </div>
       )}
+
+      {resultGiveaway ? (
+        <GiveawayResultModal
+          giveaway={resultGiveaway}
+          onClose={() => setResultGiveaway(null)}
+        />
+      ) : null}
     </SectionContainer>
   );
 }
 
-function GiveawayCard({ giveaway, isPending, onJoin }) {
+function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
   const started = hasStarted(giveaway.startsAt);
-  const canJoin = giveaway.status === "active" && started && !giveaway.hasJoined;
+  const isFinalized = giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+  const canJoin =
+    giveaway.status === "active" && started && !isFinalized && !giveaway.hasJoined;
   const entryLabel =
     giveaway.entryCost > 0
       ? `${formatNumber(giveaway.entryCost)} creditos`
       : "Gratis";
+  const statusLabel = !started
+    ? "proximamente"
+    : isFinalized
+      ? "finalizado"
+      : giveaway.status;
 
   return (
     <article className="grid overflow-hidden rounded-lg border border-white/10 bg-neutral-950/75 md:grid-cols-[220px_1fr]">
@@ -133,7 +155,7 @@ function GiveawayCard({ giveaway, isPending, onJoin }) {
         {giveaway.imageUrl ? (
           <img
             src={giveaway.imageUrl}
-            alt={giveaway.title}
+            alt={`Imagen del sorteo ${giveaway.title}`}
             className="h-full w-full object-cover"
             loading="lazy"
             decoding="async"
@@ -149,7 +171,7 @@ function GiveawayCard({ giveaway, isPending, onJoin }) {
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-xl font-bold text-white">{giveaway.title}</h2>
             <span className="rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-400">
-              {started ? giveaway.status : "proximamente"}
+              {statusLabel}
             </span>
           </div>
           <p className="mt-2 text-sm text-neutral-400">
@@ -176,7 +198,8 @@ function GiveawayCard({ giveaway, isPending, onJoin }) {
         <button
           disabled={isPending || !canJoin}
           onClick={() => onJoin(giveaway)}
-          className="inline-flex w-fit items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          aria-label={`Participar en el sorteo ${giveaway.title}`}
+          className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
         >
           <IconGift size={18} />
           {giveaway.hasJoined
@@ -185,9 +208,73 @@ function GiveawayCard({ giveaway, isPending, onJoin }) {
               ? giveaway.entryCost > 0
                 ? `Participar - ${entryLabel}`
                 : "Participar gratis"
-            : "Todavia no disponible"}
+            : isFinalized
+              ? "Sorteo finalizado"
+              : "Todavia no disponible"}
         </button>
+
+        <div className="border-t border-white/10 pt-4">
+          <button
+            type="button"
+            onClick={() => onOpenResult(giveaway)}
+            aria-label={`Ver resultado del sorteo ${giveaway.title}`}
+            className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-100 transition hover:border-red-300 hover:bg-red-500/20"
+          >
+            <IconTrophy size={17} />
+            {isFinalized ? "Ver resultado" : "Resultado disponible al finalizar"}
+          </button>
+        </div>
       </div>
     </article>
+  );
+}
+
+function GiveawayResultModal({ giveaway, onClose }) {
+  const isFinalized = giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+      <div
+        role="dialog"
+        aria-modal="true"
+        className="w-full max-w-md rounded-lg border border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black"
+      >
+        <div className="flex items-start justify-between gap-4">
+          <div>
+            <p className="text-sm font-semibold uppercase text-red-300/80">
+              Resultado
+            </p>
+            <h2 className="mt-1 text-2xl font-bold text-white">{giveaway.title}</h2>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="cursor-pointer rounded-md border border-white/10 p-2 text-neutral-400 transition hover:text-white"
+            aria-label="Cerrar resultado"
+          >
+            <IconX size={18} />
+          </button>
+        </div>
+
+        <div className="mt-5 rounded-md border border-white/10 bg-neutral-900/70 p-4">
+          {isFinalized ? (
+            giveaway.winnerUsername ? (
+              <p className="text-sm text-neutral-300">
+                Ganador:{" "}
+                <strong className="text-white">{giveaway.winnerUsername}</strong>
+              </p>
+            ) : (
+              <p className="text-sm text-neutral-400">
+                El sorteo finalizo sin participantes, no hay ganador.
+              </p>
+            )
+          ) : (
+            <p className="text-sm text-neutral-400">
+              El ganador se sortea automaticamente cuando llega la fecha de fin.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
