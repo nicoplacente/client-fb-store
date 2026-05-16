@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import { SidebarContext } from "@/context/sidebar-context/sidebar-context";
+import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
 import LinkSidebar from "../ui/link-sidebar";
 
 export default function Sidebar() {
@@ -33,6 +34,11 @@ export default function Sidebar() {
       <div className="flex flex-col h-full p-2">
         <nav className="flex-1 space-y-2">
           {menuItems.map((item, idx) => {
+            if (item.requiresAuth && !user) return null;
+            if (item.requiresDashboardAccess && !hasDashboardAccess(user)) {
+              return null;
+            }
+
             const isActive = pathname === item.href;
 
             return (

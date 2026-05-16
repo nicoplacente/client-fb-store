@@ -1,9 +1,12 @@
 "use client";
+
 import { useEffect } from "react";
+import { toast } from "sonner";
 import { socket } from "@/modules/auth/libs/socket";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import { envConfig } from "@/config";
+import { apiRequest } from "@/modules/api/client";
 
 export default function useVerifyListener(onClose) {
   const { setUser } = useAppContext(AuthContext);
@@ -20,22 +23,18 @@ export default function useVerifyListener(onClose) {
 
         if (!res.ok) {
           console.error("Error en complete-verify", await res.json());
+          toast.error("No se pudo completar la verificacion");
           return;
         }
 
-        // 🔥 importante: refrescar user
-        const userRes = await fetch(envConfig.API_USER, {
-          credentials: "include",
-        });
+        const data = await apiRequest(envConfig.API_USER);
+        setUser(data.user);
 
-        if (userRes.ok) {
-          const data = await userRes.json();
-          setUser(data.user); // guarda en AuthContext
-        }
-
+        toast.success("Sesion iniciada");
         if (onClose) onClose();
       } catch (err) {
         console.error("Error en complete-verify:", err);
+        toast.error("No se pudo iniciar sesion");
       }
     };
 

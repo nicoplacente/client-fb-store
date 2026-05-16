@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import LoginModal from "@/modules/auth/components/login-modal";
 import HandleShowLogin from "./handle-show-login";
-import useLoginState from "@/modules/header/hooks/use-login-state";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import useAppContext from "@/context/use-app-context";
 import Link from "next/link";
@@ -11,6 +9,7 @@ import { IconUser, IconBrandKick } from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import Image from "next/image";
 import { envConfig } from "@/config";
+import { apiRequest } from "@/modules/api/client";
 
 function formatPoints(value) {
   const number = Number(value) || 0;
@@ -28,7 +27,6 @@ function formatPoints(value) {
 
 export default function Header() {
   const { user } = useAppContext(AuthContext);
-  const { showLogin, setShowLogin } = useLoginState();
 
   const [kickPoints, setKickPoints] = useState(0);
   const [loadingPoints, setLoadingPoints] = useState(false);
@@ -45,17 +43,7 @@ export default function Header() {
       try {
         setLoadingPoints(true);
 
-        const res = await fetch(envConfig.API_MY_RANKING, {
-          method: "GET",
-          credentials: "include",
-        });
-
-        const data = await res.json();
-
-        if (!res.ok || data.error) {
-          console.error("Error obteniendo puntos:", data);
-          return;
-        }
+        const data = await apiRequest(envConfig.API_MY_RANKING);
 
         if (!cancelled) {
           setKickPoints(Number(data.ranking?.points || 0));
@@ -119,10 +107,8 @@ export default function Header() {
           </Link>
         </div>
       ) : (
-        <HandleShowLogin setShowLogin={setShowLogin} />
+        <HandleShowLogin />
       )}
-
-      {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </header>
   );
 }
