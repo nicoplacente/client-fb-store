@@ -5,6 +5,7 @@ import {
   IconDeviceFloppy,
   IconEdit,
   IconGift,
+  IconCoins,
   IconPackage,
   IconPlus,
   IconRefresh,
@@ -25,6 +26,12 @@ import {
   updateProduct,
 } from "@/modules/products/libs/product-api";
 import {
+  createCreditPackage,
+  getCreditPackages,
+  normalizeCreditPackage,
+  updateCreditPackage,
+} from "@/modules/credits/libs/credit-api";
+import {
   createGiveaway,
   deleteGiveaway,
   getGiveaways,
@@ -40,6 +47,7 @@ import {
 
 const tabs = [
   { id: "products", label: "Productos", icon: IconPackage },
+  { id: "credits", label: "Creditos", icon: IconCoins },
   { id: "giveaways", label: "Sorteos", icon: IconGift },
   { id: "support", label: "Soporte", icon: IconTicket },
 ];
@@ -55,10 +63,20 @@ const emptyProduct = {
   featured: false,
 };
 
+const emptyCreditPackage = {
+  name: "",
+  description: "",
+  credits: "",
+  pointsCost: "",
+  status: "active",
+  sortOrder: "0",
+};
+
 const emptyGiveaway = {
   title: "",
   description: "",
   prize: "",
+  entryCost: "",
   imageUrl: "",
   status: "active",
   startsAt: "",
@@ -85,11 +103,23 @@ function productToForm(product) {
   };
 }
 
+function creditPackageToForm(creditPackage) {
+  return {
+    name: creditPackage.name,
+    description: creditPackage.description,
+    credits: String(creditPackage.credits),
+    pointsCost: String(creditPackage.pointsCost),
+    status: creditPackage.status,
+    sortOrder: String(creditPackage.sortOrder),
+  };
+}
+
 function giveawayToForm(giveaway) {
   return {
     title: giveaway.title,
     description: giveaway.description,
     prize: giveaway.prize,
+    entryCost: String(giveaway.entryCost || 0),
     imageUrl: giveaway.imageUrl,
     status: giveaway.status,
     startsAt: formatDateInput(giveaway.startsAt),
@@ -134,15 +164,18 @@ function SelectInput(props) {
 }
 
 export default function DashboardPage() {
-  const { user } = useAppContext(AuthContext);
+  const { user, refreshUser } = useAppContext(AuthContext);
   const canManageDashboard = hasDashboardAccess(user);
   const [activeTab, setActiveTab] = useState("products");
   const [products, setProducts] = useState([]);
+  const [creditPackages, setCreditPackages] = useState([]);
   const [giveaways, setGiveaways] = useState([]);
   const [tickets, setTickets] = useState([]);
   const [productForm, setProductForm] = useState(emptyProduct);
+  const [creditPackageForm, setCreditPackageForm] = useState(emptyCreditPackage);
   const [giveawayForm, setGiveawayForm] = useState(emptyGiveaway);
   const [selectedProductId, setSelectedProductId] = useState(null);
+  const [selectedCreditPackageId, setSelectedCreditPackageId] = useState(null);
   const [selectedGiveawayId, setSelectedGiveawayId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -151,6 +184,14 @@ export default function DashboardPage() {
   const normalizedProducts = useMemo(
     () => products.map(normalizeProduct).filter((product) => product.id),
     [products]
+  );
+
+  const normalizedCreditPackages = useMemo(
+    () =>
+      creditPackages
+        .map(normalizeCreditPackage)
+        .filter((creditPackage) => creditPackage.id),
+    [creditPackages]
   );
 
   const normalizedGiveaways = useMemo(
@@ -166,11 +207,17 @@ export default function DashboardPage() {
   const stats = useMemo(
     () => ({
       products: normalizedProducts.length,
+      credits: normalizedCreditPackages.length,
       giveaways: normalizedGiveaways.length,
       tickets: normalizedTickets.filter((ticket) => ticket.status !== "closed")
         .length,
     }),
-    [normalizedProducts, normalizedGiveaways, normalizedTickets]
+    [
+      normalizedProducts,
+      normalizedCreditPackages,
+      normalizedGiveaways,
+      normalizedTickets,
+    ]
   );
 
   async function loadDashboard() {
@@ -178,13 +225,16 @@ export default function DashboardPage() {
       setLoading(true);
       setError("");
 
-      const [productData, giveawayData, ticketData] = await Promise.all([
+      const [productData, creditPackageData, giveawayData, ticketData] =
+        await Promise.all([
         getProducts({ includeDisabled: true }),
+        getCreditPackages({ includeDisabled: true }),
         getGiveaways({ includeInactive: true }),
         getSupportTickets({ includeAll: true }),
       ]);
 
       setProducts(productData);
+      setCreditPackages(creditPackageData);
       setGiveaways(giveawayData);
       setTickets(ticketData);
     } catch (err) {
@@ -195,6 +245,12 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
+    if (user) {
+      refreshUser?.();
+    }
+  }, [refreshUser, user?.id]);
+
+  useEffect(() => {
     if (!canManageDashboard) return;
     loadDashboard();
   }, [canManageDashboard]);
@@ -202,6 +258,11 @@ export default function DashboardPage() {
   function resetProductForm() {
     setSelectedProductId(null);
     setProductForm(emptyProduct);
+  }
+
+  function resetCreditPackageForm() {
+    setSelectedCreditPackageId(null);
+    setCreditPackageForm(emptyCreditPackage);
   }
 
   function resetGiveawayForm() {
@@ -246,6 +307,42 @@ export default function DashboardPage() {
     });
   }
 
+  function submitCreditPackage(event) {
+    event.preventDefault();
+
+    const payload = {
+      name: creditPackageForm.name.trim(),
+      description: creditPackageForm.description.trim(),
+      credits: Number(creditPackageForm.credits),
+      pointsCost: Number(creditPackageForm.pointsCost),
+      status: creditPackageForm.status,
+      sortOrder: Number(creditPackageForm.sortOrder),
+      source: "points",
+    };
+
+    if (!payload.name || Number.isNaN(payload.credits) || Number.isNaN(payload.pointsCost)) {
+      toast.error("Completa nombre, creditos y costo");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        if (selectedCreditPackageId) {
+          await updateCreditPackage(selectedCreditPackageId, payload);
+          toast.success("Pack de creditos actualizado");
+        } else {
+          await createCreditPackage(payload);
+          toast.success("Pack de creditos creado");
+        }
+
+        resetCreditPackageForm();
+        await loadDashboard();
+      } catch (err) {
+        toast.error(err.message || "No se pudo guardar el pack");
+      }
+    });
+  }
+
   function submitGiveaway(event) {
     event.preventDefault();
 
@@ -253,6 +350,7 @@ export default function DashboardPage() {
       title: giveawayForm.title.trim(),
       description: giveawayForm.description.trim(),
       prize: giveawayForm.prize.trim(),
+      entryCost: Number(giveawayForm.entryCost || 0),
       imageUrl: giveawayForm.imageUrl.trim(),
       status: giveawayForm.status,
       startsAt: giveawayForm.startsAt,
@@ -261,6 +359,11 @@ export default function DashboardPage() {
 
     if (!payload.title || !payload.prize) {
       toast.error("Completa titulo y premio");
+      return;
+    }
+
+    if (!Number.isFinite(payload.entryCost) || payload.entryCost < 0) {
+      toast.error("El costo debe ser 0 o mayor");
       return;
     }
 
@@ -394,8 +497,9 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-4">
         <Stat label="Productos" value={stats.products} />
+        <Stat label="Packs de creditos" value={stats.credits} />
         <Stat label="Sorteos" value={stats.giveaways} />
         <Stat label="Tickets abiertos" value={stats.tickets} />
       </div>
@@ -443,6 +547,23 @@ export default function DashboardPage() {
             setProductForm(productToForm(product));
           }}
           onDelete={removeProduct}
+        />
+      ) : null}
+
+      {activeTab === "credits" ? (
+        <CreditPackagesPanel
+          form={creditPackageForm}
+          setForm={setCreditPackageForm}
+          items={normalizedCreditPackages}
+          loading={loading}
+          isPending={isPending}
+          selectedId={selectedCreditPackageId}
+          onSubmit={submitCreditPackage}
+          onCancel={resetCreditPackageForm}
+          onEdit={(creditPackage) => {
+            setSelectedCreditPackageId(creditPackage.id);
+            setCreditPackageForm(creditPackageToForm(creditPackage));
+          }}
         />
       ) : null}
 
@@ -630,12 +751,142 @@ function ProductsPanel({
           <AdminCard
             key={product.id}
             title={product.title}
-            meta={`${product.price.toLocaleString()} puntos`}
+            meta={`${product.price.toLocaleString()} creditos`}
             detail={`${product.stock} disponibles - ${product.status}`}
             imageUrl={product.imageUrl}
             icon={<IconPackage size={42} />}
             onEdit={() => onEdit(product)}
             onDelete={() => onDelete(product)}
+          />
+        )}
+      />
+    </div>
+  );
+}
+
+function CreditPackagesPanel({
+  form,
+  setForm,
+  items,
+  loading,
+  isPending,
+  selectedId,
+  onSubmit,
+  onCancel,
+  onEdit,
+}) {
+  return (
+    <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
+      <form
+        onSubmit={onSubmit}
+        className="h-fit rounded-lg border border-white/10 bg-neutral-950/80 p-5"
+      >
+        <PanelHeader
+          title={selectedId ? "Editar pack" : "Nuevo pack"}
+          subtitle="Creditos comprados con puntos"
+          canCancel={Boolean(selectedId)}
+          onCancel={onCancel}
+        />
+
+        <div className="grid gap-4">
+          <Field label="Nombre">
+            <TextInput
+              value={form.name}
+              onChange={(event) =>
+                setForm((current) => ({ ...current, name: event.target.value }))
+              }
+              required
+            />
+          </Field>
+          <Field label="Descripcion">
+            <TextArea
+              value={form.description}
+              rows={4}
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  description: event.target.value,
+                }))
+              }
+            />
+          </Field>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Creditos que recibe">
+              <TextInput
+                type="number"
+                min="1"
+                value={form.credits}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    credits: event.target.value,
+                  }))
+                }
+                required
+              />
+            </Field>
+            <Field label="Costo en puntos">
+              <TextInput
+                type="number"
+                min="1"
+                step="0.01"
+                value={form.pointsCost}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    pointsCost: event.target.value,
+                  }))
+                }
+                required
+              />
+            </Field>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Orden">
+              <TextInput
+                type="number"
+                value={form.sortOrder}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    sortOrder: event.target.value,
+                  }))
+                }
+              />
+            </Field>
+            <Field label="Estado">
+              <SelectInput
+                value={form.status}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    status: event.target.value,
+                  }))
+                }
+              >
+                <option value="active">Activo</option>
+                <option value="draft">Borrador</option>
+                <option value="archived">Archivado</option>
+              </SelectInput>
+            </Field>
+          </div>
+        </div>
+
+        <SubmitButton isPending={isPending} selectedId={selectedId} />
+      </form>
+
+      <ItemsGrid
+        loading={loading}
+        emptyText="Todavia no hay packs de creditos."
+        items={items}
+        renderItem={(creditPackage) => (
+          <AdminCard
+            key={creditPackage.id}
+            title={creditPackage.name}
+            meta={`${creditPackage.credits.toLocaleString()} creditos`}
+            detail={`${creditPackage.pointsCost.toLocaleString()} puntos - ${creditPackage.status}`}
+            icon={<IconCoins size={42} />}
+            onEdit={() => onEdit(creditPackage)}
           />
         )}
       />
@@ -685,6 +936,21 @@ function GiveawaysPanel({
                 setForm((current) => ({ ...current, prize: event.target.value }))
               }
               required
+            />
+          </Field>
+          <Field label="Costo para participar (creditos)">
+            <TextInput
+              type="number"
+              min="0"
+              step="1"
+              value={form.entryCost}
+              placeholder="0"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  entryCost: event.target.value,
+                }))
+              }
             />
           </Field>
           <Field label="Descripcion">
@@ -766,7 +1032,11 @@ function GiveawaysPanel({
           <AdminCard
             key={giveaway.id}
             title={giveaway.title}
-            meta={giveaway.prize}
+            meta={`${giveaway.prize} - ${
+              giveaway.entryCost > 0
+                ? `${giveaway.entryCost.toLocaleString()} creditos`
+                : "Gratis"
+            }`}
             detail={`${giveaway.participants} participantes - ${giveaway.status}`}
             imageUrl={giveaway.imageUrl}
             icon={<IconGift size={42} />}
@@ -918,13 +1188,15 @@ function AdminCard({ title, meta, detail, imageUrl, icon, onEdit, onDelete }) {
             <IconEdit size={17} />
             Editar
           </button>
-          <button
-            onClick={onDelete}
-            className="inline-flex items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-red-200 transition hover:bg-red-500/20"
-            aria-label={`Eliminar ${title}`}
-          >
-            <IconTrash size={17} />
-          </button>
+          {onDelete ? (
+            <button
+              onClick={onDelete}
+              className="inline-flex items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-red-200 transition hover:bg-red-500/20"
+              aria-label={`Eliminar ${title}`}
+            >
+              <IconTrash size={17} />
+            </button>
+          ) : null}
         </div>
       </div>
     </article>

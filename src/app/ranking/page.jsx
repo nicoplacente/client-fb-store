@@ -13,8 +13,18 @@ import RankingSearchBar from "@/modules/ranking/components/ranking-searchbar";
 import TH from "@/modules/ranking/ui/th";
 import { envConfig } from "@/config";
 
-function formatNumber(value) {
+function formatExactNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
+}
+
+function formatRoundedNumber(value) {
+  return Math.round(Number(value) || 0).toLocaleString("es-AR");
+}
+
+function RoundedStat({ value }) {
+  return (
+    <span title={formatExactNumber(value)}>{formatRoundedNumber(value)}</span>
+  );
 }
 
 function getRankLabel(index) {
@@ -141,11 +151,21 @@ export default function RankingPage() {
                       </span>
                     </td>
                     <td>{`${hours}h ${minutes}m`}</td>
-                    <td>{formatNumber(user.totalPoints)}</td>
-                    <td>{formatNumber(user.chests)}</td>
-                    <td>{formatNumber(user.streak)}</td>
-                    <td>{formatNumber(user.totalMessages)}</td>
-                    <td>{formatNumber(user.recChat)}</td>
+                    <td>
+                      <RoundedStat value={user.totalPoints} />
+                    </td>
+                    <td>
+                      <RoundedStat value={user.chests} />
+                    </td>
+                    <td>
+                      <RoundedStat value={user.streak} />
+                    </td>
+                    <td>
+                      <RoundedStat value={user.totalMessages} />
+                    </td>
+                    <td>
+                      <RoundedStat value={user.recChat} />
+                    </td>
                   </tr>
                 );
               })

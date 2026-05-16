@@ -11,16 +11,22 @@ import Image from "next/image";
 import { envConfig } from "@/config";
 import { apiRequest } from "@/modules/api/client";
 
-function formatPoints(value) {
+function formatExactNumber(value) {
+  return Number(value || 0).toLocaleString("es-AR");
+}
+
+function formatHeaderNumber(value) {
   const number = Number(value) || 0;
+  const absolute = Math.abs(number);
+  const sign = number < 0 ? "-" : "";
 
-  if (number >= 1000) {
-    return `${(number / 1000).toFixed(1)}k`;
-  }
+  const compact = (divisor, suffix) =>
+    `${sign}${(absolute / divisor).toFixed(1).replace(/\.0$/, "")}${suffix}`;
 
-  if (number % 1 !== 0) {
-    return number.toFixed(2);
-  }
+  if (absolute >= 1_000_000_000) return compact(1_000_000_000, "B");
+  if (absolute >= 1_000_000) return compact(1_000_000, "M");
+  if (absolute >= 1000) return compact(1000, "k");
+  if (number % 1 !== 0) return number.toFixed(2).replace(/\.00$/, "");
 
   return String(number);
 }
@@ -30,10 +36,13 @@ export default function Header() {
 
   const [kickPoints, setKickPoints] = useState(0);
   const [loadingPoints, setLoadingPoints] = useState(false);
+  const [hasLoadedPoints, setHasLoadedPoints] = useState(false);
 
   useEffect(() => {
     if (!user) {
       setKickPoints(0);
+      setHasLoadedPoints(false);
+      setLoadingPoints(false);
       return;
     }
 
@@ -41,12 +50,15 @@ export default function Header() {
 
     async function fetchRankingPoints() {
       try {
-        setLoadingPoints(true);
+        if (!hasLoadedPoints) {
+          setLoadingPoints(true);
+        }
 
         const data = await apiRequest(envConfig.API_MY_RANKING);
 
         if (!cancelled) {
           setKickPoints(Number(data.ranking?.points || 0));
+          setHasLoadedPoints(true);
         }
       } catch (err) {
         console.error("Error obteniendo puntos:", err);
@@ -65,7 +77,7 @@ export default function Header() {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [user]);
+  }, [hasLoadedPoints, user]);
 
   return (
     <header className="fixed top-0 left-0 w-full h-16 bg-neutral-950 border-b border-neutral-800 flex items-center justify-between px-6 z-30">
@@ -80,8 +92,11 @@ export default function Header() {
               <span className="text-xs text-orange-300 font-normal">
                 Creditos
               </span>
-              <span className="text-sm text-[#ffe000] font-semibold">
-                1.000
+              <span
+                className="min-w-14 text-sm font-semibold tabular-nums text-[#ffe000]"
+                title={formatExactNumber(user.credits)}
+              >
+                {formatHeaderNumber(user.credits)}
               </span>
             </div>
           </Link>
@@ -92,8 +107,13 @@ export default function Header() {
               <span className="text-xs text-green-500/70 font-normal">
                 Puntos
               </span>
-              <span className="text-sm font-semibold">
-                {loadingPoints ? "..." : formatPoints(kickPoints)}
+              <span
+                className="min-w-16 text-sm font-semibold tabular-nums"
+                title={formatExactNumber(kickPoints)}
+              >
+                {loadingPoints && !hasLoadedPoints
+                  ? "..."
+                  : formatHeaderNumber(kickPoints)}
               </span>
             </div>
           </span>

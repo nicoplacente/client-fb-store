@@ -1,7 +1,7 @@
 "use client";
 
 import { envConfig } from "@/config";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { apiRequest } from "@/modules/api/client";
 import { toast } from "sonner";
@@ -11,7 +11,29 @@ export const AuthContext = createContext(null);
 export function AuthProvider({ children, initialUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(!initialUser);
+  const linkedViewerIdRef = useRef(null);
   const router = useRouter();
+
+  const linkExtensionViewer = useCallback(async (viewerId) => {
+    const safeViewerId = String(viewerId || "").trim();
+
+    if (!safeViewerId || linkedViewerIdRef.current === safeViewerId) {
+      return;
+    }
+
+    try {
+      await apiRequest(envConfig.API_LINK_EXTENSION_VIEWER, {
+        method: "POST",
+        body: {
+          viewerId: safeViewerId,
+        },
+      });
+
+      linkedViewerIdRef.current = safeViewerId;
+    } catch (err) {
+      console.error("Error vinculando extension:", err);
+    }
+  }, []);
 
   useEffect(() => {
     if (initialUser) {
@@ -56,6 +78,26 @@ export function AuthProvider({ children, initialUser }) {
 
     window.history.replaceState(null, "", nextUrl);
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const storedViewerId = localStorage.getItem("kickBridgeViewerId");
+
+    if (storedViewerId) {
+      linkExtensionViewer(storedViewerId);
+    }
+
+    function handleViewerIdReady(event) {
+      linkExtensionViewer(event.detail?.viewerId);
+    }
+
+    window.addEventListener("kickBridgeViewerIdReady", handleViewerIdReady);
+
+    return () => {
+      window.removeEventListener("kickBridgeViewerIdReady", handleViewerIdReady);
+    };
+  }, [linkExtensionViewer, user]);
 
   const login = async () => {
     await refreshUser();
