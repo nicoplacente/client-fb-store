@@ -18,6 +18,8 @@ export const envConfig = {
   API_SUPPORT_TICKETS: `${SERVER_URL}/api/support/tickets`,
   API_USER: `${SERVER_URL}/api/user`,
   API_USER_REDEMPTIONS: `${SERVER_URL}/api/user/redemptions`,
+  API_STREAM_HOURS: `${SERVER_URL}/api/stream/hours`,
+  API_STREAM_REWARDS: `${SERVER_URL}/api/stream/rewards`,
   API_LOGOUT: `${SERVER_URL}/api/logout`,
   API_KICK_AUTH: `${SERVER_URL}/api/auth/kick`,
   API_LINK_EXTENSION_VIEWER: `${SERVER_URL}/api/auth/link-extension-viewer`,

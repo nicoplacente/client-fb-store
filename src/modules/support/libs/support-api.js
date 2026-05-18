@@ -43,13 +43,33 @@ export async function deleteSupportTicket(ticketId) {
 }
 
 export function normalizeTicket(ticket) {
+  const user = ticket.user
+    ? {
+        id: ticket.user.id || ticket.user._id,
+        username: ticket.user.username || ticket.username || "Sin usuario",
+        avatarUrl: ticket.user.avatarUrl || "",
+        name: ticket.user.name || "",
+        dni: ticket.user.dni || "",
+        email: ticket.user.email || "",
+        country: ticket.user.country || "",
+        province: ticket.user.province || "",
+        city: ticket.user.city || "",
+        direction: ticket.user.direction || "",
+        postalCode: ticket.user.postalCode || "",
+        phone: ticket.user.phone || "",
+        instagram: ticket.user.instagram || "",
+        discord: ticket.user.discord || "",
+      }
+    : null;
+
   return {
     id: ticket.id || ticket._id || ticket.code || ticket.subject,
     subject: ticket.subject || "Consulta",
     message: ticket.message || ticket.description || "",
     status: ticket.status || "open",
     category: ticket.category || "General",
-    username: ticket.user?.username || ticket.username || "Sin usuario",
+    username: user?.username || ticket.username || "Sin usuario",
+    user,
     createdAt: ticket.createdAt || ticket.date || "",
     messages: Array.isArray(ticket.messages)
       ? ticket.messages.map((message) => ({
