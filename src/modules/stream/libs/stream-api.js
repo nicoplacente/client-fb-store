@@ -1,6 +1,16 @@
 import { envConfig } from "@/config";
 import { apiRequest } from "@/modules/api/client";
 
+const SPECIAL_HOUR_LABELS = {
+  netherite: "Bertello-Snack Hour",
+};
+
+function normalizeSpecialHourLabel(hourId, label) {
+  if (SPECIAL_HOUR_LABELS[hourId]) return SPECIAL_HOUR_LABELS[hourId];
+  if (label === "Netherite Hour") return SPECIAL_HOUR_LABELS.netherite;
+  return label || hourId || "Sin hora especial";
+}
+
 export async function getStreamHours() {
   const data = await apiRequest(envConfig.API_STREAM_HOURS);
   return data.specialHour;
@@ -43,14 +53,14 @@ export function normalizeStreamHourState(state = {}) {
     mode: state.mode || "auto",
     hasManualOverride: Boolean(state.hasManualOverride),
     active: state.active || "",
-    activeLabel: state.activeLabel || "Sin hora especial",
+    activeLabel: normalizeSpecialHourLabel(state.active, state.activeLabel),
     manual: state.manual || "",
     expiresAt: state.expiresAt || null,
     automatic: state.automatic || "",
-    automaticLabel: state.automaticLabel || "Sin hora especial",
+    automaticLabel: normalizeSpecialHourLabel(state.automatic, state.automaticLabel),
     hours: hours.map((hour) => ({
       id: hour.id,
-      label: hour.label || hour.id,
+      label: normalizeSpecialHourLabel(hour.id, hour.label),
       watchtimeMultiplier: Number(hour.watchtimeMultiplier || 1),
       chatMultiplier: Number(hour.chatMultiplier || 1),
     })),

@@ -12,7 +12,7 @@ import {
 const hourStyles = {
   happy: "border-yellow-300/30 bg-yellow-400/10 text-yellow-100",
   golden: "border-amber-300/30 bg-amber-400/10 text-amber-100",
-  netherite: "border-purple-300/30 bg-purple-400/10 text-purple-100",
+  netherite: "border-red-300/30 bg-red-500/10 text-red-100",
 };
 
 function formatMultiplier(value) {
