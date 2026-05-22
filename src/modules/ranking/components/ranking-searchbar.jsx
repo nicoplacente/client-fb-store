@@ -1,12 +1,16 @@
-export default function RankingSearchBar({ onSearch }) {
+import { IconSearch } from "@tabler/icons-react";
+
+export default function RankingSearchBar({ value, onSearch }) {
   return (
-    <div className="text-start  border border-neutral-600 ml-2 rounded-3xl">
+    <label className="ml-2 flex items-center gap-2 rounded-3xl border border-neutral-700 bg-neutral-950/60 px-3 text-start transition focus-within:border-red-400">
+      <IconSearch size={16} className="text-neutral-500" />
       <input
         type="text"
+        value={value}
         placeholder="Buscar usuario"
-        className="px-4 w-full focus:outline-none text-white/70 py-1.5"
-        onChange={(e) => onSearch(e.target.value)}
+        className="w-full bg-transparent py-1.5 text-white/80 outline-none placeholder:text-neutral-600"
+        onChange={(event) => onSearch(event.target.value)}
       />
-    </div>
+    </label>
   );
 }

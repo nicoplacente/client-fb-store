@@ -5,12 +5,20 @@ import {
   IconGift,
   IconHelpHexagon,
   IconFileText,
+  IconLayoutDashboard,
+  IconUser,
 } from "@tabler/icons-react";
 
 export const menuItems = [
   { name: "Inicio", icon: <IconHomeFilled size={20} />, href: "/" },
+  {
+    name: "Dashboard",
+    icon: <IconLayoutDashboard size={20} />,
+    href: "/dashboard",
+    requiresDashboardAccess: true,
+  },
   { name: "Ranking", icon: <IconChartBar size={20} />, href: "/ranking" },
-  { name: "Market", icon: <IconCoinBitcoin size={20} />, href: "/market" },
+  { name: "Tienda", icon: <IconCoinBitcoin size={20} />, href: "/market" },
   { name: "Sorteos", icon: <IconGift size={20} />, href: "/gifts" },
   { name: "Soporte", icon: <IconHelpHexagon size={20} />, href: "/support" },
   {

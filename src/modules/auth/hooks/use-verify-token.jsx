@@ -6,7 +6,6 @@ import { envConfig } from "@/config";
 
 function getSyncedViewerId() {
   if (typeof window === "undefined") return null;
-
   return localStorage.getItem("kickBridgeViewerId");
 }
 
@@ -46,11 +45,11 @@ export default function useVerifyToken() {
       const viewerId = await waitForKickBridgeViewerId();
 
       if (!viewerId) {
-        setError("No se encontró el viewerId de la extensión. Instalá o recargá la extensión.");
+        setError(
+          "No se encontro el viewerId de la extension. Instala o recarga la extension."
+        );
         return;
       }
-
-      console.log("[VerifyToken] Usando viewerId:", viewerId);
 
       const res = await fetch(`${envConfig.API_REQUEST_TOKEN}`, {
         method: "POST",
@@ -58,9 +57,7 @@ export default function useVerifyToken() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          viewerId,
-        }),
+        body: JSON.stringify({ viewerId }),
       });
 
       const data = await res.json();
@@ -70,11 +67,8 @@ export default function useVerifyToken() {
         return;
       }
 
-      const newToken = data.token;
-
-      setToken(newToken);
-
-      socket.emit("join", newToken);
+      setToken(data.token);
+      socket.emit("join", data.token);
     } catch (err) {
       console.error("Error generando token:", err);
       setError("Error generando token");

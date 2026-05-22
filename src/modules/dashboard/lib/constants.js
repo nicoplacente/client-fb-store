@@ -1,0 +1,48 @@
+import {
+  IconBroadcast,
+  IconCoins,
+  IconGift,
+  IconPackage,
+  IconShoppingBag,
+  IconTicket,
+} from "@tabler/icons-react";
+
+export const dashboardTabs = [
+  { id: "products", label: "Productos", icon: IconPackage },
+  { id: "credits", label: "Creditos", icon: IconCoins },
+  { id: "giveaways", label: "Sorteos", icon: IconGift },
+  { id: "redemptions", label: "Canjes", icon: IconShoppingBag },
+  { id: "support", label: "Soporte", icon: IconTicket },
+  { id: "stream", label: "Stream", icon: IconBroadcast },
+];
+
+export const emptyProduct = {
+  title: "",
+  description: "",
+  price: "",
+  stock: "",
+  category: "",
+  imageUrl: "",
+  status: "active",
+  featured: false,
+};
+
+export const emptyCreditPackage = {
+  name: "",
+  description: "",
+  credits: "",
+  pointsCost: "",
+  status: "active",
+  sortOrder: "0",
+};
+
+export const emptyGiveaway = {
+  title: "",
+  description: "",
+  prize: "",
+  entryCost: "",
+  imageUrl: "",
+  status: "active",
+  startsAt: "",
+  endsAt: "",
+};
