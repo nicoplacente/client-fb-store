@@ -2,8 +2,7 @@
 
 const SERVER_URL =
   process.env.NEXT_PUBLIC_SERVER_URL ||
-  process.env.SERVER_URL ||
-  "http://localhost:3001";
+  process.env.SERVER_URL
 
 export const envConfig = {
   SERVER_URL,
