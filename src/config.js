@@ -1,8 +1,7 @@
 // Configuration for environment variables
 
 const SERVER_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  process.env.SERVER_URL
+  process.env.NEXT_PUBLIC_SERVER_URL 
 
 export const envConfig = {
   SERVER_URL,
