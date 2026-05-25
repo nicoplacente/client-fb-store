@@ -48,7 +48,7 @@ export default function AdminCard({
           <p className="mt-1 text-sm text-neutral-400">{meta}</p>
           <p className="mt-1 text-xs text-neutral-500">{detail}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={onEdit}
             className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-white/10 bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition hover:border-red-400/50"

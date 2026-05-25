@@ -93,13 +93,12 @@ export default function RankingPage() {
         <p className="text-sm font-semibold uppercase text-red-300/80">
           Ranking
         </p>
-        <h1 className="mt-2 text-4xl font-bold text-white">Tabla de puntos</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Tabla de puntos</h1>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-neutral-950/75 p-2">
+      <div className="overflow-x-auto rounded-xl border border-white/10 bg-neutral-950/75 p-1 sm:p-2">
         <table
-          className="mx-auto w-full min-w-[880px] table border-separate overflow-hidden"
-          style={{ borderSpacing: "0 4px" }}
+          className="mx-auto w-full min-w-[760px] table border-separate overflow-hidden [border-spacing:0_4px] sm:min-w-[880px]"
         >
           <thead className="bg-neutral-900">
             <tr>
@@ -175,11 +174,11 @@ export default function RankingPage() {
       </div>
 
       {ranking && filteredRanking.length > ITEMS_PER_PAGE && (
-        <div className="mx-auto flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-neutral-950/70 p-3">
+        <div className="mx-auto flex w-full flex-col items-stretch justify-between gap-3 rounded-lg border border-white/10 bg-neutral-950/70 p-3 sm:w-auto sm:flex-row sm:items-center">
           <span className="text-sm text-neutral-400">
-            Pagina {currentPage} de {totalPages}
+            Página {currentPage} de {totalPages}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
             <button
               className="rounded-md bg-neutral-900 px-3 py-1 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}

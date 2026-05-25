@@ -6,7 +6,6 @@ import {
   IconHelpHexagon,
   IconFileText,
   IconLayoutDashboard,
-  IconUser,
 } from "@tabler/icons-react";
 
 export const menuItems = [
@@ -22,7 +21,7 @@ export const menuItems = [
   { name: "Sorteos", icon: <IconGift size={20} />, href: "/gifts" },
   { name: "Soporte", icon: <IconHelpHexagon size={20} />, href: "/support" },
   {
-    name: "Términos y Condiciones",
+    name: "Términos y condiciones",
     icon: <IconFileText size={20} />,
     href: "/terms",
   },

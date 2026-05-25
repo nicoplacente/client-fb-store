@@ -16,13 +16,13 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-16 bg-neutral-950 text-gray-100 transition-all duration-300 z-20
-        ${isOpen ? "w-72" : "w-16"} h-[calc(100vh-4rem)]`}
+      className={`fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] border-r border-neutral-800 bg-neutral-950 text-gray-100 transition-all duration-300 lg:block
+        ${isOpen ? "lg:w-72" : "lg:w-16"}`}
       onMouseEnter={() => !expanded && setHovered(true)}
       onMouseLeave={() => !expanded && setHovered(false)}
     >
       <button
-        className={`absolute transition-all duration-300 hover:scale-110 cursor-pointer hover:shadow-[inset_0px_1px_5px_#f005] -right-3 top-6 w-6 h-6 flex items-center justify-center bg-neutral-900 rounded-full border border-neutral-800 z-30 ${
+        className={`absolute -right-3 top-6 z-30 hidden h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-neutral-800 bg-neutral-900 transition-all duration-300 hover:scale-110 hover:shadow-[inset_0px_1px_5px_#f005] lg:flex ${
           expanded ? "rotate-12" : "-rotate-45"
         }`}
         aria-label={expanded ? "Desfijar sidebar" : "Fijar sidebar"}
@@ -31,8 +31,8 @@ export default function Sidebar() {
         <IconPin size={16} />
       </button>
 
-      <div className="flex flex-col h-full p-2">
-        <nav className="flex-1 space-y-2">
+      <div className="flex h-full flex-col p-2">
+        <nav className="flex flex-1 flex-col items-stretch space-y-2">
           {menuItems.map((item, idx) => {
             if (item.requiresAuth && !user) return null;
             if (item.requiresDashboardAccess && !hasDashboardAccess(user)) {
@@ -57,15 +57,15 @@ export default function Sidebar() {
           <button
             aria-label="Cerrar sesión"
             onClick={logout}
-            className="space-y-2 border-t border-gray-800 pt-2 cursor-pointer"
+            className="shrink-0 cursor-pointer border-t border-gray-800 pt-2"
           >
-            <div className="flex items-center px-3 py-2 rounded-md bg-red-800/50 hover:bg-red-800/70 transition-colors duration-300">
-              <div className="w-6 flex items-center justify-center">
+            <div className="flex items-center rounded-md bg-red-800/50 px-3 py-2 transition-colors duration-300 hover:bg-red-800/70">
+              <div className="flex w-6 items-center justify-center">
                 <IconPower size={20} />
               </div>
               <div
-                className={`whitespace-nowrap  transition-all duration-300 ${
-                  isOpen ? "opacity-100 ml-3" : "opacity-0 -ml-10"
+                className={`whitespace-nowrap transition-all duration-300 ${
+                  isOpen ? "ml-3 opacity-100" : "-ml-10 opacity-0"
                 }`}
               >
                 Cerrar sesión

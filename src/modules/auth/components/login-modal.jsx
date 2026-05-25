@@ -1,9 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
-import { FaRegCopy } from "react-icons/fa";
-import { FiExternalLink } from "react-icons/fi";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import {
+  IconCheck,
+  IconCopy,
+  IconExternalLink,
+  IconX,
+} from "@tabler/icons-react";
 import { envConfig } from "@/config";
 import useVerifyToken from "../hooks/use-verify-token";
 import useVerifyListener from "../hooks/use-verify-listener";
@@ -35,9 +38,9 @@ export default function LoginModal({ onClose }) {
       <div className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-950 p-6 text-white shadow-2xl">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold">Verificacion Kick</h2>
+            <h2 className="text-xl font-semibold">Verificación Kick</h2>
             <p className="mt-2 text-sm text-zinc-400">
-              Entra al chat y envia el comando para vincular tu cuenta.
+              Entra al chat y envía el comando para vincular tu cuenta.
             </p>
           </div>
           <button
@@ -53,7 +56,7 @@ export default function LoginModal({ onClose }) {
           <p className="text-sm leading-6 text-zinc-300">
             Para completar el proceso debes ingresar al siguiente{" "}
             <a
-              href={envConfig.CHAT_POPUOT}
+              href={envConfig.CHAT_POPUP_URL}
               target="_blank"
               rel="noopener noreferrer"
               className="text-green-400 hover:underline"
@@ -64,7 +67,7 @@ export default function LoginModal({ onClose }) {
           </p>
 
           <p className="rounded-md border border-yellow-400/20 bg-yellow-400/10 px-3 py-2 text-sm text-yellow-200">
-            El codigo se renueva cada 3 minutos.
+            El código se renueva cada 3 minutos.
           </p>
 
           {error ? (
@@ -79,7 +82,7 @@ export default function LoginModal({ onClose }) {
                 </code>
               ) : (
                 <span className="text-sm italic text-gray-400">
-                  Generando codigo...
+                  Generando código...
                 </span>
               )}
 
@@ -88,8 +91,9 @@ export default function LoginModal({ onClose }) {
                   onClick={handleCopy}
                   className="ml-2 cursor-pointer text-white transition hover:text-green-400"
                   title="Copiar comando"
+                  aria-label="Copiar comando"
                 >
-                  {copied ? <IconCheck /> : <FaRegCopy />}
+                  {copied ? <IconCheck /> : <IconCopy />}
                 </button>
               ) : (
                 <Loader />
@@ -98,13 +102,13 @@ export default function LoginModal({ onClose }) {
           )}
 
           <a
-            href={envConfig.CHAT_POPUOT}
+            href={envConfig.CHAT_POPUP_URL}
             target="_blank"
             rel="noopener noreferrer nofollow"
             aria-label="Abrir chat de Kick"
             className="flex w-full items-center justify-center gap-2 rounded-md bg-green-600 py-2.5 font-semibold text-white transition hover:bg-green-500"
           >
-            <FiExternalLink /> Abrir chat
+            <IconExternalLink size={18} /> Abrir chat
           </a>
 
           <button

@@ -1,4 +1,4 @@
 import { io } from "socket.io-client";
 import { envConfig } from "@/config";
 
-export const socket = io(envConfig.SERVER_URL);
+export const socket = io(envConfig.SOCKET_URL);

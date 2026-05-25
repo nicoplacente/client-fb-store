@@ -88,7 +88,7 @@ function TicketPanel({
   onDelete,
 }) {
   return (
-    <div className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-5">
+    <div className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-3 sm:p-5">
       {loading ? (
         <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
           {loadingText}
@@ -129,7 +129,7 @@ function TicketGroup({
 }) {
   return (
     <section className="space-y-3">
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-white">
           {icon}
           {title}
@@ -215,7 +215,7 @@ function TicketCard({
             Estado actual: {ticket.status}
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <SelectInput
             value={ticket.status}
             disabled={isPending}
@@ -246,7 +246,7 @@ function TicketCard({
                 fromAdmin
                   ? "ml-auto border-red-400/20 bg-red-500/10"
                   : "border-white/10 bg-neutral-900/80"
-              } max-w-[86%]`}
+              } max-w-full sm:max-w-[86%]`}
             >
               <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">
                 <span className={fromAdmin ? "text-red-200" : "text-neutral-300"}>
@@ -337,8 +337,8 @@ function UserProfileModal({ user, fallbackUsername, open, onClose }) {
   const username = user.username || fallbackUsername || "Usuario";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-      <div className="w-full max-w-2xl rounded-lg border border-white/10 bg-neutral-950 shadow-2xl shadow-black/60">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-4">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 shadow-2xl shadow-black/60">
         <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
           <div className="flex items-center gap-3">
             <div className="flex size-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900 text-neutral-500">

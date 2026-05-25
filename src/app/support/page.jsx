@@ -89,7 +89,7 @@ export default function SupportPage() {
     const message = String(replyDrafts[ticket.id] || "").trim();
 
     if (!message) {
-      toast.error("Escribi una respuesta");
+      toast.error("Escribí una respuesta");
       return;
     }
 
@@ -113,17 +113,19 @@ export default function SupportPage() {
   return (
     <SectionContainer className="space-y-8">
       <div>
-        <p className="text-sm font-semibold uppercase text-red-300/80">Soporte</p>
-        <h1 className="mt-2 text-4xl font-bold text-white">Centro de ayuda</h1>
+        <p className="text-sm font-semibold uppercase text-red-300/80">
+          Soporte
+        </p>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Centro de ayuda</h1>
         <p className="mt-3 max-w-2xl text-neutral-400">
-          Enviá consultas sobre canjes, creditos, sorteos o problemas de cuenta.
+          Enviá consultas sobre canjes, créditos, sorteos o problemas de cuenta.
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_420px]">
+      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
         <form
           onSubmit={handleSubmit}
-          className="rounded-lg border border-white/10 bg-neutral-950/80 p-6"
+          className="rounded-lg border border-white/10 bg-neutral-950/80 p-4 sm:p-6"
         >
           <div className="mb-6 flex items-center gap-3">
             <span className="rounded-md border border-red-500/30 bg-red-500/10 p-2 text-red-200">
@@ -131,7 +133,9 @@ export default function SupportPage() {
             </span>
             <div>
               <h2 className="text-xl font-semibold text-white">Nueva consulta</h2>
-              <p className="text-sm text-neutral-500">Te respondemos desde el backend configurado.</p>
+              <p className="text-sm text-neutral-500">
+                Te respondemos desde el backend configurado.
+              </p>
             </div>
           </div>
 
@@ -146,17 +150,17 @@ export default function SupportPage() {
               />
             </label>
             <label className="grid gap-2 text-sm font-medium text-neutral-300">
-              Categoria
+              Categoría
               <select
                 value={form.category}
                 onChange={(event) => updateField("category", event.target.value)}
                 className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
               >
                 <option value="general">General</option>
-                <option value="credits">Creditos</option>
+                <option value="credits">Créditos</option>
                 <option value="giveaways">Sorteos</option>
                 <option value="account">Cuenta</option>
-                <option value="technical">Tecnico</option>
+                <option value="technical">Técnico</option>
               </select>
             </label>
             <label className="grid gap-2 text-sm font-medium text-neutral-300">
@@ -180,7 +184,7 @@ export default function SupportPage() {
           </button>
         </form>
 
-        <aside className="rounded-lg border border-white/10 bg-neutral-950/70 p-6">
+        <aside className="rounded-lg border border-white/10 bg-neutral-950/70 p-4 sm:p-6">
           <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
             <IconTicket size={22} />
             Mis tickets
@@ -210,7 +214,9 @@ export default function SupportPage() {
                     className="flex w-full items-start justify-between gap-3 text-left"
                   >
                     <span>
-                      <span className="font-semibold text-white">{ticket.subject}</span>
+                      <span className="font-semibold text-white">
+                        {ticket.subject}
+                      </span>
                       <span className="mt-2 line-clamp-2 block text-sm text-neutral-500">
                         {ticket.message}
                       </span>
@@ -253,7 +259,8 @@ export default function SupportPage() {
 
 function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
   const hasInitialMessage = ticket.messages.some(
-    (message) => message.senderRole === "user" && message.message === ticket.message
+    (message) =>
+      message.senderRole === "user" && message.message === ticket.message
   );
   const messages = hasInitialMessage
     ? ticket.messages
@@ -275,13 +282,15 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
           return (
             <div
               key={message.id}
-              className={`rounded-md border p-3 ${
+                  className={`rounded-md border p-3 ${
                 fromAdmin
                   ? "border-red-400/20 bg-red-500/10"
                   : "ml-auto border-white/10 bg-neutral-950/70"
-              } max-w-[90%]`}
+              } max-w-full sm:max-w-[90%]`}
             >
-              <p className={fromAdmin ? "text-xs text-red-200" : "text-xs text-neutral-500"}>
+              <p
+                className={fromAdmin ? "text-xs text-red-200" : "text-xs text-neutral-500"}
+              >
                 {fromAdmin ? "Soporte" : "Vos"}
               </p>
               <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-300">

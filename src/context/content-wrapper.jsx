@@ -7,9 +7,9 @@ export default function ContentWrapper({ children }) {
 
   return (
     <main
-      className={`transition-discrete space-y-96 duration-300 pt-20 ${
-        isOpen ? "ml-72" : "ml-16"
-      } p-6`}
+      className={`min-h-screen px-4 pb-8 pt-20 transition-[margin] duration-300 sm:px-6 ${
+        isOpen ? "lg:ml-72" : "lg:ml-16"
+      }`}
     >
       {children}
     </main>

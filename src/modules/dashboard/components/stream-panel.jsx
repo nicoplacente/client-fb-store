@@ -60,7 +60,7 @@ export default function StreamPanel({
   };
 
   return (
-    <section className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-5">
+    <section className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-3 sm:p-5">
       <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
         <div>
           <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-white">
@@ -71,7 +71,7 @@ export default function StreamPanel({
             Controla la hora especial que modifica puntos de watchtime y chat.
           </p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-neutral-900/70 p-4">
+        <div className="rounded-lg border border-white/10 bg-neutral-900/70 p-4 lg:min-w-72">
           <p className="text-xs font-semibold uppercase text-neutral-500">Activo ahora</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xl font-bold text-white">{state.activeLabel}</span>
@@ -101,7 +101,7 @@ export default function StreamPanel({
                   : "border-white/10 bg-neutral-900/70 text-neutral-300"
               }`}
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <span className="inline-flex items-center gap-2 font-bold">
                   <IconSparkles size={18} />
                   {hour.label}
@@ -149,7 +149,7 @@ export default function StreamPanel({
             type="button"
             onClick={onActivateChest}
             disabled={isPending || Boolean(chestState.chest)}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-yellow-300/30 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-100 transition hover:bg-yellow-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-yellow-300/30 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-100 transition hover:bg-yellow-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
           >
             <IconBox size={17} />
             Activar cofre
@@ -175,7 +175,7 @@ export default function StreamPanel({
             type="button"
             onClick={onActivateChatReward}
             disabled={isPending || Boolean(chestState.chatReward)}
-            className="inline-flex items-center justify-center gap-2 rounded-md border border-green-300/30 bg-green-400/10 px-4 py-2 text-sm font-bold text-green-100 transition hover:bg-green-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-green-300/30 bg-green-400/10 px-4 py-2 text-sm font-bold text-green-100 transition hover:bg-green-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
           >
             <IconMessageCircle size={17} />
             Activar recompensa
