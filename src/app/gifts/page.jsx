@@ -75,13 +75,13 @@ export default function GiftsPage() {
     startTransition(async () => {
       try {
         const result = await joinGiveaway(giveaway.id);
-        await refreshUser?.();
-        await loadGiveaways({ showLoading: false });
         toast.success(
           result?.alreadyJoined
             ? "Ya estabas participando"
-            : "Participacion registrada"
+            : "Participación registrada"
         );
+        await loadGiveaways({ showLoading: false });
+        await Promise.resolve(refreshUser?.()).catch(() => {});
       } catch (err) {
         toast.error(err.message || "No se pudo participar");
       }
@@ -91,10 +91,12 @@ export default function GiftsPage() {
   return (
     <SectionContainer className="space-y-8">
       <div>
-        <p className="text-sm font-semibold uppercase text-red-300/80">Sorteos</p>
-        <h1 className="mt-2 text-4xl font-bold text-white">Premios activos</h1>
+        <p className="text-sm font-semibold uppercase text-red-300/80">
+          Sorteos
+        </p>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Premios activos</h1>
         <p className="mt-3 max-w-2xl text-neutral-400">
-          Participá en sorteos activos y seguí el estado de los proximos premios.
+          Participá en sorteos activos y seguí el estado de los próximos premios.
         </p>
       </div>
 
@@ -141,16 +143,16 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
     giveaway.status === "active" && started && !isFinalized && !giveaway.hasJoined;
   const entryLabel =
     giveaway.entryCost > 0
-      ? `${formatNumber(giveaway.entryCost)} creditos`
+      ? `${formatNumber(giveaway.entryCost)} créditos`
       : "Gratis";
   const statusLabel = !started
-    ? "proximamente"
+    ? "próximamente"
     : isFinalized
       ? "finalizado"
       : giveaway.status;
 
   return (
-    <article className="grid overflow-hidden rounded-lg border border-white/10 bg-neutral-950/75 md:grid-cols-[220px_1fr]">
+    <article className="grid overflow-hidden rounded-lg border border-white/10 bg-neutral-950/75 md:grid-cols-[200px_1fr] xl:grid-cols-[220px_1fr]">
       <div className="aspect-[4/3] bg-neutral-900 md:aspect-auto">
         {giveaway.imageUrl ? (
           <img
@@ -168,7 +170,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
       </div>
       <div className="flex flex-col justify-between gap-5 p-5">
         <div>
-          <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <h2 className="text-xl font-bold text-white">{giveaway.title}</h2>
             <span className="rounded-md border border-white/10 px-2 py-1 text-xs text-neutral-400">
               {statusLabel}
@@ -179,7 +181,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
           </p>
         </div>
 
-        <div className="grid gap-3 text-sm text-neutral-400 sm:grid-cols-4">
+        <div className="grid gap-3 text-sm text-neutral-400 sm:grid-cols-2 xl:grid-cols-4">
           <span className="flex items-center gap-2">
             <IconTicket size={17} /> {giveaway.prize}
           </span>
@@ -187,7 +189,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
             <IconUsers size={17} /> {giveaway.participants}
           </span>
           <span className="flex items-center gap-2 text-amber-200">
-            <Image src={coins} alt="Creditos" className="size-5" />
+            <Image src={coins} alt="Créditos" className="size-5" />
             {entryLabel}
           </span>
           <span>
@@ -199,7 +201,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
           disabled={isPending || !canJoin}
           onClick={() => onJoin(giveaway)}
           aria-label={`Participar en el sorteo ${giveaway.title}`}
-          className="inline-flex w-fit cursor-pointer items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 sm:w-fit"
         >
           <IconGift size={18} />
           {giveaway.hasJoined
@@ -208,9 +210,9 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
               ? giveaway.entryCost > 0
                 ? `Participar - ${entryLabel}`
                 : "Participar gratis"
-            : isFinalized
-              ? "Sorteo finalizado"
-              : "Todavia no disponible"}
+              : isFinalized
+                ? "Sorteo finalizado"
+                : "Todavía no disponible"}
         </button>
 
         <div className="border-t border-white/10 pt-4">
@@ -218,7 +220,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
             type="button"
             onClick={() => onOpenResult(giveaway)}
             aria-label={`Ver resultado del sorteo ${giveaway.title}`}
-            className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-100 transition hover:border-red-300 hover:bg-red-500/20"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md border border-red-400/40 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-100 transition hover:border-red-300 hover:bg-red-500/20 sm:w-fit"
           >
             <IconTrophy size={17} />
             {isFinalized ? "Ver resultado" : "Resultado disponible al finalizar"}
@@ -265,12 +267,12 @@ function GiveawayResultModal({ giveaway, onClose }) {
               </p>
             ) : (
               <p className="text-sm text-neutral-400">
-                El sorteo finalizo sin participantes, no hay ganador.
+                El sorteo finalizó sin participantes, no hay ganador.
               </p>
             )
           ) : (
             <p className="text-sm text-neutral-400">
-              El ganador se sortea automaticamente cuando llega la fecha de fin.
+              El ganador se sortea automáticamente cuando llega la fecha de fin.
             </p>
           )}
         </div>

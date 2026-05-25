@@ -38,7 +38,7 @@ export function SelectInput(props) {
 
 export function PanelHeader({ title, subtitle, canCancel, onCancel }) {
   return (
-    <div className="mb-5 flex items-center justify-between gap-3">
+    <div className="mb-5 flex items-start justify-between gap-3">
       <div>
         <h2 className="text-xl font-semibold text-white">{title}</h2>
         <p className="text-sm text-neutral-500">{subtitle}</p>

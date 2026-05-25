@@ -220,8 +220,8 @@ export default function ProfilePage() {
           method: "PATCH",
           body: profile,
         });
-        await refreshUser?.();
         toast.success("Perfil actualizado");
+        await Promise.resolve(refreshUser?.()).catch(() => {});
       } catch (err) {
         toast.error(err.message || "No se pudo guardar el perfil");
       }
@@ -231,8 +231,8 @@ export default function ProfilePage() {
   if (!user) {
     return (
       <SectionContainer className="space-y-6">
-        <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-neutral-950/80 p-8 text-center">
-          <h1 className="text-3xl font-bold text-white">Perfil</h1>
+        <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-neutral-950/80 p-5 text-center sm:p-8">
+          <h1 className="text-2xl font-bold text-white sm:text-3xl">Perfil</h1>
           <p className="mt-3 text-neutral-400">
             Inicia sesion para ver y editar tu informacion.
           </p>
@@ -244,8 +244,8 @@ export default function ProfilePage() {
   return (
     <SectionContainer className="space-y-8">
       <div className="mx-auto max-w-5xl overflow-hidden rounded-lg border border-white/10 bg-neutral-950/80 shadow-2xl shadow-black/50">
-        <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.18),transparent_34%),linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.95))] px-6 pb-8 pt-10 text-center">
-          <div className="mx-auto flex size-28 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-600 shadow-xl shadow-black/40">
+        <div className="border-b border-white/10 bg-[radial-gradient(circle_at_top,rgba(239,68,68,0.18),transparent_34%),linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.95))] px-4 pb-7 pt-8 text-center sm:px-6 sm:pb-8 sm:pt-10">
+          <div className="mx-auto flex size-24 items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-600 shadow-xl shadow-black/40 sm:size-28">
             {user.avatarUrl ? (
               <img
                 src={user.avatarUrl}
@@ -256,14 +256,14 @@ export default function ProfilePage() {
               <IconUserCircle size={92} stroke={1.2} />
             )}
           </div>
-          <h1 className="mt-7 text-2xl font-bold text-white">
+          <h1 className="mt-6 break-words text-xl font-bold text-white sm:mt-7 sm:text-2xl">
             <span className="text-neutral-400">Bienvenido, </span>
             {displayName}
           </h1>
         </div>
 
         <div className="px-5 py-7 sm:px-8">
-          <div className="mb-7 flex justify-center gap-2 border-b border-white/10">
+          <div className="mb-7 flex justify-start gap-2 overflow-x-auto border-b border-white/10 sm:justify-center">
             <ProfileTab
               active={activeTab === "info"}
               icon={<IconInfoCircle size={17} />}
@@ -280,7 +280,7 @@ export default function ProfilePage() {
 
           {activeTab === "info" ? (
             <form onSubmit={handleSubmit}>
-              <div className="grid gap-5 md:grid-cols-2">
+              <div className="grid gap-5 lg:grid-cols-2">
                 <ProfileField
                   label="Pais"
                   value={profile.country}
@@ -329,7 +329,7 @@ export default function ProfilePage() {
                   onChange={(value) => updateField("instagram", value)}
                   icon={<IconBrandX size={18} />}
                 />
-                <div className="md:col-span-2">
+                <div className="lg:col-span-2">
                   <ProfileField
                     label="Usuario de Discord"
                     value={profile.discord}
@@ -367,7 +367,7 @@ function ProfileTab({ active, icon, label, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Ver seccion ${label}`}
-      className={`inline-flex cursor-pointer items-center gap-2 border-b-2 px-4 py-3 text-sm font-bold transition ${
+      className={`inline-flex shrink-0 cursor-pointer items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition sm:px-4 ${
         active
           ? "border-red-400 text-white"
           : "border-transparent text-neutral-500 hover:text-neutral-200"

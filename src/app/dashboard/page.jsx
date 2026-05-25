@@ -57,11 +57,11 @@ export default function DashboardPage() {
 function DashboardMessage({ eyebrow, title, text }) {
   return (
     <SectionContainer className="space-y-6">
-      <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-neutral-950/80 p-8 text-center">
+      <div className="mx-auto max-w-2xl rounded-lg border border-white/10 bg-neutral-950/80 p-5 text-center sm:p-8">
         {eyebrow ? (
           <p className="text-sm font-semibold uppercase text-red-300/80">{eyebrow}</p>
         ) : null}
-        <h1 className={eyebrow ? "mt-2 text-3xl font-bold text-white" : "text-3xl font-bold text-white"}>
+        <h1 className={eyebrow ? "mt-2 text-2xl font-bold text-white sm:text-3xl" : "text-2xl font-bold text-white sm:text-3xl"}>
           {title}
         </h1>
         <p className="mt-3 text-neutral-400">{text}</p>
@@ -77,7 +77,7 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
         <p className="text-sm font-semibold uppercase text-red-300/80">
           Administracion
         </p>
-        <h1 className="mt-2 text-4xl font-bold text-white">Dashboard</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Dashboard</h1>
         <p className="mt-3 max-w-2xl text-neutral-400">
           Gestiona productos, sorteos y tickets desde el mismo panel.
         </p>
@@ -85,7 +85,7 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
       <button
         onClick={onRefresh}
         disabled={loading || isPending}
-        className="inline-flex w-fit items-center gap-2 rounded-md border border-white/10 bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:border-red-400/50 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-neutral-900 px-4 py-2 text-sm font-semibold text-white transition hover:border-red-400/50 hover:text-red-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit"
       >
         <IconRefresh size={18} />
         Actualizar
@@ -96,7 +96,7 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
 
 function DashboardStats({ stats }) {
   return (
-    <div className="grid gap-4 md:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
       <StatCard label="Productos" value={stats.products} />
       <StatCard label="Packs de creditos" value={stats.credits} />
       <StatCard label="Sorteos" value={stats.giveaways} />
@@ -108,7 +108,7 @@ function DashboardStats({ stats }) {
 
 function DashboardTabs({ activeTab, onChange }) {
   return (
-    <div className="flex flex-wrap gap-2 border-b border-white/10">
+    <div className="grid grid-cols-3 gap-2 rounded-lg border border-white/10 bg-neutral-950/70 p-2 lg:flex lg:gap-2 lg:border-x-0 lg:border-t-0 lg:bg-transparent lg:p-0">
       {dashboardTabs.map((tab) => {
         const Icon = tab.icon;
         const active = activeTab === tab.id;
@@ -117,14 +117,14 @@ function DashboardTabs({ activeTab, onChange }) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`inline-flex items-center gap-2 border-b-2 px-4 py-3 text-sm font-semibold transition ${
+            className={`flex min-h-16 flex-col items-center justify-center gap-1 rounded-md border px-2 py-2 text-xs font-semibold transition lg:min-h-0 lg:flex-row lg:gap-2 lg:rounded-none lg:border-x-0 lg:border-t-0 lg:border-b-2 lg:px-4 lg:py-3 lg:text-sm ${
               active
-                ? "border-red-400 text-white"
-                : "border-transparent text-neutral-500 hover:text-neutral-200"
+                ? "border-red-400 bg-red-500/15 text-white lg:bg-transparent"
+                : "border-white/10 bg-neutral-900/60 text-neutral-500 hover:border-white/20 hover:text-neutral-200 lg:border-transparent lg:bg-transparent"
             }`}
           >
-            <Icon size={18} />
-            {tab.label}
+            <Icon size={19} />
+            <span className="max-w-full truncate">{tab.label}</span>
           </button>
         );
       })}

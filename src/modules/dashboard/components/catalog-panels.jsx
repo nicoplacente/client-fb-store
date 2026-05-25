@@ -9,7 +9,7 @@ function CreateButton({ children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500"
+      className="inline-flex w-full items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 sm:w-fit"
     >
       <IconPlus size={18} />
       {children}
@@ -19,7 +19,7 @@ function CreateButton({ children, onClick }) {
 
 function PanelTitle({ title, subtitle, action }) {
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h2 className="text-xl font-semibold text-white">{title}</h2>
         <p className="text-sm text-neutral-500">{subtitle}</p>
@@ -31,12 +31,12 @@ function PanelTitle({ title, subtitle, action }) {
 
 function ModalForm({ children, onSubmit }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 backdrop-blur-sm sm:items-center sm:p-4">
       <form
         onSubmit={onSubmit}
         role="dialog"
         aria-modal="true"
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 p-5 shadow-2xl shadow-black"
+        className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black sm:max-h-[90vh] sm:p-5"
       >
         {children}
       </form>

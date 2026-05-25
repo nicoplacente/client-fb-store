@@ -16,12 +16,12 @@ export const metadata = {
     template: "%s | FrancoBertello74 Store",
   },
   description:
-    "Tienda de la comunidad de FrancoBertello74 para canjear creditos, participar en sorteos y gestionar soporte.",
+    "Tienda de la comunidad de FrancoBertello74 para canjear créditos, participar en sorteos y gestionar soporte.",
   keywords: [
     "FrancoBertello74",
     "Kick",
     "tienda",
-    "creditos",
+    "créditos",
     "sorteos",
     "canjes",
   ],
@@ -29,13 +29,16 @@ export const metadata = {
   openGraph: {
     title: "FrancoBertello74 Store",
     description:
-      "Canjea creditos, participa en sorteos y revisa tus compras de la comunidad.",
+      "Canjeá créditos, participá en sorteos y revisá tus compras de la comunidad.",
+    siteName: "FrancoBertello74 Store",
     type: "website",
     locale: "es_AR",
   },
-  robots: {
-    index: true,
-    follow: true,
+  twitter: {
+    card: "summary",
+    title: "FrancoBertello74 Store",
+    description:
+      "Canjeá créditos, participá en sorteos y gestioná soporte de la comunidad.",
   },
 };
 

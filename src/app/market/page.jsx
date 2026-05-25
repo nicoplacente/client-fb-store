@@ -8,6 +8,7 @@ import {
   useState,
   useTransition,
 } from "react";
+import Image from "next/image";
 import {
   IconBrandKick,
   IconCoins,
@@ -19,6 +20,7 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
+import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import {
@@ -32,7 +34,6 @@ import {
   purchaseCreditPackage,
 } from "@/modules/credits/libs/credit-api";
 import coins from "@/assets/coins.webp";
-import Image from "next/image";
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
@@ -52,21 +53,77 @@ function saveLocalRedemption(redemption) {
 
     window.localStorage.setItem("fbStoreLocalRedemptions", JSON.stringify(next));
   } catch {
-    window.localStorage.setItem(
-      "fbStoreLocalRedemptions",
-      JSON.stringify([redemption])
-    );
+    try {
+      window.localStorage.setItem(
+        "fbStoreLocalRedemptions",
+        JSON.stringify([redemption])
+      );
+    } catch {
+      // Ignore storage write errors.
+    }
   }
+}
+
+function getActionConfirmation(action) {
+  if (!action) return null;
+
+  if (action.type === "purchase") {
+    return {
+      title: "Confirmar compra",
+      description: `Vas a gastar ${formatNumber(action.item.pointsCost)} puntos para recibir ${formatNumber(action.item.credits)} créditos.`,
+      confirmLabel: "Comprar",
+    };
+  }
+
+  return {
+    title: "Confirmar canje",
+    description: `Vas a gastar ${formatNumber(action.item.price)} créditos para solicitar este producto.`,
+    confirmLabel: "Canjear",
+  };
+}
+
+function ActionSummary({ action }) {
+  const isPurchase = action.type === "purchase";
+  const item = action.item;
+
+  return (
+    <div className="grid gap-3 text-sm text-neutral-300">
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-neutral-400">
+          {isPurchase ? "Paquete" : "Producto"}
+        </span>
+        <strong className="text-white">
+          {isPurchase ? item.name : item.title}
+        </strong>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-neutral-400">
+          {isPurchase ? "Puntos a gastar" : "Créditos a gastar"}
+        </span>
+        <strong className="text-amber-300">
+          {formatNumber(isPurchase ? item.pointsCost : item.price)}
+        </strong>
+      </div>
+      <div className="flex items-center justify-between gap-4">
+        <span className="text-neutral-400">
+          {isPurchase ? "Créditos que recibís" : "Stock restante"}
+        </span>
+        <strong className="text-white">
+          {formatNumber(isPurchase ? item.credits : item.stock)}
+        </strong>
+      </div>
+    </div>
+  );
 }
 
 function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
   return (
     <article className="relative overflow-hidden rounded-lg border border-yellow-300/20 bg-neutral-950/75 p-5">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-bold text-white">{creditPackage.name}</h2>
           <p className="mt-2 min-h-10 text-sm text-neutral-400">
-            {creditPackage.description || "Compra creditos usando tus puntos."}
+            {creditPackage.description || "Comprá créditos usando tus puntos."}
           </p>
         </div>
         <span className="inline-flex size-10 items-center justify-center rounded-md bg-yellow-300/10 text-yellow-300">
@@ -74,11 +131,11 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
         </span>
       </div>
 
-      <div className="mt-5 flex items-end justify-between gap-4">
+      <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="text-xs text-neutral-500">Recibis</p>
-          <p className="mt-1 flex items-center gap-2 text-3xl font-black text-yellow-300">
-            <Image src={coins} alt="Creditos" className="size-7" />
+          <p className="text-xs text-neutral-500">Recibís</p>
+          <p className="mt-1 flex items-center gap-2 text-2xl font-black text-yellow-300 sm:text-3xl">
+            <Image src={coins} alt="Créditos" className="size-7" />
             {formatNumber(creditPackage.credits)}
           </p>
         </div>
@@ -98,7 +155,7 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
         className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-500 px-4 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
       >
         <IconShoppingCart size={18} />
-        Comprar creditos
+        Comprar créditos
       </button>
     </article>
   );
@@ -160,7 +217,7 @@ function ProductCard({ product, onRedeem, disabled }) {
             </span>
           </div>
           <p className="mt-2 line-clamp-2 min-h-10 text-sm text-neutral-400">
-            {product.description || "Producto disponible en el market."}
+            {product.description || "Producto disponible en la tienda."}
           </p>
         </div>
 
@@ -168,8 +225,8 @@ function ProductCard({ product, onRedeem, disabled }) {
           <div>
             <p className="text-xs text-neutral-500">Precio</p>
             <p className="mt-1 flex items-center gap-2 text-2xl font-black text-yellow-300">
-              <Image src={coins} alt="Creditos" className="size-6" />
-              {product.price.toLocaleString()}
+              <Image src={coins} alt="Créditos" className="size-6" />
+              {formatNumber(product.price)}
             </p>
           </div>
           <div className="text-right text-sm text-neutral-500">
@@ -210,6 +267,7 @@ export default function MarketPage() {
   const [category, setCategory] = useState("all");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [pendingAction, setPendingAction] = useState(null);
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
 
@@ -237,15 +295,18 @@ export default function MarketPage() {
   const filteredProducts = useMemo(() => {
     const term = deferredQuery.trim().toLowerCase();
 
-    return normalizedProducts.filter((product) => {
-      const matchesCategory = category === "all" || product.category === category;
-      const matchesQuery =
-        !term ||
-        product.title.toLowerCase().includes(term) ||
-        product.description.toLowerCase().includes(term);
+    return normalizedProducts
+      .filter((product) => {
+        const matchesCategory =
+          category === "all" || product.category === category;
+        const matchesQuery =
+          !term ||
+          product.title.toLowerCase().includes(term) ||
+          product.description.toLowerCase().includes(term);
 
-      return matchesCategory && matchesQuery;
-    }).toSorted((a, b) => Number(b.featured) - Number(a.featured));
+        return matchesCategory && matchesQuery;
+      })
+      .toSorted((a, b) => Number(b.featured) - Number(a.featured));
   }, [category, deferredQuery, normalizedProducts]);
 
   const loadMarket = useCallback(async ({ showLoading = true } = {}) => {
@@ -260,7 +321,7 @@ export default function MarketPage() {
       setProducts(productData);
       setCreditPackages(creditPackageData);
     } catch (err) {
-      setError(err.message || "No se pudo cargar el market");
+      setError(err.message || "No se pudo cargar la tienda");
       setProducts([]);
       setCreditPackages([]);
     } finally {
@@ -272,88 +333,117 @@ export default function MarketPage() {
     loadMarket();
   }, [loadMarket]);
 
-  function handleRedeem(product) {
+  function handleRequestRedeem(product) {
+    if (isPending) return;
+    setPendingAction({
+      type: "redeem",
+      item: product,
+    });
+  }
+
+  function handleRequestPurchase(creditPackage) {
+    if (isPending) return;
+    setPendingAction({
+      type: "purchase",
+      item: creditPackage,
+    });
+  }
+
+  function handleConfirmAction() {
+    const action = pendingAction;
+
+    if (!action) return;
+
+    setPendingAction(null);
+
     startTransition(async () => {
       try {
-        const result = await redeemProduct(product.id);
-        if (result?.redemption) {
-          saveLocalRedemption({
-            ...result.redemption,
-            product: result.product || product,
-          });
+        if (action.type === "redeem") {
+          const result = await redeemProduct(action.item.id);
+
+          if (result?.redemption) {
+            saveLocalRedemption({
+              ...result.redemption,
+              product: result.product || action.item,
+            });
+          }
+
+          if (result?.product) {
+            setProducts((current) =>
+              current.map((item) =>
+                Number(item.id) === Number(result.product.id)
+                  ? result.product
+                  : item
+              )
+            );
+          } else {
+            await loadMarket({ showLoading: false });
+          }
+
+          toast.success("Canje solicitado");
+          await Promise.resolve(refreshUser?.()).catch(() => {});
+          return;
         }
-        if (result?.product) {
-          setProducts((current) =>
-            current.map((item) =>
-              Number(item.id) === Number(result.product.id) ? result.product : item
-            )
-          );
-        } else {
+
+        await purchaseCreditPackage(action.item.id);
+        toast.success("Créditos acreditados");
+        await Promise.resolve(refreshUser?.()).catch(() => {});
+      } catch (err) {
+        toast.error(err.message || "No se pudo completar la operación");
+
+        if (action.type === "redeem") {
           await loadMarket({ showLoading: false });
         }
-        toast.success("Canje solicitado");
-        await refreshUser?.();
-      } catch (err) {
-        toast.error(err.message || "No se pudo solicitar el canje");
-        await loadMarket({ showLoading: false });
       }
     });
   }
 
-  function handlePurchaseCredits(creditPackage) {
-    startTransition(async () => {
-      try {
-        await purchaseCreditPackage(creditPackage.id);
-        toast.success("Creditos acreditados");
-        await refreshUser?.();
-      } catch (err) {
-        toast.error(err.message || "No se pudieron comprar creditos");
-      }
-    });
-  }
+  const confirmation = getActionConfirmation(pendingAction);
 
   return (
     <SectionContainer className="space-y-8">
-
-     {normalizedCreditPackages.length > 0 ? (
+      {normalizedCreditPackages.length > 0 ? (
         <section className="space-y-5">
           <div className="text-center">
             <p className="text-sm font-semibold uppercase text-yellow-300/80">
-              Compra creditos
+              Compra créditos
             </p>
-            <h2 className="mt-2 text-3xl font-bold text-white">
-              Converti tus puntos en creditos
+            <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+              Convertí tus puntos en créditos
             </h2>
             <p className="mx-auto mt-3 max-w-2xl text-neutral-400">
-              Usa tus puntos del canal para cargar creditos y canjear productos.
+              Usa tus puntos del canal para cargar créditos y canjear productos.
             </p>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
             {normalizedCreditPackages.map((creditPackage) => (
               <CreditPackageCard
                 key={creditPackage.id}
                 creditPackage={creditPackage}
-                onPurchase={handlePurchaseCredits}
-                disabled={isPending}
+                onPurchase={handleRequestPurchase}
+                disabled={isPending || Boolean(pendingAction)}
               />
             ))}
           </div>
         </section>
       ) : null}
 
-
       <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
         <div>
-          <p className="text-sm font-semibold uppercase text-red-300/80">Tienda</p>
-          <h1 className="mt-2 text-4xl font-bold text-white">Canjeá tus creditos</h1>
+          <p className="text-sm font-semibold uppercase text-red-300/80">
+            Tienda
+          </p>
+          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+            Canjeá tus créditos
+          </h1>
           <p className="mt-3 max-w-2xl text-neutral-400">
-            Productos, codigos y recompensas disponibles para la comunidad.
+            Productos, códigos y recompensas disponibles para la comunidad.
           </p>
         </div>
 
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <label className="flex min-w-64 items-center gap-2 rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-neutral-400">
+        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+          <label className="flex w-full items-center gap-2 rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-neutral-400 sm:min-w-64">
             <IconSearch size={18} />
             <input
               value={query}
@@ -366,8 +456,8 @@ export default function MarketPage() {
           <select
             value={category}
             onChange={(event) => setCategory(event.target.value)}
-            aria-label="Filtrar productos por categoria"
-            className="rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-sm text-white outline-none"
+            aria-label="Filtrar productos por categoría"
+            className="w-full rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-sm text-white outline-none sm:w-auto"
           >
             {categories.map((item) => (
               <option key={item} value={item}>
@@ -378,11 +468,9 @@ export default function MarketPage() {
         </div>
       </div>
 
-     
-
       {loading ? (
         <div className="rounded-lg border border-white/10 bg-neutral-950/70 p-10 text-center text-neutral-400">
-          Cargando market...
+          Cargando tienda...
         </div>
       ) : error ? (
         <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-10 text-center text-red-200">
@@ -393,17 +481,28 @@ export default function MarketPage() {
           No hay productos para mostrar.
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
-              onRedeem={handleRedeem}
-              disabled={isPending}
+              onRedeem={handleRequestRedeem}
+              disabled={isPending || Boolean(pendingAction)}
             />
           ))}
         </div>
       )}
+
+      <ConfirmationDialog
+        open={Boolean(pendingAction)}
+        title={confirmation?.title}
+        description={confirmation?.description}
+        confirmLabel={confirmation?.confirmLabel}
+        onConfirm={handleConfirmAction}
+        onCancel={() => setPendingAction(null)}
+      >
+        {pendingAction ? <ActionSummary action={pendingAction} /> : null}
+      </ConfirmationDialog>
     </SectionContainer>
   );
 }

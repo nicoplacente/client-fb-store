@@ -1,11 +1,29 @@
 // Configuration for environment variables
 
-const SERVER_URL =
-  process.env.NEXT_PUBLIC_SERVER_URL 
+function normalizeUrl(value) {
+  return String(value || "").trim().replace(/\/+$/, "");
+}
+
+function ensureApiUrl(value) {
+  const normalized = normalizeUrl(value);
+
+  if (!normalized) return "http://localhost:3001/api";
+  if (normalized.endsWith("/api")) return normalized;
+
+  return `${normalized}/api`;
+}
+
+const rawServerUrl =
+  process.env.NEXT_PUBLIC_SERVER_URL ||
+  process.env.SERVER_URL ||
+  "http://localhost:3001";
+const SERVER_URL = ensureApiUrl(rawServerUrl);
+const SOCKET_URL = normalizeUrl(SERVER_URL).replace(/\/api$/, "");
 
 export const envConfig = {
   SERVER_URL,
-  CHAT_POPUOT: "https://kick.com/popout/francobertello74-verify/chat",
+  SOCKET_URL,
+  CHAT_POPUP_URL: "https://kick.com/popout/francobertello74-verify/chat",
   API_MY_RANKING: `${SERVER_URL}/ranking/me`,
   API_RANKING: `${SERVER_URL}/ranking`,
   API_PRODUCTS: `${SERVER_URL}/products`,
@@ -25,6 +43,5 @@ export const envConfig = {
   API_COMPLETE_VERIFY: `${SERVER_URL}/complete-verify`,
   API_REQUEST_TOKEN: `${SERVER_URL}/request-token`,
   API_REFRESH_TOKEN: `${SERVER_URL}/refresh-token`,
-  JWT_SECRET: process.env.JWT_SECRET,
   NODE_ENV: process.env.NODE_ENV,
 };

@@ -1,22 +1,46 @@
 import SectionContainer from "@/modules/ui/section-container";
-import Carrousel from "@/modules/carrousel/Carrousel";
+
+export const metadata = {
+  title: {
+    absolute: "FrancoBertello74 Store",
+  },
+  description:
+    "Sitio oficial de la comunidad de FrancoBertello74 para canjear créditos, participar en sorteos y abrir soporte.",
+  keywords: [
+    "FrancoBertello74",
+    "Kick",
+    "tienda",
+    "créditos",
+    "canjes",
+    "sorteos",
+    "soporte",
+  ],
+  openGraph: {
+    title: "FrancoBertello74 Store",
+    description:
+      "Canjeá créditos, participá en sorteos y revisá tus compras de la comunidad.",
+    type: "website",
+    locale: "es_AR",
+  },
+};
 
 export default function Home() {
   return (
     <SectionContainer>
-      <div>
-        <h1 className="text-6xl font-bold mb-18 text-center">
-          <span className="text-7xl">FRANCO BERTELLO</span> <br />
+      <div className="space-y-8 sm:space-y-10">
+        <h1 className="text-center text-4xl font-black leading-tight sm:text-6xl lg:text-7xl">
+          <span className="block">FRANCO BERTELLO</span>
           STORE
         </h1>
 
-        <div className="flex justify-center flex-col gap-9">
+        <div className="flex flex-col justify-center gap-6 sm:gap-9">
           <iframe
             width="1246"
-            className="aspect-video h-96 w-3xl mx-auto border-dashed border-4 border-white/50 rounded-md"
+            className="mx-auto aspect-video h-auto w-full max-w-5xl rounded-md border-2 border-dashed border-white/50 sm:border-4"
             height="701"
             src="https://www.youtube.com/embed/1vl9vioLo7o?list=RD1vl9vioLo7o"
             title="Nico Placente - My Head"
+            loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
@@ -24,7 +48,7 @@ export default function Home() {
 
           <a
             href="#"
-            className="text-xl font-semibold gap-2 px-6 py-1.5 rounded-full border-2 w-fit mx-auto bg-gradient-to-br from-red-900/50 to-red-500/30 border-red-500 hover:translate-y-0.5 transition-all duration-300 shadow-[4px_4px_10px_rgba(0,0,0,0.4)] saturate-150 hover:saturate-200"
+            className="mx-auto inline-flex w-full max-w-xs justify-center rounded-full border-2 border-red-500 bg-gradient-to-br from-red-900/50 to-red-500/30 px-6 py-2 text-base font-semibold transition-all duration-300 hover:translate-y-0.5 hover:saturate-200 sm:w-fit sm:text-xl"
             aria-label="Instalar extensión"
             rel="noopener noreferrer nofollow"
           >
@@ -32,8 +56,6 @@ export default function Home() {
           </a>
         </div>
       </div>
-
-      {/* <Carrousel /> */}
     </SectionContainer>
   );
 }
