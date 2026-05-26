@@ -222,7 +222,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
             ) : null}
           </div>
           <p className="mx-auto mt-3 line-clamp-2 min-h-10 max-w-[16rem] text-sm font-semibold leading-5 text-neutral-500">
-            {giveaway.description || giveaway.prize}
+            {giveaway.description}
           </p>
         </div>
 
