@@ -11,6 +11,7 @@ import {
 import Image from "next/image";
 import {
   IconBrandKick,
+  IconChevronDown,
   IconCoins,
   IconLock,
   IconPackage,
@@ -70,14 +71,14 @@ function getActionConfirmation(action) {
   if (action.type === "purchase") {
     return {
       title: "Confirmar compra",
-      description: `Vas a gastar ${formatNumber(action.item.pointsCost)} puntos para recibir ${formatNumber(action.item.credits)} créditos.`,
+      description: `Vas a usar ${formatNumber(action.item.pointsCost)} puntos y recibir ${formatNumber(action.item.credits)} creditos al instante.`,
       confirmLabel: "Comprar",
     };
   }
 
   return {
     title: "Confirmar canje",
-    description: `Vas a gastar ${formatNumber(action.item.price)} créditos para solicitar este producto.`,
+    description: `Vas a usar ${formatNumber(action.item.price)} creditos para solicitar este producto.`,
     confirmLabel: "Canjear",
   };
 }
@@ -92,21 +93,21 @@ function ActionSummary({ action }) {
         <span className="text-neutral-400">
           {isPurchase ? "Paquete" : "Producto"}
         </span>
-        <strong className="text-white">
+        <strong className="text-right text-white">
           {isPurchase ? item.name : item.title}
         </strong>
       </div>
       <div className="flex items-center justify-between gap-4">
         <span className="text-neutral-400">
-          {isPurchase ? "Puntos a gastar" : "Créditos a gastar"}
+          {isPurchase ? "Puntos a usar" : "Creditos a usar"}
         </span>
-        <strong className="text-amber-300">
+        <strong className="text-amber-200">
           {formatNumber(isPurchase ? item.pointsCost : item.price)}
         </strong>
       </div>
       <div className="flex items-center justify-between gap-4">
         <span className="text-neutral-400">
-          {isPurchase ? "Créditos que recibís" : "Stock restante"}
+          {isPurchase ? "Creditos que recibis" : "Stock restante"}
         </span>
         <strong className="text-white">
           {formatNumber(isPurchase ? item.credits : item.stock)}
@@ -118,33 +119,39 @@ function ActionSummary({ action }) {
 
 function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
   return (
-    <article className="relative overflow-hidden rounded-lg border border-yellow-300/20 bg-neutral-950/75 p-5">
+    <article className="group relative overflow-hidden rounded-2xl border border-amber-300/20 bg-[linear-gradient(145deg,rgba(251,191,36,0.10),rgba(10,10,10,0.92)_42%,rgba(10,10,10,0.98))] p-5 shadow-xl shadow-black/25 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:border-amber-300/45 hover:shadow-amber-950/20">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-amber-200/60 to-transparent" />
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h2 className="text-lg font-bold text-white">{creditPackage.name}</h2>
-          <p className="mt-2 min-h-10 text-sm text-neutral-400">
-            {creditPackage.description || "Comprá créditos usando tus puntos."}
+          <p className="text-xs font-bold uppercase tracking-wide text-amber-100/80">
+            Saldo para canjes
+          </p>
+          <h2 className="mt-2 text-lg font-bold text-white">{creditPackage.name}</h2>
+          <p className="mt-2 min-h-10 text-sm leading-6 text-neutral-400">
+            {creditPackage.description || "Transforma tus puntos del canal en creditos listos para usar."}
           </p>
         </div>
-        <span className="inline-flex size-10 items-center justify-center rounded-md bg-yellow-300/10 text-yellow-300">
+        <span className="inline-flex size-11 shrink-0 items-center justify-center rounded-xl border border-amber-300/25 bg-amber-300/15 text-amber-100 shadow-lg shadow-amber-950/20 transition group-hover:scale-105">
           <IconCoins size={22} />
         </span>
       </div>
 
-      <div className="mt-5 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs text-neutral-500">Recibís</p>
-          <p className="mt-1 flex items-center gap-2 text-2xl font-black text-yellow-300 sm:text-3xl">
-            <Image src={coins} alt="Créditos" className="size-7" />
-            {formatNumber(creditPackage.credits)}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-xs text-neutral-500">Costo</p>
-          <p className="mt-1 inline-flex items-center gap-1 rounded-md border border-green-500/30 bg-green-500/10 px-2 py-1 text-sm font-bold text-green-300">
-            <IconBrandKick size={16} />
-            {formatNumber(creditPackage.pointsCost)}
-          </p>
+      <div className="mt-6 rounded-xl border border-amber-100/10 bg-black/25 p-4">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase text-neutral-500">Recibis</p>
+            <p className="mt-1 flex items-center gap-2 text-3xl font-black text-amber-200">
+              <Image src={coins} alt="Creditos" className="size-7" />
+              {formatNumber(creditPackage.credits)}
+            </p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs font-semibold uppercase text-neutral-500">Pagas</p>
+            <p className="mt-1 inline-flex items-center gap-1 rounded-full border border-green-400/25 bg-green-400/10 px-3 py-1 text-sm font-bold text-green-200 shadow-inner shadow-green-950/20">
+              <IconBrandKick size={16} />
+              {formatNumber(creditPackage.pointsCost)}
+            </p>
+          </div>
         </div>
       </div>
 
@@ -152,10 +159,10 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
         disabled={disabled || creditPackage.status !== "active"}
         onClick={() => onPurchase(creditPackage)}
         aria-label={`Comprar pack ${creditPackage.name}`}
-        className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-yellow-500 px-4 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-yellow-400 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+        className="mt-5 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-neutral-950 shadow-lg shadow-amber-950/30 transition hover:-translate-y-0.5 hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200/70 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:shadow-none"
       >
         <IconShoppingCart size={18} />
-        Comprar créditos
+        Comprar creditos
       </button>
     </article>
   );
@@ -168,31 +175,31 @@ function ProductCard({ product, onRedeem, disabled }) {
 
   return (
     <article
-      className={`relative overflow-hidden rounded-lg border bg-neutral-950/75 transition ${
+      className={`group relative flex min-h-[356px] flex-col items-center overflow-visible rounded-[14px] border bg-[#090b10]/90 p-5 pb-0 text-center shadow-xl shadow-black/25 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:bg-[#0c0e14] ${
         product.featured
-          ? "border-yellow-300/50 shadow-[0_0_0_1px_rgba(250,204,21,0.18)]"
-          : "border-white/10"
+          ? "border-amber-300/45 shadow-[0_0_0_1px_rgba(251,191,36,0.14)] hover:border-amber-300/60"
+          : "border-white/10 hover:border-red-300/25"
       } ${outOfStock ? "opacity-75" : ""}`}
     >
       {product.featured ? (
-        <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-md border border-yellow-300/40 bg-yellow-300/15 px-2 py-1 text-xs font-bold text-yellow-200 backdrop-blur">
+        <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100 backdrop-blur">
           <IconStarFilled size={13} />
           Destacado
         </div>
       ) : null}
 
       {outOfStock || isDisabled ? (
-        <div className="absolute right-3 top-3 z-10 rounded-md border border-neutral-500/40 bg-neutral-950/80 px-2 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
+        <div className="absolute right-3 top-3 z-10 rounded-full border border-neutral-500/40 bg-neutral-950/80 px-3 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
           {outOfStock ? "Agotado" : "Deshabilitado"}
         </div>
       ) : null}
 
-      <div className="relative aspect-[4/3] bg-neutral-900">
+      <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.045),transparent_58%)] sm:h-44">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
             alt={`Imagen del producto ${product.title}`}
-            className={`h-full w-full object-cover ${outOfStock ? "grayscale" : ""}`}
+            className={`max-h-full max-w-full object-contain drop-shadow-[0_18px_26px_rgba(0,0,0,0.45)] transition duration-700 group-hover:scale-105 ${outOfStock ? "grayscale" : ""}`}
             loading="lazy"
             decoding="async"
           />
@@ -202,38 +209,39 @@ function ProductCard({ product, onRedeem, disabled }) {
           </div>
         )}
       </div>
-      <div className="space-y-4 p-5">
+      <div className="flex flex-1 flex-col items-center justify-between gap-4 pt-4">
         <div>
-          <div className="flex items-start justify-between gap-3">
-            <h2 className="text-lg font-bold text-white">{product.title}</h2>
+          <div className="grid justify-items-center gap-2">
+            <h2 className="line-clamp-2 text-lg font-black leading-tight text-white">
+              {product.title}
+            </h2>
             <span
-              className={`rounded-md border px-2 py-1 text-xs ${
+              className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase ${
                 product.featured
-                  ? "border-yellow-300/30 bg-yellow-300/10 text-yellow-200"
-                  : "border-white/10 text-neutral-400"
+                  ? "border-amber-300/30 bg-amber-300/10 text-amber-100"
+                  : "border-white/10 bg-white/[0.03] text-neutral-400"
               }`}
             >
               {product.category}
             </span>
           </div>
-          <p className="mt-2 line-clamp-2 min-h-10 text-sm text-neutral-400">
+          <p className="mx-auto mt-3 line-clamp-2 min-h-10 max-w-[16rem] text-sm font-semibold leading-5 text-neutral-500">
             {product.description || "Producto disponible en la tienda."}
           </p>
         </div>
 
-        <div className="flex items-end justify-between gap-4">
+        <div className="grid justify-items-center gap-2">
           <div>
-            <p className="text-xs text-neutral-500">Precio</p>
-            <p className="mt-1 flex items-center gap-2 text-2xl font-black text-yellow-300">
-              <Image src={coins} alt="Créditos" className="size-6" />
+            <p className="flex items-center justify-center gap-2 text-2xl font-black text-amber-300">
+              <Image src={coins} alt="Creditos" className="size-5" />
               {formatNumber(product.price)}
             </p>
           </div>
-          <div className="text-right text-sm text-neutral-500">
-            <p className={outOfStock ? "font-semibold text-red-200" : ""}>
+          <div className="text-center text-xs font-black uppercase text-neutral-600">
+            <p className={outOfStock ? "text-red-200" : ""}>
               {outOfStock ? "Sin stock" : `${product.stock} restantes`}
             </p>
-            <p className={unavailable ? "text-neutral-500" : "text-green-300"}>
+            <p className={`mt-1 normal-case ${unavailable ? "text-neutral-600" : "text-green-300"}`}>
               {outOfStock
                 ? "Agotado"
                 : isDisabled
@@ -249,7 +257,7 @@ function ProductCard({ product, onRedeem, disabled }) {
           disabled={disabled || unavailable}
           onClick={() => onRedeem(product)}
           aria-label={`Canjear producto ${product.title}`}
-          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="relative -bottom-4 inline-flex min-w-36 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-red-600 px-5 py-3 text-xs font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
         >
           {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
           {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}
@@ -386,10 +394,10 @@ export default function MarketPage() {
         }
 
         await purchaseCreditPackage(action.item.id);
-        toast.success("Créditos acreditados");
+        toast.success("Creditos acreditados");
         await Promise.resolve(refreshUser?.()).catch(() => {});
       } catch (err) {
-        toast.error(err.message || "No se pudo completar la operación");
+        toast.error(err.message || "No se pudo completar la operacion");
 
         if (action.type === "redeem") {
           await loadMarket({ showLoading: false });
@@ -403,85 +411,103 @@ export default function MarketPage() {
   return (
     <SectionContainer className="space-y-8">
       {normalizedCreditPackages.length > 0 ? (
-        <section className="space-y-5">
-          <div className="text-center">
-            <p className="text-sm font-semibold uppercase text-yellow-300/80">
-              Compra créditos
-            </p>
-            <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
-              Convertí tus puntos en créditos
-            </h2>
-            <p className="mx-auto mt-3 max-w-2xl text-neutral-400">
-              Usa tus puntos del canal para cargar créditos y canjear productos.
-            </p>
-          </div>
+        <section className="relative overflow-hidden rounded-3xl border border-amber-300/15 bg-neutral-950/65 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+          <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-200/45 to-transparent" />
+          <div className="relative space-y-5">
+            <div className="flex flex-col gap-3 text-left lg:flex-row lg:items-end lg:justify-between">
+              <div>
+                <p className="text-sm font-semibold uppercase tracking-wide text-amber-200/80">
+                  Packs de creditos
+                </p>
+                <h2 className="mt-2 text-2xl font-bold text-white sm:text-3xl">
+                  Prepara saldo para canjear al instante
+                </h2>
+                <p className="mt-3 max-w-2xl text-neutral-400">
+                  Usa tus puntos del canal para cargar creditos y desbloquear recompensas sin esperar.
+                </p>
+              </div>
+              <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-300/20 bg-amber-300/10 px-3 py-1.5 text-xs font-bold text-amber-100">
+                <IconCoins size={16} />
+                Acreditacion inmediata
+              </span>
+            </div>
 
-          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-            {normalizedCreditPackages.map((creditPackage) => (
-              <CreditPackageCard
-                key={creditPackage.id}
-                creditPackage={creditPackage}
-                onPurchase={handleRequestPurchase}
-                disabled={isPending || Boolean(pendingAction)}
-              />
-            ))}
+            <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+              {normalizedCreditPackages.map((creditPackage) => (
+                <CreditPackageCard
+                  key={creditPackage.id}
+                  creditPackage={creditPackage}
+                  onPurchase={handleRequestPurchase}
+                  disabled={isPending || Boolean(pendingAction)}
+                />
+              ))}
+            </div>
           </div>
         </section>
       ) : null}
 
-      <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase text-red-300/80">
-            Tienda
-          </p>
-          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
-            Canjeá tus créditos
-          </h1>
-          <p className="mt-3 max-w-2xl text-neutral-400">
-            Productos, códigos y recompensas disponibles para la comunidad.
-          </p>
-        </div>
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(135deg,rgba(220,38,38,0.16),rgba(10,10,10,0.72)_38%,rgba(10,10,10,0.88))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+        <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-red-200/45 to-transparent" />
+        <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
+              Tienda
+            </p>
+            <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+              Recompensas listas para la comunidad
+            </h1>
+            <p className="mt-3 max-w-2xl text-neutral-400">
+              Explora productos, codigos y beneficios disponibles. Filtra rapido y canjea con tus creditos.
+            </p>
+          </div>
 
-        <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-          <label className="flex w-full items-center gap-2 rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-neutral-400 sm:min-w-64">
-            <IconSearch size={18} />
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar producto"
-              aria-label="Buscar producto"
-              className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
-            />
-          </label>
-          <select
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            aria-label="Filtrar productos por categoría"
-            className="w-full rounded-md border border-white/10 bg-neutral-950/80 px-3 py-2 text-sm text-white outline-none sm:w-auto"
-          >
-            {categories.map((item) => (
-              <option key={item} value={item}>
-                {item === "all" ? "Todas" : item}
-              </option>
-            ))}
-          </select>
+          <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+            <label className="flex w-full items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-neutral-400 shadow-inner shadow-black/20 transition focus-within:border-red-300/50 focus-within:ring-2 focus-within:ring-red-300/10 sm:min-w-72">
+              <IconSearch size={18} />
+              <input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar producto"
+                aria-label="Buscar producto"
+                className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
+              />
+            </label>
+            <label className="relative w-full sm:w-auto">
+              <select
+                value={category}
+                onChange={(event) => setCategory(event.target.value)}
+                aria-label="Filtrar productos por categoria"
+                className="w-full cursor-pointer appearance-none rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 pr-10 text-sm font-semibold text-white shadow-inner shadow-black/20 outline-none transition hover:border-red-300/30 focus:border-red-300/50 focus:ring-2 focus:ring-red-300/10 sm:w-auto"
+              >
+                {categories.map((item) => (
+                  <option key={item} value={item}>
+                    {item === "all" ? "Todas" : item}
+                  </option>
+                ))}
+              </select>
+              <IconChevronDown
+                size={16}
+                className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500"
+              />
+            </label>
+          </div>
         </div>
       </div>
 
       {loading ? (
-        <div className="rounded-lg border border-white/10 bg-neutral-950/70 p-10 text-center text-neutral-400">
+        <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
           Cargando tienda...
         </div>
       ) : error ? (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-10 text-center text-red-200">
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-10 text-center text-red-200 shadow-xl shadow-black/15">
           {error}
         </div>
       ) : filteredProducts.length === 0 ? (
-        <div className="rounded-lg border border-white/10 bg-neutral-950/70 p-10 text-center text-neutral-400">
-          No hay productos para mostrar.
+        <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
+          No encontramos productos con esos filtros.
         </div>
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
           {filteredProducts.map((product) => (
             <ProductCard
               key={product.id}

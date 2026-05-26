@@ -34,7 +34,7 @@ export default function ConfirmationDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onCancel();
@@ -46,11 +46,11 @@ export default function ConfirmationDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="w-full max-w-lg rounded-2xl border border-white/10 bg-neutral-950 p-6 shadow-2xl shadow-black/60"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70"
       >
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-white/[0.03] p-5 sm:p-6">
           <div className="space-y-3">
-            <div className="inline-flex size-11 items-center justify-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-200">
+            <div className="inline-flex size-11 items-center justify-center rounded-xl border border-amber-300/25 bg-amber-300/10 text-amber-200">
               <IconAlertTriangle size={22} />
             </div>
             <div className="space-y-2">
@@ -70,35 +70,37 @@ export default function ConfirmationDialog({
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-md border border-white/10 p-2 text-neutral-400 transition hover:text-white"
-            aria-label="Cerrar confirmación"
+            className="rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-300/40"
+            aria-label="Cerrar confirmacion"
           >
             <IconX size={18} />
           </button>
         </div>
 
-        {children ? (
-          <div className="mt-5 rounded-xl border border-white/10 bg-neutral-900/80 p-4">
-            {children}
-          </div>
-        ) : null}
+        <div className="p-5 sm:p-6">
+          {children ? (
+            <div className="rounded-xl border border-white/10 bg-neutral-900/80 p-4">
+              {children}
+            </div>
+          ) : null}
 
-        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex items-center justify-center rounded-md border border-white/10 bg-transparent px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5"
-          >
-            {cancelLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-amber-500 px-4 py-2.5 text-sm font-bold text-neutral-950 transition hover:bg-amber-400"
-          >
-            <IconCheck size={18} />
-            {confirmLabel}
-          </button>
+          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center justify-center rounded-md border border-white/10 bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
+            >
+              {cancelLabel}
+            </button>
+            <button
+              type="button"
+              onClick={onConfirm}
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-amber-400 px-4 py-2.5 text-sm font-black text-neutral-950 transition hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-200/70"
+            >
+              <IconCheck size={18} />
+              {confirmLabel}
+            </button>
+          </div>
         </div>
       </div>
     </div>

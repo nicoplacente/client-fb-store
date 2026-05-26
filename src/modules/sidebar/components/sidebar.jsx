@@ -61,7 +61,7 @@ export default function Sidebar() {
           >
             <div
               className={`flex items-center rounded-lg bg-red-800/50 transition-colors duration-300 hover:bg-red-800/70 ${
-                isOpen ? "h-11 justify-start px-3" : "mx-auto size-11 justify-center p-0"
+                isOpen ? "h-11 justify-start px-3" : "w-full h-11 justify-center p-0"
               }`}
             >
               <div className="flex size-6 items-center justify-center">

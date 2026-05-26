@@ -13,18 +13,19 @@ export default function AdminCard({
 }) {
   return (
     <article
-      className={`overflow-hidden rounded-lg border bg-neutral-900/60 ${
-        featured ? "border-yellow-300/40" : "border-white/10"
+      className={`group overflow-hidden rounded-2xl border bg-neutral-950/80 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:bg-neutral-950 ${
+        featured ? "border-amber-300/40 hover:border-amber-300/60" : "border-white/10 hover:border-red-300/25"
       } ${unavailable ? "opacity-75" : ""}`}
     >
-      <div className="relative aspect-[5/3] bg-neutral-900">
+      <div className="relative aspect-[5/3] overflow-hidden bg-neutral-900">
+        <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-t from-black/50 via-transparent to-black/10" />
         {featured ? (
-          <span className="absolute left-3 top-3 z-10 rounded-md border border-yellow-300/40 bg-yellow-300/15 px-2 py-1 text-xs font-bold text-yellow-200">
+          <span className="absolute left-3 top-3 z-10 rounded-full border border-amber-300/40 bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100 backdrop-blur">
             Destacado
           </span>
         ) : null}
         {unavailable ? (
-          <span className="absolute right-3 top-3 z-10 rounded-md border border-neutral-500/40 bg-neutral-950/80 px-2 py-1 text-xs font-bold uppercase text-neutral-300">
+          <span className="absolute right-3 top-3 z-10 rounded-full border border-neutral-500/40 bg-neutral-950/80 px-3 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
             No disponible
           </span>
         ) : null}
@@ -32,7 +33,7 @@ export default function AdminCard({
           <img
             src={imageUrl}
             alt={title}
-            className={`h-full w-full object-cover ${unavailable ? "grayscale" : ""}`}
+            className={`h-full w-full object-cover transition duration-700 group-hover:scale-105 ${unavailable ? "grayscale" : ""}`}
             loading="lazy"
             decoding="async"
           />
@@ -42,16 +43,16 @@ export default function AdminCard({
           </div>
         )}
       </div>
-      <div className="space-y-3 p-3">
+      <div className="space-y-4 p-4">
         <div>
-          <h3 className="line-clamp-1 font-semibold text-white">{title}</h3>
-          <p className="mt-1 text-sm text-neutral-400">{meta}</p>
+          <h3 className="line-clamp-1 font-bold text-white">{title}</h3>
+          <p className="mt-2 text-sm font-semibold text-neutral-300">{meta}</p>
           <p className="mt-1 text-xs text-neutral-500">{detail}</p>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={onEdit}
-            className="inline-flex flex-1 items-center justify-center gap-2 rounded-md border border-white/10 bg-neutral-950 px-3 py-2 text-sm font-semibold text-white transition hover:border-red-400/50"
+            className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-300/50 hover:bg-white/[0.04] focus:outline-none focus:ring-2 focus:ring-red-300/40"
           >
             <IconEdit size={17} />
             Editar
@@ -59,7 +60,7 @@ export default function AdminCard({
           {onDelete ? (
             <button
               onClick={onDelete}
-              className="inline-flex items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 px-3 py-2 text-red-200 transition hover:bg-red-500/20"
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40"
               aria-label={`Eliminar ${title}`}
             >
               <IconTrash size={17} />
