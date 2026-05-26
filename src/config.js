@@ -13,10 +13,7 @@ function ensureApiUrl(value) {
   return `${normalized}/api`;
 }
 
-const rawServerUrl =
-  process.env.NEXT_PUBLIC_SERVER_URL ||
-  process.env.SERVER_URL ||
-  "http://localhost:3001";
+const rawServerUrl = process.env.NEXT_PUBLIC_SERVER_URL
 const SERVER_URL = ensureApiUrl(rawServerUrl);
 const SOCKET_URL = normalizeUrl(SERVER_URL).replace(/\/api$/, "");
 
