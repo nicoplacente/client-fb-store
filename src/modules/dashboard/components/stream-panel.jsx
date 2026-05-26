@@ -11,8 +11,8 @@ import {
 
 const hourStyles = {
   happy: "border-yellow-300/30 bg-yellow-400/10 text-yellow-100",
-  golden: "border-amber-300/30 bg-amber-400/10 text-amber-100",
-  netherite: "border-red-300/30 bg-red-500/10 text-red-100",
+  opening: "border-sky-300/30 bg-sky-400/10 text-sky-100",
+  bertello_snack: "border-red-300/30 bg-red-500/10 text-red-100",
 };
 
 function formatMultiplier(value) {
