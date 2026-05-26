@@ -308,15 +308,14 @@ export default function useDashboardController() {
     const payloadBase = {
       title: giveawayForm.title.trim(),
       description: giveawayForm.description.trim(),
-      prize: giveawayForm.prize.trim(),
       entryCost: Number(giveawayForm.entryCost || 0),
       status: giveawayForm.status,
       startsAt: giveawayForm.startsAt,
       endsAt: giveawayForm.endsAt,
     };
 
-    if (!payloadBase.title || !payloadBase.prize) {
-      toast.error("Completa titulo y premio");
+    if (!payloadBase.title) {
+      toast.error("Completa titulo");
       return;
     }
 
