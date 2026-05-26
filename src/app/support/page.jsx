@@ -8,6 +8,8 @@ import {
   IconTicket,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
+import useAppContext from "@/context/use-app-context";
+import { AuthContext } from "@/context/auth-context/auth-context";
 import SectionContainer from "@/modules/ui/section-container";
 import {
   createSupportMessage,
@@ -23,6 +25,7 @@ const emptyTicket = {
 };
 
 export default function SupportPage() {
+  const { user } = useAppContext(AuthContext);
   const [form, setForm] = useState(emptyTicket);
   const [tickets, setTickets] = useState([]);
   const [expandedTicketId, setExpandedTicketId] = useState(null);
@@ -65,6 +68,11 @@ export default function SupportPage() {
 
   function handleSubmit(event) {
     event.preventDefault();
+
+    if (!user) {
+      toast.error("Inicia sesion para enviar una consulta");
+      return;
+    }
 
     startTransition(async () => {
       try {
@@ -134,10 +142,18 @@ export default function SupportPage() {
             <div>
               <h2 className="text-xl font-semibold text-white">Nueva consulta</h2>
               <p className="text-sm text-neutral-500">
-                Te respondemos desde el backend configurado.
+                {user
+                  ? "Te respondemos desde el backend configurado."
+                  : "Inicia sesion para que podamos responderte."}
               </p>
             </div>
           </div>
+
+          {!user ? (
+            <div className="mb-5 rounded-md border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium text-red-100">
+              Para enviar una consulta necesitas iniciar sesion. Asi soporte puede responderte en tu ticket.
+            </div>
+          ) : null}
 
           <div className="grid gap-4">
             <label className="grid gap-2 text-sm font-medium text-neutral-300">
@@ -146,6 +162,7 @@ export default function SupportPage() {
                 value={form.subject}
                 onChange={(event) => updateField("subject", event.target.value)}
                 className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                disabled={!user || isPending}
                 required
               />
             </label>
@@ -155,6 +172,7 @@ export default function SupportPage() {
                 value={form.category}
                 onChange={(event) => updateField("category", event.target.value)}
                 className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                disabled={!user || isPending}
               >
                 <option value="general">General</option>
                 <option value="credits">Créditos</option>
@@ -170,13 +188,14 @@ export default function SupportPage() {
                 onChange={(event) => updateField("message", event.target.value)}
                 rows={8}
                 className="resize-none rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                disabled={!user || isPending}
                 required
               />
             </label>
           </div>
 
           <button
-            disabled={isPending}
+            disabled={!user || isPending}
             className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconSend size={18} />
