@@ -2,12 +2,14 @@ import { envConfig } from "@/config";
 import { apiRequest } from "@/modules/api/client";
 
 const SPECIAL_HOUR_LABELS = {
-  netherite: "Bertello-Snack Hour",
+  opening: "Opening Hour",
+  bertello_snack: "Bertello-Snack Hour",
 };
 
 function normalizeSpecialHourLabel(hourId, label) {
   if (SPECIAL_HOUR_LABELS[hourId]) return SPECIAL_HOUR_LABELS[hourId];
-  if (label === "Netherite Hour") return SPECIAL_HOUR_LABELS.netherite;
+  if (hourId === "golden" || label === "Golden Hour") return SPECIAL_HOUR_LABELS.opening;
+  if (hourId === "netherite" || label === "Netherite Hour") return SPECIAL_HOUR_LABELS.bertello_snack;
   return label || hourId || "Sin hora especial";
 }
 
