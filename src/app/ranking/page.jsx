@@ -7,6 +7,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { IconAwardFilled, IconCrown } from "@tabler/icons-react";
 import SectionContainer from "@/modules/ui/section-container";
 import { ITEMS_PER_PAGE } from "@/modules/ranking/libs/constants";
 import RankingSearchBar from "@/modules/ranking/components/ranking-searchbar";
@@ -32,6 +33,43 @@ function getRankLabel(index) {
   if (index === 1) return "#2";
   if (index === 2) return "#3";
   return String(index + 1);
+}
+
+function RankIndicator({ index }) {
+  if (index === 0) {
+    return (
+      <span className="inline-flex w-10 items-center justify-center">
+        <IconCrown
+          size={20}
+          className="text-yellow-400"
+          fill="currentColor"
+          stroke={0}
+        />
+      </span>
+    );
+  }
+
+  if (index === 1) {
+    return (
+      <span className="inline-flex w-10 items-center justify-center">
+        <IconAwardFilled size={20} className="text-slate-200" />
+      </span>
+    );
+  }
+
+  if (index === 2) {
+    return (
+      <span className="inline-flex w-10 items-center justify-center">
+        <IconAwardFilled size={20} className="text-amber-500" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="block w-10 text-center font-bold text-neutral-500">
+      {getRankLabel(index)}
+    </span>
+  );
 }
 
 export default function RankingPage() {
@@ -132,6 +170,7 @@ export default function RankingPage() {
             ) : (
               paginatedRanking.map((user, index) => {
                 const absoluteIndex = startIndex + index;
+                const isPodium = absoluteIndex < 3;
                 const watchTimePoints = Number(user.watchTimePoints || 0);
                 const hours = Math.floor(watchTimePoints / 60);
                 const minutes = watchTimePoints % 60;
@@ -139,12 +178,14 @@ export default function RankingPage() {
                 return (
                   <tr
                     key={user.id || user._id || user.username}
-                    className="w-full bg-gradient-to-r from-neutral-800/90 to-neutral-900/70 text-sm shadow-2xl [&>td]:px-2 [&>td]:py-3 [&>td]:text-center"
+                    className={`w-full bg-gradient-to-r from-neutral-800/90 to-neutral-900/70 shadow-2xl [&>td]:px-2 [&>td]:text-center ${
+                      isPodium
+                        ? "text-base [&>td]:py-4"
+                        : "text-sm [&>td]:py-3"
+                    }`}
                   >
                     <td className="flex items-center gap-2">
-                      <span className="block w-10 text-center font-bold text-neutral-500">
-                        {getRankLabel(absoluteIndex)}
-                      </span>
+                      <RankIndicator index={absoluteIndex} />
                       <span className="w-full text-start font-semibold">
                         {user.username}
                       </span>

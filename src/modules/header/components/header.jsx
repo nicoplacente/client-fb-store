@@ -8,7 +8,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   IconBrandKick,
-  IconLogin,
   IconMenu2,
   IconPower,
   IconUser,
@@ -140,15 +139,17 @@ export default function Header() {
 
   return (
     <header className="fixed left-0 top-0 z-30 flex h-16 w-full items-center justify-between border-b border-neutral-800 bg-neutral-950/95 px-3 backdrop-blur sm:px-6">
-      <button
-        type="button"
-        onClick={() => setMenuOpen(true)}
-        className="inline-flex size-11 items-center justify-center rounded-lg border border-white/10 bg-neutral-900 text-white transition hover:border-red-400/50 hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-red-400/70 lg:hidden"
-        aria-label="Abrir menú"
-        aria-expanded={menuOpen}
+      <Link
+        href="/"
+        aria-label="Ir al inicio"
+        className="inline-flex items-center justify-center lg:hidden"
       >
-        <IconMenu2 size={24} />
-      </button>
+        <img
+          src="/favicon.ico"
+          alt=""
+          className="size-10 rounded-md border border-white/10 bg-neutral-900/60 p-1"
+        />
+      </Link>
 
       {user ? (
         <div className="ml-auto hidden max-w-full items-center gap-2 py-2 lg:flex lg:gap-4">
@@ -196,10 +197,23 @@ export default function Header() {
           </Link>
         </div>
       ) : (
-        <div className="hidden lg:block">
+        <div className="ml-auto hidden lg:block">
           <HandleShowLogin />
         </div>
       )}
+
+      <div className="ml-auto flex items-center gap-2 lg:hidden">
+        {!user ? <HandleShowLogin variant="compact" /> : null}
+        <button
+          type="button"
+          onClick={() => setMenuOpen(true)}
+          className="inline-flex size-11 items-center justify-center rounded-lg border border-white/10 bg-neutral-900 text-white transition hover:border-red-400/50 hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-red-400/70"
+          aria-label="Abrir menú"
+          aria-expanded={menuOpen}
+        >
+          <IconMenu2 size={24} />
+        </button>
+      </div>
 
       <MobileHeaderMenu
         open={menuOpen}
@@ -229,13 +243,6 @@ function MobileHeaderMenu({
 }) {
   if (!open) return null;
 
-  function handleKickLogin() {
-    const returnTo = `${window.location.pathname}${window.location.search}`;
-    const loginUrl = new URL(envConfig.API_KICK_AUTH);
-    loginUrl.searchParams.set("returnTo", returnTo);
-    window.location.href = loginUrl.toString();
-  }
-
   return (
     <div className="fixed inset-0 z-50 lg:hidden">
       <button
@@ -251,13 +258,8 @@ function MobileHeaderMenu({
         aria-label="Menú principal"
         className="absolute left-3 right-3 top-3 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black/70 [animation:mobile-menu-panel-in_220ms_cubic-bezier(0.22,1,0.36,1)] sm:left-6 sm:right-6 sm:top-5 sm:p-5 md:left-auto md:w-[420px]"
       >
-        <div className="flex items-center justify-between gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase text-red-300/80">
-              FrancoBertello74
-            </p>
-            <h2 className="mt-1 text-xl font-black text-white">Menú</h2>
-          </div>
+        <div className="flex items-center justify-end">
+          <h2 className="sr-only">Menú</h2>
           <button
             type="button"
             onClick={onClose}
@@ -316,16 +318,7 @@ function MobileHeaderMenu({
               </div>
             </div>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleKickLogin}
-            className="mt-5 flex items-center justify-center gap-2 rounded-lg border border-green-500/50 bg-green-500/10 px-4 py-3 font-bold text-green-300 transition hover:bg-green-500/15"
-          >
-            <IconLogin size={20} />
-            Iniciar sesión con Kick
-          </button>
-        )}
+        ) : null}
 
         <nav className="mt-5 grid gap-2">
           {visibleMenuItems.map((item) => {

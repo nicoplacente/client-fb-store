@@ -263,7 +263,7 @@ export default function ProfilePage() {
         </div>
 
         <div className="px-5 py-7 sm:px-8">
-          <div className="mb-7 flex justify-start gap-2 overflow-x-auto border-b border-white/10 sm:justify-center">
+          <div className="mx-auto mb-7 grid w-full max-w-xs grid-cols-2 gap-2 border-b border-white/10 sm:max-w-sm">
             <ProfileTab
               active={activeTab === "info"}
               icon={<IconInfoCircle size={17} />}
@@ -367,7 +367,7 @@ function ProfileTab({ active, icon, label, onClick }) {
       type="button"
       onClick={onClick}
       aria-label={`Ver seccion ${label}`}
-      className={`inline-flex shrink-0 cursor-pointer items-center gap-2 border-b-2 px-3 py-3 text-sm font-bold transition sm:px-4 ${
+      className={`inline-flex min-w-0 cursor-pointer items-center justify-center gap-2 border-b-2 px-2 py-3 text-sm font-bold transition sm:px-4 ${
         active
           ? "border-red-400 text-white"
           : "border-transparent text-neutral-500 hover:text-neutral-200"

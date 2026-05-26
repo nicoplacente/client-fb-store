@@ -8,7 +8,7 @@ export default function ContentWrapper({ children }) {
   return (
     <main
       className={`min-h-screen px-4 pb-8 pt-20 transition-[margin] duration-300 sm:px-6 ${
-        isOpen ? "lg:ml-72" : "lg:ml-16"
+        isOpen ? "lg:ml-72" : "lg:ml-20"
       }`}
     >
       {children}

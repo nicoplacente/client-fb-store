@@ -33,10 +33,10 @@ export default function Home() {
           STORE
         </h1>
 
-        <div className="flex flex-col justify-center gap-6 sm:gap-9">
+        <div className="flex flex-col justify-center gap-4 sm:gap-6">
           <iframe
             width="1246"
-            className="mx-auto aspect-video h-auto w-full max-w-5xl rounded-md border-2 border-dashed border-white/50 sm:border-4"
+            className="mx-auto aspect-video h-auto w-full max-w-4xl rounded-md border-2 border-dashed border-white/50 sm:border-4"
             height="701"
             src="https://www.youtube.com/embed/1vl9vioLo7o?list=RD1vl9vioLo7o"
             title="Nico Placente - My Head"
