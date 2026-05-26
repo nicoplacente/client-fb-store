@@ -23,6 +23,7 @@ import {
   normalizeGiveaway,
   updateGiveaway,
 } from "@/modules/giveaways/libs/giveaway-api";
+import { uploadImage } from "@/modules/uploads/libs/upload-api";
 import {
   createSupportMessage,
   deleteSupportTicket,
@@ -224,24 +225,31 @@ export default function useDashboardController() {
   function submitProduct(event) {
     event.preventDefault();
 
-    const payload = {
+    const payloadBase = {
       title: productForm.title.trim(),
       description: productForm.description.trim(),
       price: Number(productForm.price),
       stock: Number(productForm.stock),
       category: productForm.category.trim() || "General",
-      imageUrl: productForm.imageUrl.trim(),
       status: productForm.status,
       featured: productForm.featured,
     };
 
-    if (!payload.title || Number.isNaN(payload.price)) {
+    if (!payloadBase.title || Number.isNaN(payloadBase.price)) {
       toast.error("Completa nombre y precio");
       return;
     }
 
     startTransition(async () => {
       try {
+        const imageUrl = productForm.imageFile
+          ? await uploadImage(productForm.imageFile)
+          : productForm.imageUrl.trim();
+        const payload = {
+          ...payloadBase,
+          imageUrl,
+        };
+
         if (selectedProductId) {
           await updateProduct(selectedProductId, payload);
           toast.success("Producto actualizado");
@@ -297,29 +305,36 @@ export default function useDashboardController() {
   function submitGiveaway(event) {
     event.preventDefault();
 
-    const payload = {
+    const payloadBase = {
       title: giveawayForm.title.trim(),
       description: giveawayForm.description.trim(),
       prize: giveawayForm.prize.trim(),
       entryCost: Number(giveawayForm.entryCost || 0),
-      imageUrl: giveawayForm.imageUrl.trim(),
       status: giveawayForm.status,
       startsAt: giveawayForm.startsAt,
       endsAt: giveawayForm.endsAt,
     };
 
-    if (!payload.title || !payload.prize) {
+    if (!payloadBase.title || !payloadBase.prize) {
       toast.error("Completa titulo y premio");
       return;
     }
 
-    if (!Number.isFinite(payload.entryCost) || payload.entryCost < 0) {
+    if (!Number.isFinite(payloadBase.entryCost) || payloadBase.entryCost < 0) {
       toast.error("El costo debe ser 0 o mayor");
       return;
     }
 
     startTransition(async () => {
       try {
+        const imageUrl = giveawayForm.imageFile
+          ? await uploadImage(giveawayForm.imageFile)
+          : giveawayForm.imageUrl.trim();
+        const payload = {
+          ...payloadBase,
+          imageUrl,
+        };
+
         if (selectedGiveawayId) {
           await updateGiveaway(selectedGiveawayId, payload);
           toast.success("Sorteo actualizado");
