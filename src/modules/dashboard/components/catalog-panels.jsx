@@ -524,13 +524,6 @@ export function GiveawaysPanel({
                 required
               />
             </Field>
-            <Field label="Premio">
-              <TextInput
-                value={form.prize}
-                onChange={(event) => setForm((current) => ({ ...current, prize: event.target.value }))}
-                required
-              />
-            </Field>
             <Field label="Costo para participar (creditos)">
               <TextInput
                 type="number"
