@@ -33,6 +33,7 @@ export const envConfig = {
   API_USER_REDEMPTIONS: `${SERVER_URL}/user/redemptions`,
   API_STREAM_HOURS: `${SERVER_URL}/stream/hours`,
   API_STREAM_REWARDS: `${SERVER_URL}/stream/rewards`,
+  API_UPLOAD_IMAGE: `${SERVER_URL}/uploads/image`,
   API_LOGOUT: `${SERVER_URL}/logout`,
   API_KICK_AUTH: `${SERVER_URL}/auth/kick`,
   API_LINK_EXTENSION_VIEWER: `${SERVER_URL}/auth/link-extension-viewer`,

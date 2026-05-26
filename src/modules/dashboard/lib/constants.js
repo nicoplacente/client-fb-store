@@ -23,6 +23,7 @@ export const emptyProduct = {
   stock: "",
   category: "",
   imageUrl: "",
+  imageFile: null,
   status: "active",
   featured: false,
 };
@@ -42,6 +43,7 @@ export const emptyGiveaway = {
   prize: "",
   entryCost: "",
   imageUrl: "",
+  imageFile: null,
   status: "active",
   startsAt: "",
   endsAt: "",

@@ -8,6 +8,7 @@ export function productToForm(product) {
     stock: String(product.stock),
     category: product.category,
     imageUrl: product.imageUrl,
+    imageFile: null,
     status: product.status,
     featured: product.featured,
   };
@@ -31,6 +32,7 @@ export function giveawayToForm(giveaway) {
     prize: giveaway.prize,
     entryCost: String(giveaway.entryCost || 0),
     imageUrl: giveaway.imageUrl,
+    imageFile: null,
     status: giveaway.status,
     startsAt: formatDateInput(giveaway.startsAt),
     endsAt: formatDateInput(giveaway.endsAt),
