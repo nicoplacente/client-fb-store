@@ -37,7 +37,7 @@ export default function StreamPanel({
 
   if (loading && !streamHour) {
     return (
-      <div className="rounded-lg border border-white/10 bg-neutral-950/70 p-8 text-center text-neutral-400">
+      <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-8 text-center text-neutral-400 shadow-xl shadow-black/15">
         Cargando configuracion de stream...
       </div>
     );
@@ -60,22 +60,22 @@ export default function StreamPanel({
   };
 
   return (
-    <section className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-3 sm:p-5">
+    <section className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
       <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
         <div>
-          <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-white">
+          <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
             <IconClockCog size={19} />
             Stream
           </h2>
           <p className="mt-2 max-w-2xl text-sm text-neutral-400">
-            Controla la hora especial que modifica puntos de watchtime y chat.
+            Controla bonus de puntos, cofres y recompensas activas durante el stream.
           </p>
         </div>
-        <div className="rounded-lg border border-white/10 bg-neutral-900/70 p-4 lg:min-w-72">
-          <p className="text-xs font-semibold uppercase text-neutral-500">Activo ahora</p>
+        <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-inner shadow-black/10 lg:min-w-72">
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Activo ahora</p>
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <span className="text-xl font-bold text-white">{state.activeLabel}</span>
-            <span className="rounded-md border border-white/10 bg-neutral-950 px-2 py-1 text-xs font-semibold text-neutral-400">
+            <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-400">
               {isManual ? "Manual" : "Auto"}
             </span>
           </div>
@@ -95,7 +95,7 @@ export default function StreamPanel({
               type="button"
               disabled={isPending}
               onClick={() => onActivateHour(hour.id, { autoDisable })}
-              className={`grid gap-4 rounded-lg border p-4 text-left transition hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60 ${
+              className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${
                 active
                   ? hourStyles[hour.id] || "border-red-300/30 bg-red-500/10 text-red-100"
                   : "border-white/10 bg-neutral-900/70 text-neutral-300"
@@ -107,7 +107,7 @@ export default function StreamPanel({
                   {hour.label}
                 </span>
                 {active ? (
-                  <span className="rounded-md bg-white/10 px-2 py-1 text-xs font-semibold">
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
                     Activa
                   </span>
                 ) : null}
@@ -129,7 +129,7 @@ export default function StreamPanel({
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <div className="grid gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-amber-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <h3 className="inline-flex items-center gap-2 font-semibold text-white">
               <IconBox size={18} />
@@ -149,14 +149,14 @@ export default function StreamPanel({
             type="button"
             onClick={onActivateChest}
             disabled={isPending || Boolean(chestState.chest)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-yellow-300/30 bg-yellow-400/10 px-4 py-2 text-sm font-bold text-yellow-100 transition hover:bg-yellow-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-300/40 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
           >
             <IconBox size={17} />
             Activar cofre
           </button>
         </div>
 
-        <div className="grid gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-4 lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-green-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
           <div>
             <h3 className="inline-flex items-center gap-2 font-semibold text-white">
               <IconMessageCircle size={18} />
@@ -175,7 +175,7 @@ export default function StreamPanel({
             type="button"
             onClick={onActivateChatReward}
             disabled={isPending || Boolean(chestState.chatReward)}
-            className="inline-flex w-full items-center justify-center gap-2 rounded-md border border-green-300/30 bg-green-400/10 px-4 py-2 text-sm font-bold text-green-100 transition hover:bg-green-400/20 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/20 focus:outline-none focus:ring-2 focus:ring-green-300/40 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
           >
             <IconMessageCircle size={17} />
             Activar recompensa
@@ -183,7 +183,7 @@ export default function StreamPanel({
         </div>
       </div>
 
-      <div className="grid gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+      <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 lg:grid-cols-[1fr_auto_auto] lg:items-center">
         <div>
           <h3 className="font-semibold text-white">Control de modo</h3>
           <p className="mt-1 text-sm text-neutral-500">
@@ -208,7 +208,7 @@ export default function StreamPanel({
           type="button"
           onClick={onDisableHour}
           disabled={isPending || (isManual && !state.active)}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-neutral-950 px-4 py-2 text-sm font-bold text-white transition hover:border-red-400/50 disabled:cursor-not-allowed disabled:text-neutral-600"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-400/50 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:text-neutral-600"
         >
           <IconPower size={17} />
           Sin bonus
@@ -217,7 +217,7 @@ export default function StreamPanel({
           type="button"
           onClick={onUseAutoHour}
           disabled={isPending || !isManual}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-neutral-950 px-4 py-2 text-sm font-bold text-white transition hover:border-red-400/50 disabled:cursor-not-allowed disabled:text-neutral-600"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-400/50 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:text-neutral-600"
         >
           <IconPlayerPause size={17} />
           Usar auto

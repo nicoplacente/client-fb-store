@@ -88,13 +88,13 @@ function TicketPanel({
   onDelete,
 }) {
   return (
-    <div className="space-y-5 rounded-lg border border-white/10 bg-neutral-950/70 p-3 sm:p-5">
+    <div className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
       {loading ? (
-        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
+        <p className="rounded-2xl border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400 shadow-inner shadow-black/10">
           {loadingText}
         </p>
       ) : tickets.length === 0 ? (
-        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
+        <p className="rounded-2xl border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400 shadow-inner shadow-black/10">
           {emptyText}
         </p>
       ) : (
@@ -130,17 +130,17 @@ function TicketGroup({
   return (
     <section className="space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="inline-flex items-center gap-2 text-lg font-semibold text-white">
+        <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
           {icon}
           {title}
         </h2>
-        <span className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-neutral-900 px-2 py-1 text-xs text-neutral-400">
+        <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-neutral-900 px-3 py-1 text-xs font-bold text-neutral-400">
           <IconBell size={14} />
           {tickets.filter((ticket) => ticket.status !== "closed").length}
         </span>
       </div>
       {tickets.length === 0 ? (
-        <p className="rounded-lg border border-white/10 bg-neutral-900/60 p-5 text-sm text-neutral-400">
+        <p className="rounded-2xl border border-white/10 bg-neutral-900/60 p-5 text-sm text-neutral-400">
           {emptyText}
         </p>
       ) : (
@@ -192,12 +192,12 @@ function TicketCard({
       ];
 
   return (
-    <article className="grid gap-4 rounded-lg border border-white/10 bg-neutral-900/60 p-4">
+    <article className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/15 transition hover:border-red-300/20">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <div className="flex flex-wrap items-center gap-2">
             <h3 className="font-semibold text-white">{ticket.subject}</h3>
-            <span className="rounded-md bg-white/5 px-2 py-1 text-xs text-neutral-400">
+            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-neutral-400">
               {ticket.category}
             </span>
             <UserProfileButton
@@ -228,7 +228,7 @@ function TicketCard({
           <button
             onClick={() => onDelete(ticket)}
             disabled={isPending}
-            className="inline-flex size-10 items-center justify-center rounded-md border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20 disabled:opacity-50"
+            className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
             aria-label={`Eliminar ticket ${ticket.subject}`}
           >
             <IconTrash size={17} />
@@ -236,7 +236,7 @@ function TicketCard({
         </div>
       </div>
 
-      <div className="space-y-2 rounded-md border border-white/10 bg-neutral-950/60 p-3">
+      <div className="space-y-2 rounded-2xl border border-white/10 bg-neutral-950/65 p-3 shadow-inner shadow-black/10">
         {messages.map((message) => {
           const fromAdmin = message.senderRole === "admin";
           return (
@@ -281,7 +281,7 @@ function TicketCard({
         <button
           onClick={() => onReply(ticket)}
           disabled={isPending || !reply.trim()}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-2 text-sm font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500 disabled:shadow-none"
         >
           <IconSend size={17} />
           Responder
@@ -308,7 +308,7 @@ function UserProfileButton({ user, username, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-sm text-xs font-semibold text-neutral-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-red-400/60"
+      className="inline-flex cursor-pointer items-center gap-1 rounded-md text-xs font-semibold text-neutral-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-red-400/60"
       aria-label={`Ver perfil de ${username}`}
     >
       <IconUserCircle size={14} />
@@ -319,7 +319,7 @@ function UserProfileButton({ user, username, onClick }) {
 
 function ProfileValue({ label, value, icon }) {
   return (
-    <div className="rounded-md border border-white/10 bg-neutral-950/70 p-3">
+    <div className="rounded-xl border border-white/10 bg-neutral-950/70 p-3 shadow-inner shadow-black/10">
       <div className="flex items-center gap-2 text-xs font-semibold uppercase text-neutral-500">
         {icon}
         {label}
@@ -337,9 +337,9 @@ function UserProfileModal({ user, fallbackUsername, open, onClose }) {
   const username = user.username || fallbackUsername || "Usuario";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 p-2 sm:items-center sm:p-4">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-lg border border-white/10 bg-neutral-950 shadow-2xl shadow-black/60">
-        <div className="flex items-start justify-between gap-4 border-b border-white/10 p-5">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-2 backdrop-blur-md sm:items-center sm:p-4">
+      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70 ring-1 ring-white/[0.03]">
+        <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(255,255,255,0.02))] p-5">
           <div className="flex items-center gap-3">
             <div className="flex size-12 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-neutral-900 text-neutral-500">
               {user.avatarUrl ? (
@@ -360,7 +360,7 @@ function UserProfileModal({ user, fallbackUsername, open, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-9 items-center justify-center rounded-md border border-white/10 bg-neutral-900 text-neutral-400 transition hover:text-white"
+            className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
             aria-label="Cerrar perfil"
           >
             <IconX size={18} />

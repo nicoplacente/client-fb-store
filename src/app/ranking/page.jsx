@@ -134,7 +134,7 @@ export default function RankingPage() {
         <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Tabla de puntos</h1>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-white/10 bg-neutral-950/75 p-1 sm:p-2">
+      <div className="overflow-x-auto rounded-xl ">
         <table
           className="mx-auto w-full min-w-[760px] table border-separate overflow-hidden [border-spacing:0_4px] sm:min-w-[880px]"
         >

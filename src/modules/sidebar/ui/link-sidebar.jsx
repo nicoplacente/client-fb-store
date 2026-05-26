@@ -5,7 +5,7 @@ export default function LinkSidebar({ item, isActive, isOpen }) {
     <Link
       href={item.href}
       className={`flex items-center rounded-lg transition-colors [&_svg]:size-5 [&_svg]:shrink-0 ${
-        isOpen ? "h-11 justify-start px-3" : "mx-auto size-11 justify-center p-0"
+        isOpen ? "h-11 justify-start px-3" : "w-full h-11 justify-center p-0"
       }
                     ${
                       isActive

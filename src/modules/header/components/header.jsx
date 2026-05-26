@@ -142,12 +142,16 @@ export default function Header() {
       <Link
         href="/"
         aria-label="Ir al inicio"
-        className="inline-flex items-center justify-center lg:hidden"
+        className="inline-flex items-center justify-center"
       >
-        <img
-          src="/favicon.ico"
-          alt=""
-          className="size-10 rounded-md border border-white/10 bg-neutral-900/60 p-1"
+        <Image
+          src="/logo.webp"
+          alt="Logo Epico xd"
+          className="size-10 lg:size-12 rounded-md p-1"
+          width={1024}
+          height={1024}
+          priority
+          loading="eager"
         />
       </Link>
 
