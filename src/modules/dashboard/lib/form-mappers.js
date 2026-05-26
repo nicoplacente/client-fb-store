@@ -29,7 +29,6 @@ export function giveawayToForm(giveaway) {
   return {
     title: giveaway.title,
     description: giveaway.description,
-    prize: giveaway.prize,
     entryCost: String(giveaway.entryCost || 0),
     imageUrl: giveaway.imageUrl,
     imageFile: null,

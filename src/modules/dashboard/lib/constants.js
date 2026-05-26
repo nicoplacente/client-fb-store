@@ -40,7 +40,6 @@ export const emptyCreditPackage = {
 export const emptyGiveaway = {
   title: "",
   description: "",
-  prize: "",
   entryCost: "",
   imageUrl: "",
   imageFile: null,

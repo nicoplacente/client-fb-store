@@ -40,7 +40,7 @@ export function normalizeGiveaway(giveaway) {
     id: giveaway.id || giveaway._id || giveaway.slug || giveaway.title,
     title: giveaway.title || "Sorteo sin nombre",
     description: giveaway.description || "",
-    prize: giveaway.prize || giveaway.reward || "Premio sorpresa",
+    prize: giveaway.prize || giveaway.reward || giveaway.title || "",
     status: giveaway.status || "active",
     imageUrl: giveaway.imageUrl || giveaway.image || "",
     entryCost: Number(giveaway.entryCost || giveaway.price || giveaway.cost || 0),

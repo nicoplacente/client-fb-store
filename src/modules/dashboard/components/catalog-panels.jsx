@@ -482,7 +482,7 @@ export function GiveawaysPanel({
     <div className="space-y-5">
       <PanelTitle
         title="Sorteos"
-        subtitle="Organiza premios, fechas, costos y resultados."
+        subtitle="Organiza fechas, costos y resultados."
         action={<CreateButton onClick={onCreate}>Crear nuevo sorteo</CreateButton>}
       />
 
@@ -494,11 +494,11 @@ export function GiveawaysPanel({
           <AdminCard
             key={giveaway.id}
             title={giveaway.title}
-            meta={`${giveaway.prize} - ${
+            meta={
               giveaway.entryCost > 0
                 ? `${giveaway.entryCost.toLocaleString()} creditos`
                 : "Gratis"
-            }`}
+            }
             detail={`${giveaway.participants} participantes - ${giveaway.status}`}
             imageUrl={giveaway.imageUrl}
             icon={<IconGift size={42} />}
@@ -512,7 +512,7 @@ export function GiveawaysPanel({
         <ModalForm onSubmit={onSubmit}>
           <PanelHeader
             title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
-            subtitle="Premios y participacion"
+            subtitle="Participacion y fechas"
             canCancel
             onCancel={onCancel}
           />
