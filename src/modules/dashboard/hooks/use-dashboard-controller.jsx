@@ -233,6 +233,13 @@ export default function useDashboardController() {
       category: productForm.category.trim() || "General",
       status: productForm.status,
       featured: productForm.featured,
+      rewardEffectType: productForm.rewardEffectType,
+      rewardEffectValue: productForm.rewardEffectType
+        ? productForm.rewardEffectValue
+        : "",
+      rewardEffectDurationMinutes: productForm.rewardEffectType
+        ? Number(productForm.rewardEffectDurationMinutes || 60)
+        : "",
     };
 
     if (!payloadBase.title || Number.isNaN(payloadBase.price)) {

@@ -29,9 +29,12 @@ export async function deleteProduct(productId) {
   });
 }
 
-export async function redeemProduct(productId) {
+export async function redeemProduct(productId, { quantity = 1 } = {}) {
   return apiRequest(`${buildResourceUrl(envConfig.API_PRODUCTS, productId)}/redeem`, {
     method: "POST",
+    body: {
+      quantity: Math.max(1, Math.floor(Number(quantity || 1))),
+    },
   });
 }
 
@@ -61,6 +64,7 @@ export function normalizeProductRedemption(redemption) {
     id: redemption.id || redemption._id,
     status: redemption.status || "pending",
     cost: Number(redemption.cost || 0),
+    quantity: Number(redemption.quantity || 1),
     createdAt: redemption.createdAt || "",
     product: normalizeProduct(product),
   };
@@ -79,5 +83,8 @@ export function normalizeProduct(product) {
     imageUrl: product.imageUrl || product.image || product.img || "",
     status,
     featured: Boolean(product.featured),
+    rewardEffectType: product.rewardEffectType || "",
+    rewardEffectValue: product.rewardEffectValue || "",
+    rewardEffectDurationMinutes: Number(product.rewardEffectDurationMinutes || 0),
   };
 }

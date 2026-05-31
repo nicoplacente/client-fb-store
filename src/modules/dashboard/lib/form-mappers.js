@@ -11,6 +11,9 @@ export function productToForm(product) {
     imageFile: null,
     status: product.status,
     featured: product.featured,
+    rewardEffectType: product.rewardEffectType,
+    rewardEffectValue: product.rewardEffectValue || "happy",
+    rewardEffectDurationMinutes: String(product.rewardEffectDurationMinutes || 60),
   };
 }
 

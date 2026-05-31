@@ -14,7 +14,9 @@ import {
   IconChevronDown,
   IconCoins,
   IconLock,
+  IconMinus,
   IconPackage,
+  IconPlus,
   IconSearch,
   IconShoppingCart,
   IconStarFilled,
@@ -38,6 +40,15 @@ import coins from "@/assets/coins.webp";
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
+}
+
+function clampRedemptionQuantity(value, stock) {
+  const maxStock = Math.max(1, Math.floor(Number(stock || 1)));
+  const quantity = Math.floor(Number(value || 1));
+
+  if (!Number.isFinite(quantity)) return 1;
+
+  return Math.min(Math.max(quantity, 1), maxStock);
 }
 
 function saveLocalRedemption(redemption) {
@@ -76,16 +87,21 @@ function getActionConfirmation(action) {
     };
   }
 
+  const quantity = clampRedemptionQuantity(action.quantity, action.item.stock);
+  const totalCost = Number(action.item.price || 0) * quantity;
+
   return {
     title: "Confirmar canje",
-    description: `Vas a usar ${formatNumber(action.item.price)} creditos para solicitar este producto.`,
+    description: `Vas a usar ${formatNumber(totalCost)} creditos para solicitar ${quantity} ${quantity === 1 ? "unidad" : "unidades"} de este producto.`,
     confirmLabel: "Canjear",
   };
 }
 
-function ActionSummary({ action }) {
+function ActionSummary({ action, onQuantityChange }) {
   const isPurchase = action.type === "purchase";
   const item = action.item;
+  const quantity = clampRedemptionQuantity(action.quantity, item.stock);
+  const totalCost = Number(item.price || 0) * quantity;
 
   return (
     <div className="grid gap-3 text-sm text-neutral-300">
@@ -102,15 +118,82 @@ function ActionSummary({ action }) {
           {isPurchase ? "Puntos a usar" : "Creditos a usar"}
         </span>
         <strong className="text-amber-200">
-          {formatNumber(isPurchase ? item.pointsCost : item.price)}
+          {formatNumber(isPurchase ? item.pointsCost : totalCost)}
         </strong>
       </div>
-      <div className="flex items-center justify-between gap-4">
-        <span className="text-neutral-400">
-          {isPurchase ? "Creditos que recibis" : "Stock restante"}
+      {isPurchase ? (
+        <div className="flex items-center justify-between gap-4">
+          <span className="text-neutral-400">Creditos que recibis</span>
+          <strong className="text-white">{formatNumber(item.credits)}</strong>
+        </div>
+      ) : (
+        <QuantityControl
+          value={quantity}
+          max={item.stock}
+          onChange={onQuantityChange}
+        />
+      )}
+    </div>
+  );
+}
+
+function QuantityControl({ value, max, onChange }) {
+  const stock = Math.max(0, Number(max || 0));
+  const safeValue = clampRedemptionQuantity(value, stock);
+
+  function updateQuantity(nextValue) {
+    onChange(clampRedemptionQuantity(nextValue, stock));
+  }
+
+  return (
+    <div className="grid gap-2 border-t border-white/10 pt-3">
+      <div className="flex items-center justify-between gap-3">
+        <label
+          htmlFor="redeem-quantity"
+          className="text-sm font-semibold text-neutral-300"
+        >
+          Unidades
+        </label>
+        <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-black text-neutral-400">
+          Disponible: {formatNumber(stock)}
         </span>
-        <strong className="text-white">
-          {formatNumber(isPurchase ? item.credits : item.stock)}
+      </div>
+
+      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-amber-300/50 focus-within:ring-2 focus-within:ring-amber-300/15">
+        <button
+          type="button"
+          onClick={() => updateQuantity(safeValue - 1)}
+          disabled={safeValue <= 1}
+          className="grid h-12 cursor-pointer place-items-center border-r border-white/10 text-neutral-300 transition hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:text-neutral-700"
+          aria-label="Reducir unidades"
+        >
+          <IconMinus size={17} />
+        </button>
+        <input
+          id="redeem-quantity"
+          type="number"
+          min="1"
+          max={stock}
+          value={safeValue}
+          onChange={(event) => updateQuantity(event.target.value)}
+          className="h-12 w-full bg-transparent px-3 text-center text-lg font-black text-white outline-none"
+          aria-label="Unidades a canjear"
+        />
+        <button
+          type="button"
+          onClick={() => updateQuantity(safeValue + 1)}
+          disabled={safeValue >= stock}
+          className="grid h-12 cursor-pointer place-items-center border-l border-white/10 text-neutral-300 transition hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:text-neutral-700"
+          aria-label="Aumentar unidades"
+        >
+          <IconPlus size={17} />
+        </button>
+      </div>
+
+      <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
+        <span>Maximo segun stock disponible</span>
+        <strong className="font-black text-amber-200">
+          {safeValue} {safeValue === 1 ? "unidad" : "unidades"}
         </strong>
       </div>
     </div>
@@ -346,6 +429,7 @@ export default function MarketPage() {
     setPendingAction({
       type: "redeem",
       item: product,
+      quantity: 1,
     });
   }
 
@@ -367,7 +451,13 @@ export default function MarketPage() {
     startTransition(async () => {
       try {
         if (action.type === "redeem") {
-          const result = await redeemProduct(action.item.id);
+          const quantity = clampRedemptionQuantity(
+            action.quantity,
+            action.item.stock
+          );
+          const result = await redeemProduct(action.item.id, {
+            quantity,
+          });
 
           if (result?.redemption) {
             saveLocalRedemption({
@@ -527,7 +617,16 @@ export default function MarketPage() {
         onConfirm={handleConfirmAction}
         onCancel={() => setPendingAction(null)}
       >
-        {pendingAction ? <ActionSummary action={pendingAction} /> : null}
+        {pendingAction ? (
+          <ActionSummary
+            action={pendingAction}
+            onQuantityChange={(quantity) =>
+              setPendingAction((current) =>
+                current ? { ...current, quantity } : current
+              )
+            }
+          />
+        ) : null}
       </ConfirmationDialog>
     </SectionContainer>
   );

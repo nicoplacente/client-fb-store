@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
+  IconBroadcast,
   IconCoins,
   IconGift,
   IconLink,
@@ -13,6 +14,21 @@ import AdminCard from "./admin-card";
 import { Field, PanelHeader, SelectInput, SubmitButton, TextArea, TextInput } from "./form-controls";
 import ItemGrid from "./item-grid";
 import { formatProductStatus } from "../lib/formatters";
+
+const rewardEffectLabels = {
+  happy: "Happy Hour",
+  opening: "Opening Hour",
+  bertello_snack: "Bertello-Snack Hour",
+};
+
+function formatProductRewardEffect(product) {
+  if (product.rewardEffectType !== "stream_special_hour") return "";
+
+  const label = rewardEffectLabels[product.rewardEffectValue] || "Hora especial";
+  const duration = Number(product.rewardEffectDurationMinutes || 60);
+
+  return `Activa ${label} por ${duration} min`;
+}
 
 function CreateButton({ children, onClick }) {
   return (
@@ -227,6 +243,180 @@ function FeaturedToggle({ checked, onChange }) {
   );
 }
 
+function RewardEffectFields({ form, setForm }) {
+  const hasRewardEffect = form.rewardEffectType === "stream_special_hour";
+  const streamHourOptions = [
+    {
+      id: "happy",
+      title: "Happy Hour",
+      detail: "Bonus de watchtime durante el stream.",
+      className: "border-yellow-300/30 bg-yellow-400/10 text-yellow-100",
+    },
+    {
+      id: "opening",
+      title: "Opening Hour",
+      detail: "Empuja la participacion del chat.",
+      className: "border-sky-300/30 bg-sky-400/10 text-sky-100",
+    },
+    {
+      id: "bertello_snack",
+      title: "Bertello-Snack Hour",
+      detail: "Bonus fuerte de watchtime y chat.",
+      className: "border-red-300/30 bg-red-500/10 text-red-100",
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 rounded-2xl border border-red-300/15 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(10,10,10,0.78)_44%,rgba(10,10,10,0.92))] p-4 shadow-inner shadow-black/10">
+      <div className="flex items-start gap-3 border-b border-white/10 pb-4">
+        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-red-300/30 bg-red-500/15 text-red-100 shadow-lg shadow-red-950/20">
+          <IconBroadcast size={19} />
+        </span>
+        <div>
+          <h3 className="text-base font-bold text-white">Evento del stream</h3>
+          <p className="mt-1 text-sm text-neutral-500">
+            Convierte este producto en un disparador para una hora especial en vivo.
+          </p>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <RewardTypeCard
+          active={!hasRewardEffect}
+          icon={<IconPackage size={19} />}
+          title="Premio normal"
+          description="Se canjea en la tienda y crea el ticket de entrega."
+          onClick={() =>
+            setForm((current) => ({
+              ...current,
+              rewardEffectType: "",
+            }))
+          }
+        />
+        <RewardTypeCard
+          active={hasRewardEffect}
+          icon={<IconBroadcast size={19} />}
+          title="Evento de stream"
+          description="Al canjearse activa una hora especial automaticamente."
+          onClick={() =>
+            setForm((current) => ({
+              ...current,
+              rewardEffectType: "stream_special_hour",
+              rewardEffectValue: current.rewardEffectValue || "happy",
+              rewardEffectDurationMinutes:
+                current.rewardEffectDurationMinutes || "60",
+            }))
+          }
+        />
+      </div>
+
+      {hasRewardEffect ? (
+        <div className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4 shadow-lg shadow-black/10">
+          <div>
+            <p className="text-sm font-black text-white">Hora especial que se activa</p>
+            <p className="mt-1 text-xs font-medium text-neutral-500">
+              Elegi el bonus que el usuario va a prender cuando compre este premio.
+            </p>
+          </div>
+
+          <div className="grid gap-3 lg:grid-cols-3">
+            {streamHourOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                aria-pressed={form.rewardEffectValue === option.id}
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    rewardEffectValue: option.id,
+                  }))
+                }
+                className={`grid cursor-pointer gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-white/25 focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+                  form.rewardEffectValue === option.id
+                    ? `${option.className} shadow-lg shadow-black/15`
+                    : "border-white/10 bg-neutral-900/80 text-neutral-300"
+                }`}
+              >
+                <span className="flex items-center justify-between gap-3">
+                  <span className="inline-flex items-center gap-2 font-black">
+                    <IconSparkles size={17} />
+                    {option.title}
+                  </span>
+                  {form.rewardEffectValue === option.id ? (
+                    <span className="rounded-full bg-white/10 px-2.5 py-1 text-xs font-black">
+                      Elegido
+                    </span>
+                  ) : null}
+                </span>
+                <span className="text-xs font-medium text-neutral-400">
+                  {option.detail}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <Field label="Duracion del evento">
+            <div className="grid gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
+              <p className="text-sm text-neutral-500">
+                Tiempo activo despues del canje. El valor recomendado es 60 minutos.
+              </p>
+              <div className="flex items-center gap-2">
+                <TextInput
+                  type="number"
+                  min="1"
+                  max="1440"
+                  step="1"
+                  value={form.rewardEffectDurationMinutes}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      rewardEffectDurationMinutes: event.target.value,
+                    }))
+                  }
+                  className="w-28"
+                  required
+                />
+                <span className="text-sm font-bold text-neutral-400">min</span>
+              </div>
+            </div>
+          </Field>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function RewardTypeCard({ active, icon, title, description, onClick }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={active}
+      onClick={onClick}
+      className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-red-300/25 focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+        active
+          ? "border-red-300/40 bg-red-500/12 shadow-lg shadow-red-950/15"
+          : "border-white/10 bg-neutral-950/70 hover:bg-white/[0.03]"
+      }`}
+    >
+      <span
+        className={`grid size-10 shrink-0 place-items-center rounded-xl border transition ${
+          active
+            ? "border-red-300/45 bg-red-500/20 text-red-100"
+            : "border-white/10 bg-neutral-900 text-neutral-500"
+        }`}
+      >
+        {icon}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-black text-white">{title}</span>
+        <span className="mt-1 block text-xs font-medium text-neutral-500">
+          {description}
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export function ProductsPanel({
   form,
   setForm,
@@ -253,22 +443,27 @@ export function ProductsPanel({
         loading={loading}
         emptyText="Todavia no hay productos."
         items={items}
-        renderItem={(product) => (
-          <AdminCard
-            key={product.id}
-            title={product.title}
-            meta={`${product.price.toLocaleString()} creditos`}
-            detail={`${
-              product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
-            } - ${formatProductStatus(product.status)}`}
-            imageUrl={product.imageUrl}
-            featured={product.featured}
-            unavailable={product.stock <= 0 || product.status !== "active"}
-            icon={<IconPackage size={42} />}
-            onEdit={() => onEdit(product)}
-            onDelete={() => onDelete(product)}
-          />
-        )}
+        renderItem={(product) => {
+          const rewardEffect = formatProductRewardEffect(product);
+          const stockDetail = `${
+            product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
+          } - ${formatProductStatus(product.status)}`;
+
+          return (
+            <AdminCard
+              key={product.id}
+              title={product.title}
+              meta={`${product.price.toLocaleString()} creditos`}
+              detail={rewardEffect ? `${stockDetail} - ${rewardEffect}` : stockDetail}
+              imageUrl={product.imageUrl}
+              featured={product.featured}
+              unavailable={product.stock <= 0 || product.status !== "active"}
+              icon={<IconPackage size={42} />}
+              onEdit={() => onEdit(product)}
+              onDelete={() => onDelete(product)}
+            />
+          );
+        }}
       />
 
       {isFormOpen ? (
@@ -348,6 +543,7 @@ export function ProductsPanel({
               checked={form.featured}
               onChange={(featured) => setForm((current) => ({ ...current, featured }))}
             />
+            <RewardEffectFields form={form} setForm={setForm} />
           </div>
           <SubmitButton isPending={isPending} selectedId={selectedId} />
         </ModalForm>

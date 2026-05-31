@@ -5,7 +5,6 @@ import {
   IconClockCog,
   IconMessageCircle,
   IconPower,
-  IconPlayerPause,
   IconSparkles,
 } from "@tabler/icons-react";
 
@@ -31,7 +30,6 @@ export default function StreamPanel({
   onActivateChest,
   onActivateChatReward,
   onDisableHour,
-  onUseAutoHour,
 }) {
   const [autoDisable, setAutoDisable] = useState(true);
 
@@ -50,6 +48,7 @@ export default function StreamPanel({
     hours: [],
   };
   const isManual = state.hasManualOverride || state.mode === "manual";
+  const noEffectActive = !state.active;
   const chestState = streamRewards || {
     chest: null,
     chatReward: null,
@@ -85,7 +84,43 @@ export default function StreamPanel({
         </div>
       </div>
 
-      <div className="grid gap-3 lg:grid-cols-3">
+      <AutoDisableToggle
+        checked={autoDisable}
+        expiresAt={state.expiresAt}
+        onChange={setAutoDisable}
+      />
+
+      <div className="grid gap-3 lg:grid-cols-4">
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={onDisableHour}
+          className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${
+            noEffectActive
+              ? "border-white/25 bg-white/[0.06] text-white"
+              : "border-white/10 bg-neutral-900/70 text-neutral-300"
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-2 font-bold">
+              <IconPower size={18} />
+              Sin efecto activo
+            </span>
+            {noEffectActive ? (
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
+                Activa
+              </span>
+            ) : null}
+          </div>
+          <div className="grid gap-2 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <IconBolt size={16} />
+              x1 watchtime
+            </span>
+            <span className="text-neutral-400">Chat normal</span>
+          </div>
+        </button>
+
         {state.hours.map((hour) => {
           const active = isManual && state.active === hour.id;
 
@@ -182,47 +217,50 @@ export default function StreamPanel({
           </button>
         </div>
       </div>
-
-      <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 lg:grid-cols-[1fr_auto_auto] lg:items-center">
-        <div>
-          <h3 className="font-semibold text-white">Control de modo</h3>
-          <p className="mt-1 text-sm text-neutral-500">
-            Forza puntos normales o vuelve a usar la configuracion automatica del server.
-          </p>
-          <label className="mt-3 inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-neutral-300">
-            <input
-              type="checkbox"
-              checked={autoDisable}
-              onChange={(event) => setAutoDisable(event.target.checked)}
-              className="size-4 accent-red-500"
-            />
-            Apagar automaticamente despues de 1 hora
-          </label>
-          {state.expiresAt ? (
-            <p className="mt-2 text-xs text-neutral-500">
-              Se apaga: {new Date(state.expiresAt).toLocaleString("es-AR")}
-            </p>
-          ) : null}
-        </div>
-        <button
-          type="button"
-          onClick={onDisableHour}
-          disabled={isPending || (isManual && !state.active)}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-400/50 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:text-neutral-600"
-        >
-          <IconPower size={17} />
-          Sin bonus
-        </button>
-        <button
-          type="button"
-          onClick={onUseAutoHour}
-          disabled={isPending || !isManual}
-          className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-400/50 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:text-neutral-600"
-        >
-          <IconPlayerPause size={17} />
-          Usar auto
-        </button>
-      </div>
     </section>
+  );
+}
+
+function AutoDisableToggle({ checked, expiresAt, onChange }) {
+  return (
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-red-300/20 focus-within:ring-2 focus-within:ring-red-300/40">
+      <span className="flex min-w-0 items-center gap-3">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
+          <IconClockCog size={19} />
+        </span>
+        <span className="min-w-0">
+          <span className="block text-sm font-black text-white">
+            Apagar automaticamente despues de 1 hora
+          </span>
+          <span className="mt-0.5 block text-xs font-medium text-neutral-500">
+            Las horas especiales vuelven a puntos normales al terminar el tiempo.
+          </span>
+          {expiresAt ? (
+            <span className="mt-1 block text-xs font-semibold text-red-200/80">
+              Se apaga: {new Date(expiresAt).toLocaleString("es-AR")}
+            </span>
+          ) : null}
+        </span>
+      </span>
+      <span
+        className={`relative h-8 w-14 shrink-0 rounded-full border transition ${
+          checked
+            ? "border-red-300/45 bg-red-500"
+            : "border-white/10 bg-neutral-800"
+        }`}
+      >
+        <input
+          type="checkbox"
+          checked={checked}
+          onChange={(event) => onChange(event.target.checked)}
+          className="sr-only"
+        />
+        <span
+          className={`absolute top-1 size-6 rounded-full bg-white shadow-sm transition ${
+            checked ? "left-7" : "left-1"
+          }`}
+        />
+      </span>
+    </label>
   );
 }

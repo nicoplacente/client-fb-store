@@ -207,7 +207,13 @@ function DashboardActivePanel({ dashboard }) {
   }
 
   if (dashboard.activeTab === "redemptions") {
-    return <RedemptionsPanel tickets={dashboard.redemptionTickets} {...ticketProps} />;
+    return (
+      <RedemptionsPanel
+        tickets={dashboard.redemptionTickets}
+        products={dashboard.products}
+        {...ticketProps}
+      />
+    );
   }
 
   if (dashboard.activeTab === "stream") {
@@ -221,7 +227,6 @@ function DashboardActivePanel({ dashboard }) {
         onActivateChest={dashboard.activateStreamChest}
         onActivateChatReward={dashboard.activateStreamChatReward}
         onDisableHour={dashboard.disableStreamHour}
-        onUseAutoHour={dashboard.useAutomaticStreamHour}
       />
     );
   }

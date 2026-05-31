@@ -26,6 +26,9 @@ export const emptyProduct = {
   imageFile: null,
   status: "active",
   featured: false,
+  rewardEffectType: "",
+  rewardEffectValue: "happy",
+  rewardEffectDurationMinutes: "60",
 };
 
 export const emptyCreditPackage = {
