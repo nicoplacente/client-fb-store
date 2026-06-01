@@ -1,0 +1,170 @@
+export const emptyProfile = {
+  country: "",
+  name: "",
+  dni: "",
+  city: "",
+  province: "",
+  direction: "",
+  postalCode: "",
+  instagram: "",
+  discord: "",
+};
+
+export const INITIAL_VISIBLE_SUB_MILESTONES = 1;
+export const SUB_REWARD_CYCLE_MONTHS = 18;
+export const SUB_REWARD_CYCLE_LABELS = [1, 3, 6, 9, 12, 15, 18];
+
+export function toProfile(user) {
+  return {
+    country: user?.country || "",
+    name: user?.name || "",
+    dni: user?.dni || "",
+    city: user?.city || "",
+    province: user?.province || "",
+    direction: user?.direction || "",
+    postalCode: user?.postalCode || "",
+    instagram: user?.instagram || "",
+    discord: user?.discord || "",
+  };
+}
+
+export function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+export function formatShortDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return new Intl.DateTimeFormat("es-AR", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+export function getLocalRedemptions() {
+  if (typeof window === "undefined") return [];
+
+  try {
+    const data = JSON.parse(
+      window.localStorage.getItem("fbStoreLocalRedemptions") || "[]"
+    );
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+export function mergeRedemptions(primary, fallback) {
+  const seen = new Set();
+
+  return [...primary, ...fallback].filter((redemption) => {
+    const productName = String(
+      redemption.product?.name || redemption.product?.title || ""
+    )
+      .trim()
+      .toLowerCase();
+    const key = `${redemption.id || ""}-${productName}-${redemption.createdAt || ""}`;
+
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function ticketToRedemption(ticket) {
+  const productName = String(ticket.subject || "")
+    .replace(/^Canje:\s*/i, "")
+    .trim();
+  const costMatch = String(ticket.message || "").match(/(\d[\d.]*)\s*creditos/i);
+  const cost = costMatch ? Number(costMatch[1].replace(/\./g, "")) : 0;
+
+  return {
+    id: `ticket-${ticket.id}`,
+    status: ticket.status || "open",
+    cost,
+    createdAt: ticket.createdAt || "",
+    product: {
+      id: `ticket-product-${ticket.id}`,
+      title: productName || ticket.subject || "Canje",
+      description: ticket.message || "",
+      price: cost,
+      stock: 0,
+      status: "active",
+      category: "Market",
+      imageUrl: "",
+    },
+  };
+}
+
+export function getSubscriptionStatusCopy(status) {
+  if (status === "available") {
+    return {
+      label: "Disponible",
+      className: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    };
+  }
+
+  if (status === "claimed") {
+    return {
+      label: "Reclamado",
+      className: "border-sky-400/30 bg-sky-500/10 text-sky-200",
+    };
+  }
+
+  if (status === "missed") {
+    return {
+      label: "Sin registro",
+      className: "border-amber-400/30 bg-amber-500/10 text-amber-200",
+    };
+  }
+
+  return {
+    label: "Bloqueado",
+    className: "border-white/10 bg-neutral-950 text-neutral-500",
+  };
+}
+
+export function buildMilestoneRail(timeline, currentMonths) {
+  const rewardByMonth = new Map(
+    timeline.map((item) => [Number(item.milestoneMonth), item])
+  );
+  const cycleStart =
+    currentMonths > SUB_REWARD_CYCLE_MONTHS
+      ? Math.floor((currentMonths - 1) / SUB_REWARD_CYCLE_MONTHS) *
+        SUB_REWARD_CYCLE_MONTHS
+      : 0;
+
+  return SUB_REWARD_CYCLE_LABELS.map((label) => {
+    const absoluteMonth = cycleStart === 0 ? label : cycleStart + label;
+    const item = rewardByMonth.get(absoluteMonth);
+
+    return {
+      milestoneMonth: absoluteMonth,
+      displayMonth: label,
+      status: item?.status || "locked",
+    };
+  });
+}
+
+export function getVisibleSubscriptionTimeline(timeline, showAllMilestones) {
+  if (showAllMilestones || timeline.length <= INITIAL_VISIBLE_SUB_MILESTONES) {
+    return timeline;
+  }
+
+  const activeItems = timeline.filter((item) => item.status !== "claimed");
+
+  return [activeItems[0] || timeline[timeline.length - 1]].filter(Boolean);
+}

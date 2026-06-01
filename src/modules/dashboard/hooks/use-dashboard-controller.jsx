@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useEffect, useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
@@ -6,20 +6,17 @@ import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
 import {
   createProduct,
   deleteProduct,
-  getProducts,
   normalizeProduct,
   updateProduct,
 } from "@/modules/products/libs/product-api";
 import {
   createCreditPackage,
-  getCreditPackages,
   normalizeCreditPackage,
   updateCreditPackage,
 } from "@/modules/credits/libs/credit-api";
 import {
   createGiveaway,
   deleteGiveaway,
-  getGiveaways,
   normalizeGiveaway,
   updateGiveaway,
 } from "@/modules/giveaways/libs/giveaway-api";
@@ -27,15 +24,12 @@ import { uploadImage } from "@/modules/uploads/libs/upload-api";
 import {
   createSupportMessage,
   deleteSupportTicket,
-  getSupportTickets,
   normalizeTicket,
   updateSupportTicket,
 } from "@/modules/support/libs/support-api";
 import {
   createStreamChatReward,
   createStreamChest,
-  getStreamHours,
-  getStreamRewards,
   normalizeStreamHourState,
   normalizeStreamRewardState,
   updateStreamHour,
@@ -50,6 +44,13 @@ import {
   giveawayToForm,
   productToForm,
 } from "../lib/form-mappers";
+import { loadDashboardData } from "../lib/dashboard-loader";
+import {
+  buildCreditPackagePayload,
+  buildGiveawayPayload,
+  buildProductPayload,
+} from "../lib/dashboard-payloads";
+import useDashboardNotifications from "./use-dashboard-notifications";
 
 export default function useDashboardController() {
   const { user, refreshUser } = useAppContext(AuthContext);
@@ -74,9 +75,7 @@ export default function useDashboardController() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  const knownPurchaseTicketsRef = useRef(new Set());
-  const knownSupportTicketsRef = useRef(new Set());
-  const dashboardLoadedRef = useRef(false);
+  const trackDashboardNotifications = useDashboardNotifications();
 
   const normalizedProducts = useMemo(
     () => products.map(normalizeProduct).filter((product) => product.id),
@@ -126,63 +125,19 @@ export default function useDashboardController() {
     ]
   );
 
-  function trackDashboardNotifications(ticketData) {
-    const purchases = ticketData.filter((ticket) => ticket.category === "market");
-    const support = ticketData.filter((ticket) => ticket.category !== "market");
-
-    if (dashboardLoadedRef.current) {
-      const newPurchases = purchases.filter(
-        (ticket) => !knownPurchaseTicketsRef.current.has(ticket.id)
-      );
-      const newSupport = support.filter(
-        (ticket) => !knownSupportTicketsRef.current.has(ticket.id)
-      );
-
-      if (newPurchases.length > 0) {
-        toast.info(`${newPurchases.length} compra nueva en dashboard`);
-      }
-
-      if (newSupport.length > 0) {
-        toast.info(`${newSupport.length} consulta nueva en soporte`);
-      }
-    }
-
-    knownPurchaseTicketsRef.current = new Set(purchases.map((ticket) => ticket.id));
-    knownSupportTicketsRef.current = new Set(support.map((ticket) => ticket.id));
-    dashboardLoadedRef.current = true;
-  }
-
   async function loadDashboard({ showLoading = true } = {}) {
     try {
       if (showLoading) setLoading(true);
       setError("");
+      const data = await loadDashboardData();
 
-      const [
-        productData,
-        creditPackageData,
-        giveawayData,
-        ticketData,
-        streamHourData,
-        streamRewardData,
-      ] =
-        await Promise.all([
-          getProducts({ includeDisabled: true }),
-          getCreditPackages({ includeDisabled: true }),
-          getGiveaways({ includeInactive: true }),
-          getSupportTickets({ includeAll: true }),
-          getStreamHours().catch(() => null),
-          getStreamRewards().catch(() => null),
-        ]);
-
-      setProducts(productData);
-      setCreditPackages(creditPackageData);
-      setGiveaways(giveawayData);
-      setTickets(ticketData);
-      if (streamHourData) setStreamHour(normalizeStreamHourState(streamHourData));
-      if (streamRewardData) {
-        setStreamRewards(normalizeStreamRewardState(streamRewardData));
-      }
-      trackDashboardNotifications(ticketData);
+      setProducts(data.productData);
+      setCreditPackages(data.creditPackageData);
+      setGiveaways(data.giveawayData);
+      setTickets(data.ticketData);
+      if (data.streamHour) setStreamHour(data.streamHour);
+      if (data.streamRewards) setStreamRewards(data.streamRewards);
+      trackDashboardNotifications(data.ticketData);
     } catch (err) {
       setError(err.message || "No se pudo cargar el dashboard");
     } finally {
@@ -225,26 +180,7 @@ export default function useDashboardController() {
   function submitProduct(event) {
     event.preventDefault();
 
-    const payloadBase = {
-      title: productForm.title.trim(),
-      description: productForm.description.trim(),
-      price: Number(productForm.price),
-      stock: Number(productForm.stock),
-      category: productForm.category.trim() || "General",
-      status: productForm.status,
-      featured: productForm.featured,
-      rewardEffectType: productForm.rewardEffectType,
-      rewardEffectValue: productForm.rewardEffectType
-        ? productForm.rewardEffectValue
-        : "",
-      rewardEffectDurationMinutes: productForm.rewardEffectType
-        ? Number(productForm.rewardEffectDurationMinutes || 60)
-        : "",
-      alertEnabled: false,
-      alertType: productForm.alertType || "confetti",
-      alertMessage: productForm.alertMessage.trim(),
-      alertDurationSeconds: Number(productForm.alertDurationSeconds || 8),
-    };
+    const payloadBase = buildProductPayload(productForm);
 
     if (!payloadBase.title || Number.isNaN(payloadBase.price)) {
       toast.error("Completa nombre y precio");
@@ -280,15 +216,7 @@ export default function useDashboardController() {
   function submitCreditPackage(event) {
     event.preventDefault();
 
-    const payload = {
-      name: creditPackageForm.name.trim(),
-      description: creditPackageForm.description.trim(),
-      credits: Number(creditPackageForm.credits),
-      pointsCost: Number(creditPackageForm.pointsCost),
-      status: creditPackageForm.status,
-      sortOrder: Number(creditPackageForm.sortOrder),
-      source: "points",
-    };
+    const payload = buildCreditPackagePayload(creditPackageForm);
 
     if (!payload.name || Number.isNaN(payload.credits) || Number.isNaN(payload.pointsCost)) {
       toast.error("Completa nombre, creditos y costo");
@@ -316,14 +244,7 @@ export default function useDashboardController() {
   function submitGiveaway(event) {
     event.preventDefault();
 
-    const payloadBase = {
-      title: giveawayForm.title.trim(),
-      description: giveawayForm.description.trim(),
-      entryCost: Number(giveawayForm.entryCost || 0),
-      status: giveawayForm.status,
-      startsAt: giveawayForm.startsAt,
-      endsAt: giveawayForm.endsAt,
-    };
+    const payloadBase = buildGiveawayPayload(giveawayForm);
 
     if (!payloadBase.title) {
       toast.error("Completa titulo");
