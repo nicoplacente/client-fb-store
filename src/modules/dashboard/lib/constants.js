@@ -29,6 +29,10 @@ export const emptyProduct = {
   rewardEffectType: "",
   rewardEffectValue: "happy",
   rewardEffectDurationMinutes: "60",
+  alertEnabled: false,
+  alertType: "confetti",
+  alertMessage: "",
+  alertDurationSeconds: "8",
 };
 
 export const emptyCreditPackage = {

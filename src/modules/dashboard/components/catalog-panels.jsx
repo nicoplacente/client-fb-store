@@ -3,6 +3,7 @@ import {
   IconBroadcast,
   IconCoins,
   IconGift,
+  IconFlame,
   IconLink,
   IconPackage,
   IconPhotoUp,
@@ -28,6 +29,18 @@ function formatProductRewardEffect(product) {
   const duration = Number(product.rewardEffectDurationMinutes || 60);
 
   return `Activa ${label} por ${duration} min`;
+}
+
+function formatProductAlert(product) {
+  if (!product.alertEnabled) return "";
+
+  const labels = {
+    confetti: "Confetti",
+    fire: "Fuego",
+    legendary: "Legendaria",
+  };
+
+  return `Alerta ${labels[product.alertType] || "especial"} (${product.alertDurationSeconds || 8}s)`;
 }
 
 function CreateButton({ children, onClick }) {
@@ -417,6 +430,142 @@ function RewardTypeCard({ active, icon, title, description, onClick }) {
   );
 }
 
+function StreamAlertFields({ form, setForm }) {
+  const alertOptions = [
+    {
+      id: "confetti",
+      title: "Confetti",
+      detail: "Celebracion limpia para premios grandes.",
+      icon: <IconSparkles size={18} />,
+      className: "border-sky-300/30 bg-sky-400/10 text-sky-100",
+    },
+    {
+      id: "fire",
+      title: "Fuego",
+      detail: "Impacto fuerte para canjes importantes.",
+      icon: <IconFlame size={18} />,
+      className: "border-orange-300/30 bg-orange-500/10 text-orange-100",
+    },
+    {
+      id: "legendary",
+      title: "Legendaria",
+      detail: "Full pantalla para premios estrella.",
+      icon: <IconGift size={18} />,
+      className: "border-amber-300/30 bg-amber-400/10 text-amber-100",
+    },
+  ];
+
+  return (
+    <div className="grid gap-4 rounded-2xl border border-amber-300/15 bg-[linear-gradient(135deg,rgba(251,191,36,0.12),rgba(10,10,10,0.78)_42%,rgba(10,10,10,0.94))] p-4 shadow-inner shadow-black/10">
+      <button
+        type="button"
+        onClick={() =>
+          setForm((current) => ({
+            ...current,
+            alertEnabled: !current.alertEnabled,
+          }))
+        }
+        aria-pressed={form.alertEnabled}
+        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4 text-left transition hover:border-amber-300/30 focus:outline-none focus:ring-2 focus:ring-amber-200/35"
+      >
+        <span className="flex min-w-0 items-center gap-3">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-amber-300/30 bg-amber-400/15 text-amber-100">
+            <IconBroadcast size={19} />
+          </span>
+          <span>
+            <span className="block text-sm font-black text-white">
+              Alerta OBS al canjear
+            </span>
+            <span className="mt-0.5 block text-xs font-medium text-neutral-500">
+              Dispara una animacion en /stream/alerts para premios grandes.
+            </span>
+          </span>
+        </span>
+        <span
+          className={`relative h-7 w-12 shrink-0 rounded-full border transition ${
+            form.alertEnabled
+              ? "border-amber-200/50 bg-amber-400"
+              : "border-white/10 bg-neutral-800"
+          }`}
+        >
+          <span
+            className={`absolute top-1 size-5 rounded-full bg-white shadow-sm transition ${
+              form.alertEnabled ? "left-6" : "left-1"
+            }`}
+          />
+        </span>
+      </button>
+
+      {form.alertEnabled ? (
+        <div className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4">
+          <div className="grid gap-3 lg:grid-cols-3">
+            {alertOptions.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                aria-pressed={form.alertType === option.id}
+                onClick={() =>
+                  setForm((current) => ({
+                    ...current,
+                    alertType: option.id,
+                  }))
+                }
+                className={`grid cursor-pointer gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-white/25 focus:outline-none focus:ring-2 focus:ring-amber-200/35 ${
+                  form.alertType === option.id
+                    ? `${option.className} shadow-lg shadow-black/15`
+                    : "border-white/10 bg-neutral-900/80 text-neutral-300"
+                }`}
+              >
+                <span className="inline-flex items-center gap-2 font-black">
+                  {option.icon}
+                  {option.title}
+                </span>
+                <span className="text-xs font-medium text-neutral-400">
+                  {option.detail}
+                </span>
+              </button>
+            ))}
+          </div>
+
+          <Field label="Texto de la alerta">
+            <TextInput
+              value={form.alertMessage}
+              placeholder="{username} ha canjeado {product}"
+              onChange={(event) =>
+                setForm((current) => ({
+                  ...current,
+                  alertMessage: event.target.value,
+                }))
+              }
+            />
+          </Field>
+
+          <Field label="Duracion de la alerta">
+            <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-900/70 p-3">
+              <TextInput
+                type="number"
+                min="3"
+                max="30"
+                step="1"
+                value={form.alertDurationSeconds}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    alertDurationSeconds: event.target.value,
+                  }))
+                }
+                className="w-28"
+                required
+              />
+              <span className="text-sm font-bold text-neutral-400">seg</span>
+            </div>
+          </Field>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 export function ProductsPanel({
   form,
   setForm,
@@ -445,16 +594,20 @@ export function ProductsPanel({
         items={items}
         renderItem={(product) => {
           const rewardEffect = formatProductRewardEffect(product);
+          const streamAlert = formatProductAlert(product);
           const stockDetail = `${
             product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
           } - ${formatProductStatus(product.status)}`;
+          const details = [stockDetail, rewardEffect, streamAlert]
+            .filter(Boolean)
+            .join(" - ");
 
           return (
             <AdminCard
               key={product.id}
               title={product.title}
               meta={`${product.price.toLocaleString()} creditos`}
-              detail={rewardEffect ? `${stockDetail} - ${rewardEffect}` : stockDetail}
+              detail={details}
               imageUrl={product.imageUrl}
               featured={product.featured}
               unavailable={product.stock <= 0 || product.status !== "active"}
@@ -544,6 +697,7 @@ export function ProductsPanel({
               onChange={(featured) => setForm((current) => ({ ...current, featured }))}
             />
             <RewardEffectFields form={form} setForm={setForm} />
+            <StreamAlertFields form={form} setForm={setForm} />
           </div>
           <SubmitButton isPending={isPending} selectedId={selectedId} />
         </ModalForm>

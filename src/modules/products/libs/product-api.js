@@ -86,5 +86,9 @@ export function normalizeProduct(product) {
     rewardEffectType: product.rewardEffectType || "",
     rewardEffectValue: product.rewardEffectValue || "",
     rewardEffectDurationMinutes: Number(product.rewardEffectDurationMinutes || 0),
+    alertEnabled: Boolean(product.alertEnabled),
+    alertType: product.alertType || "confetti",
+    alertMessage: product.alertMessage || "",
+    alertDurationSeconds: Number(product.alertDurationSeconds || 8),
   };
 }

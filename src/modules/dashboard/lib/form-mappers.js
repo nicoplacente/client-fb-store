@@ -14,6 +14,10 @@ export function productToForm(product) {
     rewardEffectType: product.rewardEffectType,
     rewardEffectValue: product.rewardEffectValue || "happy",
     rewardEffectDurationMinutes: String(product.rewardEffectDurationMinutes || 60),
+    alertEnabled: Boolean(product.alertEnabled),
+    alertType: product.alertType || "confetti",
+    alertMessage: product.alertMessage || "",
+    alertDurationSeconds: String(product.alertDurationSeconds || 8),
   };
 }
 

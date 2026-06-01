@@ -240,6 +240,10 @@ export default function useDashboardController() {
       rewardEffectDurationMinutes: productForm.rewardEffectType
         ? Number(productForm.rewardEffectDurationMinutes || 60)
         : "",
+      alertEnabled: false,
+      alertType: productForm.alertType || "confetti",
+      alertMessage: productForm.alertMessage.trim(),
+      alertDurationSeconds: Number(productForm.alertDurationSeconds || 8),
     };
 
     if (!payloadBase.title || Number.isNaN(payloadBase.price)) {
