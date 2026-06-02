@@ -1,4 +1,5 @@
 import {
+  IconAlertTriangle,
   IconBroadcast,
   IconCoins,
   IconGift,
@@ -14,6 +15,7 @@ export const dashboardTabs = [
   { id: "redemptions", label: "Canjes", icon: IconShoppingBag },
   { id: "support", label: "Soporte", icon: IconTicket },
   { id: "stream", label: "Stream", icon: IconBroadcast },
+  { id: "danger", label: "Peligro", icon: IconAlertTriangle },
 ];
 
 export const emptyProduct = {

@@ -74,6 +74,7 @@ export default function useDashboardController() {
   const [creditPackageModalOpen, setCreditPackageModalOpen] = useState(false);
   const [giveawayModalOpen, setGiveawayModalOpen] = useState(false);
   const [supportReplies, setSupportReplies] = useState({});
+  const [confirmation, setConfirmation] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -285,9 +286,7 @@ export default function useDashboardController() {
     });
   }
 
-  function removeProduct(product) {
-    if (!window.confirm(`Eliminar "${product.title}"?`)) return;
-
+  function deleteProductById(product) {
     startTransition(async () => {
       try {
         await deleteProduct(product.id);
@@ -300,9 +299,22 @@ export default function useDashboardController() {
     });
   }
 
-  function removeGiveaway(giveaway) {
-    if (!window.confirm(`Eliminar "${giveaway.title}"?`)) return;
+  function removeProduct(product) {
+    setConfirmation({
+      type: "delete-product",
+      title: "Eliminar producto",
+      description: `Vas a eliminar "${product.title}" del catalogo.`,
+      confirmLabel: "Eliminar producto",
+      cancelLabel: "Conservar producto",
+      details: [
+        "El producto dejara de estar disponible para nuevos canjes.",
+        "Esta accion puede afectar la gestion del market.",
+      ],
+      target: product,
+    });
+  }
 
+  function deleteGiveawayById(giveaway) {
     startTransition(async () => {
       try {
         await deleteGiveaway(giveaway.id);
@@ -352,9 +364,7 @@ export default function useDashboardController() {
     });
   }
 
-  function removeTicket(ticket) {
-    if (!window.confirm(`Eliminar ticket "${ticket.subject}"?`)) return;
-
+  function deleteTicketById(ticket) {
     startTransition(async () => {
       try {
         await deleteSupportTicket(ticket.id);
@@ -434,18 +444,71 @@ export default function useDashboardController() {
     });
   }
 
-  function resetRankingPointsToZero() {
-    if (!window.confirm("Reiniciar todos los puntos del ranking a 0? Los usuarios se mantienen.")) {
+  function removeTicket(ticket) {
+    setConfirmation({
+      type: "delete-ticket",
+      title: "Eliminar ticket",
+      description: `Vas a eliminar el ticket "${ticket.subject}".`,
+      confirmLabel: "Eliminar ticket",
+      cancelLabel: "Conservar ticket",
+      details: [
+        "Se eliminara el historial visible de esta consulta.",
+        "Esta accion no cambia canjes ni productos relacionados.",
+      ],
+      target: ticket,
+    });
+  }
+
+  function cancelConfirmation() {
+    setConfirmation(null);
+  }
+
+  function confirmDashboardAction() {
+    const current = confirmation;
+    if (!current) return;
+
+    setConfirmation(null);
+
+    if (current.type === "delete-product") {
+      deleteProductById(current.target);
       return;
     }
 
+    if (current.type === "delete-giveaway") {
+      deleteGiveawayById(current.target);
+      return;
+    }
+
+    if (current.type === "delete-ticket") {
+      deleteTicketById(current.target);
+    }
+  }
+
+  function removeGiveaway(giveaway) {
+    setConfirmation({
+      type: "delete-giveaway",
+      title: "Eliminar sorteo",
+      description: `Vas a eliminar "${giveaway.title}" del listado de sorteos.`,
+      confirmLabel: "Eliminar sorteo",
+      cancelLabel: "Conservar sorteo",
+      details: [
+        "El sorteo dejara de estar disponible para la comunidad.",
+        "Revisa que no haya participantes o premios pendientes antes de continuar.",
+      ],
+      target: giveaway,
+    });
+  }
+
+  function resetRankingPointsToZero() {
     startTransition(async () => {
       try {
         const data = await resetRankingPoints();
-        toast.success(`Puntos reiniciados para ${data.updated || 0} usuarios`);
+        toast.success(
+          `Puntos y creditos reiniciados para ${data.updated || 0} usuarios`
+        );
         await loadDashboard();
       } catch (err) {
-        toast.error(err.message || "No se pudieron reiniciar los puntos");
+        toast.error(err.message || "No se pudieron reiniciar puntos y creditos");
       }
     });
   }
@@ -459,6 +522,7 @@ export default function useDashboardController() {
     loading,
     error,
     isPending,
+    confirmation,
     products: normalizedProducts,
     creditPackages: normalizedCreditPackages,
     giveaways: normalizedGiveaways,
@@ -523,6 +587,8 @@ export default function useDashboardController() {
     updateTicketStatus,
     replyToTicket,
     removeTicket,
+    cancelConfirmation,
+    confirmDashboardAction,
     activateStreamHour,
     disableStreamHour,
     activateStreamChest,

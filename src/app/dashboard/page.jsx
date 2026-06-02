@@ -2,12 +2,14 @@
 
 import { IconRefresh } from "@tabler/icons-react";
 import SectionContainer from "@/modules/ui/section-container";
+import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import {
   CreditPackagesPanel,
   GiveawaysPanel,
   ProductsPanel,
 } from "@/modules/dashboard/components/catalog-panels";
 import StatCard from "@/modules/dashboard/components/stat-card";
+import StreamDangerPanel from "@/modules/dashboard/components/stream-danger-panel";
 import StreamPanel from "@/modules/dashboard/components/stream-panel";
 import {
   RedemptionsPanel,
@@ -50,6 +52,7 @@ export default function DashboardPage() {
       ) : null}
 
       <DashboardActivePanel dashboard={dashboard} />
+      <DashboardConfirmationDialog dashboard={dashboard} />
     </SectionContainer>
   );
 }
@@ -221,17 +224,57 @@ function DashboardActivePanel({ dashboard }) {
       <StreamPanel
         streamHour={dashboard.streamHour}
         streamRewards={dashboard.streamRewards}
-        liveStatus={dashboard.liveStatus}
         loading={dashboard.loading}
         isPending={dashboard.isPending}
         onActivateHour={dashboard.activateStreamHour}
         onActivateChest={dashboard.activateStreamChest}
         onActivateChatReward={dashboard.activateStreamChatReward}
         onDisableHour={dashboard.disableStreamHour}
+      />
+    );
+  }
+
+  if (dashboard.activeTab === "danger") {
+    return (
+      <StreamDangerPanel
+        isPending={dashboard.isPending}
+        liveStatus={dashboard.liveStatus}
+        streamHour={dashboard.streamHour}
         onResetRankingPoints={dashboard.resetRankingPointsToZero}
       />
     );
   }
 
   return null;
+}
+
+function DashboardConfirmationDialog({ dashboard }) {
+  const confirmation = dashboard.confirmation;
+
+  return (
+    <ConfirmationDialog
+      open={Boolean(confirmation)}
+      variant="danger"
+      title={confirmation?.title}
+      description={confirmation?.description}
+      confirmLabel={dashboard.isPending ? "Procesando..." : confirmation?.confirmLabel}
+      cancelLabel={confirmation?.cancelLabel}
+      confirmDisabled={dashboard.isPending}
+      onCancel={dashboard.cancelConfirmation}
+      onConfirm={dashboard.confirmDashboardAction}
+    >
+      {confirmation?.details?.length ? (
+        <div className="space-y-3 text-sm leading-6 text-neutral-300">
+          <p className="font-semibold text-red-100">
+            Antes de confirmar, revisa el alcance:
+          </p>
+          <ul className="list-disc space-y-2 pl-5 text-neutral-400">
+            {confirmation.details.map((detail) => (
+              <li key={detail}>{detail}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </ConfirmationDialog>
+  );
 }

@@ -1,12 +1,10 @@
 import { useState } from "react";
 import {
-  IconAlertTriangle,
   IconBolt,
   IconBox,
   IconClockCog,
   IconMessageCircle,
   IconPower,
-  IconRefreshAlert,
   IconSparkles,
 } from "@tabler/icons-react";
 
@@ -26,14 +24,12 @@ function formatMultiplier(value) {
 export default function StreamPanel({
   streamHour,
   streamRewards,
-  liveStatus,
   loading,
   isPending,
   onActivateHour,
   onActivateChest,
   onActivateChatReward,
   onDisableHour,
-  onResetRankingPoints,
 }) {
   const [autoDisable, setAutoDisable] = useState(true);
 
@@ -63,8 +59,7 @@ export default function StreamPanel({
   };
 
   return (
-    <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_22rem]">
-      <section className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
+    <section className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
         <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
           <div>
             <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
@@ -222,96 +217,7 @@ export default function StreamPanel({
             </button>
           </div>
         </div>
-      </section>
-
-      <StreamDangerPanel
-        isPending={isPending}
-        liveStatus={liveStatus}
-        streamHour={state}
-        onResetRankingPoints={onResetRankingPoints}
-      />
-    </div>
-  );
-}
-
-function formatLiveStatus(liveStatus) {
-  if (!liveStatus) return "Sin datos";
-  if (liveStatus.isLive) return "En vivo";
-  if (liveStatus.status === "unknown") return "Desconocido";
-  return "Offline";
-}
-
-function formatLiveMode(liveStatus) {
-  if (!liveStatus) return "Esperando lectura";
-  if (liveStatus.manualOverride === true) return "Override manual online";
-  if (liveStatus.manualOverride === false) return "Override manual offline";
-  return `Detector: ${liveStatus.status || "auto"}`;
-}
-
-function StreamDangerPanel({
-  isPending,
-  liveStatus,
-  streamHour,
-  onResetRankingPoints,
-}) {
-  const live = Boolean(liveStatus?.isLive);
-
-  return (
-    <aside className="h-fit rounded-2xl border border-red-300/20 bg-red-950/20 p-4 shadow-xl shadow-black/20 ring-1 ring-red-300/[0.04]">
-      <div className="flex items-start gap-3">
-        <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
-          <IconAlertTriangle size={21} />
-        </span>
-        <div className="min-w-0">
-          <p className="text-xs font-semibold uppercase tracking-wide text-red-300/80">
-            Zona de peligro
-          </p>
-          <h3 className="mt-1 text-base font-black text-white">Estado del stream</h3>
-        </div>
-      </div>
-
-      <div className="mt-4 grid gap-3">
-        <div className="rounded-xl border border-white/10 bg-neutral-950/70 p-3">
-          <div className="flex items-center justify-between gap-3">
-            <span className="text-sm font-semibold text-neutral-400">Kick</span>
-            <span
-              className={`rounded-full border px-3 py-1 text-xs font-black ${
-                live
-                  ? "border-green-300/30 bg-green-400/10 text-green-100"
-                  : "border-red-300/25 bg-red-500/10 text-red-100"
-              }`}
-            >
-              {formatLiveStatus(liveStatus)}
-            </span>
-          </div>
-          <p className="mt-2 text-xs font-medium text-neutral-500">
-            {formatLiveMode(liveStatus)}
-          </p>
-        </div>
-
-        <div className="rounded-xl border border-white/10 bg-neutral-950/70 p-3">
-          <p className="text-sm font-semibold text-neutral-400">Bonus activo</p>
-          <p className="mt-1 text-lg font-black text-white">
-            {streamHour.activeLabel || "Sin hora especial"}
-          </p>
-          <p className="mt-1 text-xs font-medium text-neutral-500">
-            {streamHour.hasManualOverride || streamHour.mode === "manual"
-              ? "Control manual"
-              : "Control automatico"}
-          </p>
-        </div>
-
-        <button
-          type="button"
-          onClick={onResetRankingPoints}
-          disabled={isPending}
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/25 focus:outline-none focus:ring-2 focus:ring-red-300/45 disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <IconRefreshAlert size={18} />
-          Reiniciar puntos
-        </button>
-      </div>
-    </aside>
+    </section>
   );
 }
 
