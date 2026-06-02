@@ -4,7 +4,6 @@ import {
   IconCoinBitcoin,
   IconGift,
   IconHelpHexagon,
-  IconFileText,
   IconLayoutDashboard,
 } from "@tabler/icons-react";
 
@@ -20,9 +19,4 @@ export const menuItems = [
   { name: "Tienda", icon: <IconCoinBitcoin size={20} />, href: "/market" },
   { name: "Sorteos", icon: <IconGift size={20} />, href: "/gifts" },
   { name: "Soporte", icon: <IconHelpHexagon size={20} />, href: "/support" },
-  {
-    name: "Términos y condiciones",
-    icon: <IconFileText size={20} />,
-    href: "/terms",
-  },
 ];

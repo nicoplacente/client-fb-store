@@ -13,6 +13,19 @@ export const emptyProfile = {
 export const INITIAL_VISIBLE_SUB_MILESTONES = 1;
 export const SUB_REWARD_CYCLE_MONTHS = 18;
 export const SUB_REWARD_CYCLE_LABELS = [1, 3, 6, 9, 12, 15, 18];
+export const emptyLevelStats = {
+  xp: 0,
+  level: 1,
+  levelTier: "Bronce",
+  levelProgress: 0,
+  levelCurrentXp: 0,
+  levelNeededXp: 900,
+  levelRemainingXp: 900,
+  watchtime: 0,
+  messages: 0,
+  points: 0,
+  streak: 0,
+};
 
 export function toProfile(user) {
   return {
@@ -52,6 +65,29 @@ export function formatShortDate(value) {
     month: "short",
     year: "numeric",
   }).format(date);
+}
+
+export function normalizeLevelStats(stats) {
+  return {
+    ...emptyLevelStats,
+    xp: Number(stats?.xp || 0),
+    level: Number(stats?.level || 1),
+    levelTier: stats?.levelTier || "Bronce",
+    levelProgress: Number(stats?.levelProgress || 0),
+    levelCurrentXp: Number(stats?.levelCurrentXp || 0),
+    levelNeededXp: Number(stats?.levelNeededXp || 900),
+    levelRemainingXp: Number(stats?.levelRemainingXp || 900),
+    watchtime: Number(stats?.watchtime || 0),
+    messages: Number(stats?.messages || 0),
+    points: Number(stats?.points || stats?.kickPoints || 0),
+    streak: Number(stats?.streak || stats?.streamStreak || 0),
+  };
+}
+
+export function formatCompactNumber(value) {
+  return new Intl.NumberFormat("es-AR", {
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
 }
 
 export function getLocalRedemptions() {

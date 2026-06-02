@@ -3,6 +3,7 @@ import { getCreditPackages } from "@/modules/credits/libs/credit-api";
 import { getGiveaways } from "@/modules/giveaways/libs/giveaway-api";
 import { getSupportTickets } from "@/modules/support/libs/support-api";
 import {
+  getLiveStatus,
   getStreamHours,
   getStreamRewards,
   normalizeStreamHourState,
@@ -17,6 +18,7 @@ export async function loadDashboardData() {
     ticketData,
     streamHourData,
     streamRewardData,
+    liveStatusData,
   ] = await Promise.all([
     getProducts({ includeDisabled: true }),
     getCreditPackages({ includeDisabled: true }),
@@ -24,6 +26,7 @@ export async function loadDashboardData() {
     getSupportTickets({ includeAll: true }),
     getStreamHours().catch(() => null),
     getStreamRewards().catch(() => null),
+    getLiveStatus().catch(() => null),
   ]);
 
   return {
@@ -35,5 +38,6 @@ export async function loadDashboardData() {
     streamRewards: streamRewardData
       ? normalizeStreamRewardState(streamRewardData)
       : null,
+    liveStatus: liveStatusData,
   };
 }

@@ -5,9 +5,13 @@ import {
   IconBrandDiscord,
   IconBrandX,
   IconDeviceFloppy,
+  IconFlame,
   IconId,
+  IconMessageCircle,
   IconMapPin,
+  IconSparkles,
   IconUserCircle,
+  IconVideo,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
@@ -30,8 +34,11 @@ import RedemptionsList from "@/modules/profile/components/redemptions-list";
 import SubscriptionsTimeline from "@/modules/profile/components/subscriptions-timeline";
 import {
   emptyProfile,
+  emptyLevelStats,
+  formatCompactNumber,
   getLocalRedemptions,
   mergeRedemptions,
+  normalizeLevelStats,
   ticketToRedemption,
   toProfile,
 } from "@/modules/profile/lib/profile-utils";
@@ -45,6 +52,8 @@ export default function ProfilePage() {
     subscription: null,
     timeline: [],
   });
+  const [levelStats, setLevelStats] = useState(emptyLevelStats);
+  const [loadingLevelStats, setLoadingLevelStats] = useState(true);
   const [loadingRedemptions, setLoadingRedemptions] = useState(true);
   const [loadingSubscriptions, setLoadingSubscriptions] = useState(true);
   const [claimingRewardId, setClaimingRewardId] = useState(null);
@@ -62,8 +71,9 @@ export default function ProfilePage() {
       try {
         setLoadingRedemptions(true);
         setLoadingSubscriptions(true);
+        setLoadingLevelStats(true);
 
-        const [data, localData, ticketData, subscriptions] = await Promise.all([
+        const [data, localData, ticketData, subscriptions, stats] = await Promise.all([
           getMyProductRedemptions().catch(() => []),
           Promise.resolve(getLocalRedemptions()),
           getDashboardTicketRedemptions(user),
@@ -71,11 +81,13 @@ export default function ProfilePage() {
             subscription: null,
             timeline: [],
           })),
+          apiRequest(envConfig.API_STATS_ME).catch(() => ({ data: emptyLevelStats })),
         ]);
 
         if (!cancelled) {
           setRedemptions(mergeRedemptions(mergeRedemptions(data, ticketData), localData));
           setSubscriptionsData(subscriptions);
+          setLevelStats(normalizeLevelStats(stats.data));
         }
       } catch {
         if (!cancelled) {
@@ -84,11 +96,13 @@ export default function ProfilePage() {
             subscription: null,
             timeline: [],
           });
+          setLevelStats(emptyLevelStats);
         }
       } finally {
         if (!cancelled) {
           setLoadingRedemptions(false);
           setLoadingSubscriptions(false);
+          setLoadingLevelStats(false);
         }
       }
     }
@@ -165,6 +179,7 @@ export default function ProfilePage() {
         <ProfileHero user={user} displayName={displayName} />
 
         <div className="px-5 py-7 sm:px-8">
+          <ProfileXpCard stats={levelStats} loading={loadingLevelStats} />
           <ProfileTabs activeTab={activeTab} onChange={setActiveTab} />
 
           {activeTab === "info" ? (
@@ -190,6 +205,102 @@ export default function ProfilePage() {
         </div>
       </div>
     </SectionContainer>
+  );
+}
+
+function ProfileXpCard({ stats, loading }) {
+  const progress = Math.max(0, Math.min(100, Number(stats.levelProgress || 0)));
+  const sources = [
+    {
+      label: "Watchtime",
+      value: `${formatCompactNumber(stats.watchtime)} min`,
+      icon: IconVideo,
+    },
+    {
+      label: "Mensajes",
+      value: formatCompactNumber(stats.messages),
+      icon: IconMessageCircle,
+    },
+    {
+      label: "Puntos",
+      value: formatCompactNumber(stats.points),
+      icon: IconSparkles,
+    },
+    {
+      label: "Racha",
+      value: `${formatCompactNumber(stats.streak)} streams`,
+      icon: IconFlame,
+    },
+  ];
+
+  return (
+    <section className="mb-8 rounded-lg border border-white/10 bg-neutral-900/70 p-4 shadow-xl shadow-black/30 sm:p-5">
+      <div className="grid gap-5 lg:grid-cols-[auto_1fr] lg:items-center">
+        <div className="flex items-center gap-4">
+          <div className="grid size-20 place-items-center rounded-full border border-violet-300/35 bg-[radial-gradient(circle_at_35%_25%,rgba(196,181,253,0.95),rgba(124,58,237,0.72)_48%,rgba(24,24,27,0.96)_100%)] text-center shadow-lg shadow-violet-950/40">
+            <span className="text-3xl font-black leading-none text-white">
+              {loading ? "..." : stats.level}
+            </span>
+          </div>
+          <div>
+            <p className="text-xs font-bold uppercase text-neutral-500">Mi nivel</p>
+            <h2 className="mt-1 text-2xl font-black text-white">{stats.levelTier}</h2>
+            <p className="mt-1 text-sm font-bold text-violet-200">
+              {formatCompactNumber(stats.xp)} XP acumulado
+            </p>
+          </div>
+        </div>
+
+        <div className="min-w-0">
+          <div
+            className="grid grid-cols-[repeat(20,minmax(0,1fr))] gap-1"
+            aria-label={`Progreso de nivel ${progress}%`}
+            role="meter"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow={progress}
+          >
+            {Array.from({ length: 20 }, (_, index) => (
+              <span
+                key={index}
+                className={`h-3 rounded-full border border-white/10 transition ${
+                  index < Math.round(progress / 5)
+                    ? "bg-gradient-to-r from-sky-400 to-violet-400"
+                    : "bg-neutral-950"
+                }`}
+              />
+            ))}
+          </div>
+          <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-neutral-400">
+            <span>{progress}% completado</span>
+            <span>{formatCompactNumber(stats.levelRemainingXp)} XP para el nivel {stats.level + 1}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-5 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {sources.map((source) => {
+          const Icon = source.icon;
+
+          return (
+            <div
+              key={source.label}
+              className="flex items-center gap-3 rounded-md border border-white/10 bg-neutral-950/70 px-3 py-2.5"
+            >
+              <span className="grid size-8 place-items-center rounded-md bg-white/5 text-violet-200">
+                <Icon size={17} />
+              </span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold uppercase text-neutral-500">
+                  {source.label}
+                </p>
+                <p className="truncate text-sm font-black text-white">{source.value}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

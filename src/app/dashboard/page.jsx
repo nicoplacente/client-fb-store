@@ -221,12 +221,14 @@ function DashboardActivePanel({ dashboard }) {
       <StreamPanel
         streamHour={dashboard.streamHour}
         streamRewards={dashboard.streamRewards}
+        liveStatus={dashboard.liveStatus}
         loading={dashboard.loading}
         isPending={dashboard.isPending}
         onActivateHour={dashboard.activateStreamHour}
         onActivateChest={dashboard.activateStreamChest}
         onActivateChatReward={dashboard.activateStreamChatReward}
         onDisableHour={dashboard.disableStreamHour}
+        onResetRankingPoints={dashboard.resetRankingPointsToZero}
       />
     );
   }

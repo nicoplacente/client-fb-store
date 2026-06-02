@@ -8,6 +8,7 @@ const publicRoutes = [
   { path: "/gifts", priority: 0.8, changeFrequency: "weekly" },
   { path: "/support", priority: 0.7, changeFrequency: "weekly" },
   { path: "/terms", priority: 0.5, changeFrequency: "monthly" },
+  { path: "/privacy", priority: 0.5, changeFrequency: "monthly" },
 ];
 
 export default function sitemap() {

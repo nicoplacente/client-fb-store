@@ -32,6 +32,17 @@ export async function getStreamRewards() {
   return data.rewards;
 }
 
+export async function getLiveStatus() {
+  const data = await apiRequest(envConfig.API_LIVE_STATUS);
+
+  return {
+    isLive: Boolean(data.isLive),
+    status: data.status || "unknown",
+    manualOverride: data.manualOverride,
+    currentStreamId: data.currentStreamId || null,
+  };
+}
+
 export async function createStreamChest() {
   const data = await apiRequest(`${envConfig.API_STREAM_REWARDS}/chest`, {
     method: "POST",
@@ -46,6 +57,14 @@ export async function createStreamChatReward() {
   });
 
   return data.rewards;
+}
+
+export async function resetRankingPoints() {
+  const data = await apiRequest(envConfig.API_RANKING_RESET_POINTS, {
+    method: "POST",
+  });
+
+  return data;
 }
 
 export function normalizeStreamHourState(state = {}) {

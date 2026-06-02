@@ -32,6 +32,7 @@ import {
   createStreamChest,
   normalizeStreamHourState,
   normalizeStreamRewardState,
+  resetRankingPoints,
   updateStreamHour,
 } from "@/modules/stream/libs/stream-api";
 import {
@@ -62,6 +63,7 @@ export default function useDashboardController() {
   const [tickets, setTickets] = useState([]);
   const [streamHour, setStreamHour] = useState(null);
   const [streamRewards, setStreamRewards] = useState(null);
+  const [liveStatus, setLiveStatus] = useState(null);
   const [productForm, setProductForm] = useState(emptyProduct);
   const [creditPackageForm, setCreditPackageForm] = useState(emptyCreditPackage);
   const [giveawayForm, setGiveawayForm] = useState(emptyGiveaway);
@@ -137,6 +139,7 @@ export default function useDashboardController() {
       setTickets(data.ticketData);
       if (data.streamHour) setStreamHour(data.streamHour);
       if (data.streamRewards) setStreamRewards(data.streamRewards);
+      if (data.liveStatus) setLiveStatus(data.liveStatus);
       trackDashboardNotifications(data.ticketData);
     } catch (err) {
       setError(err.message || "No se pudo cargar el dashboard");
@@ -431,6 +434,22 @@ export default function useDashboardController() {
     });
   }
 
+  function resetRankingPointsToZero() {
+    if (!window.confirm("Reiniciar todos los puntos del ranking a 0? Los usuarios se mantienen.")) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const data = await resetRankingPoints();
+        toast.success(`Puntos reiniciados para ${data.updated || 0} usuarios`);
+        await loadDashboard();
+      } catch (err) {
+        toast.error(err.message || "No se pudieron reiniciar los puntos");
+      }
+    });
+  }
+
   return {
     user,
     canManageDashboard,
@@ -447,6 +466,7 @@ export default function useDashboardController() {
     redemptionTickets,
     streamHour,
     streamRewards,
+    liveStatus,
     supportReplies,
     setSupportReplies,
     loadDashboard,
@@ -507,6 +527,7 @@ export default function useDashboardController() {
     disableStreamHour,
     activateStreamChest,
     activateStreamChatReward,
+    resetRankingPointsToZero,
     useAutomaticStreamHour,
   };
 }
