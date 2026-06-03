@@ -83,7 +83,7 @@ export default function StreamDangerPanel({
                 Reiniciar ranking
               </h3>
               <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Esta accion deja los puntos y creditos de todos los usuarios en 0, manteniendo intactos los usuarios, watchtime, cofres, rachas y mensajes.
+                Esta accion deja en 0 los creditos y todos los valores del ranking de la comunidad, conservando los usuarios existentes.
               </p>
             </div>
             <button
@@ -103,7 +103,7 @@ export default function StreamDangerPanel({
         open={confirmOpen}
         variant="danger"
         title="Reiniciar puntos y creditos"
-        description="Esta accion impacta a todos los usuarios. Los usuarios se conservan, pero sus puntos del ranking y creditos vuelven a 0."
+        description="Esta accion impacta a todos los usuarios. Los usuarios se conservan, pero sus creditos y valores del ranking vuelven a 0."
         confirmLabel={isPending ? "Reiniciando..." : "Si, reiniciar todo"}
         cancelLabel="Mantener saldos"
         onCancel={() => setConfirmOpen(false)}
@@ -116,8 +116,8 @@ export default function StreamDangerPanel({
           <ul className="list-disc space-y-2 pl-5 text-neutral-400">
             <li>Todos los puntos del ranking quedaran en 0.</li>
             <li>Todos los creditos de usuario quedaran en 0.</li>
+            <li>Watchtime, cofres, rachas, mensajes y recompensas de chat quedaran en 0.</li>
             <li>Los usuarios existentes no se eliminan.</li>
-            <li>Watchtime, cofres, rachas y mensajes no se reinician.</li>
             <li>La accion no se puede deshacer desde el dashboard.</li>
           </ul>
         </div>
