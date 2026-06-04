@@ -6,14 +6,21 @@ export function productToForm(product) {
     description: product.description,
     price: String(product.price),
     stock: String(product.stock),
+    infiniteStock: Boolean(product.infiniteStock),
     category: product.category,
     imageUrl: product.imageUrl,
     imageFile: null,
     status: product.status,
     featured: product.featured,
     rewardEffectType: product.rewardEffectType,
-    rewardEffectValue: product.rewardEffectValue || "happy",
-    rewardEffectDurationMinutes: String(product.rewardEffectDurationMinutes || 60),
+    rewardEffectValue:
+      product.rewardEffectType === "stream_special_hour"
+        ? "happy"
+        : product.rewardEffectValue || "happy",
+    rewardEffectDurationMinutes:
+      product.rewardEffectType === "stream_special_hour"
+        ? "60"
+        : String(product.rewardEffectDurationMinutes || 60),
     alertEnabled: Boolean(product.alertEnabled),
     alertType: product.alertType || "confetti",
     alertMessage: product.alertMessage || "",

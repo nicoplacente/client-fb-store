@@ -18,6 +18,37 @@ export function TextInput({ className = "", ...props }) {
   );
 }
 
+export function FormattedNumberInput({
+  value,
+  onValueChange,
+  allowDecimals = false,
+  decimalScale = 2,
+  className = "",
+  ...props
+}) {
+  const formattedValue = formatNumberForInput(value, {
+    allowDecimals,
+  });
+
+  return (
+    <TextInput
+      {...props}
+      type="text"
+      inputMode={allowDecimals ? "decimal" : "numeric"}
+      value={formattedValue}
+      onChange={(event) =>
+        onValueChange(
+          normalizeNumberInput(event.target.value, {
+            allowDecimals,
+            decimalScale,
+          })
+        )
+      }
+      className={`font-mono tabular-nums ${className}`}
+    />
+  );
+}
+
 export function TextArea(props) {
   return (
     <textarea
@@ -25,6 +56,68 @@ export function TextArea(props) {
       className="resize-none rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 focus:ring-2 focus:ring-red-300/15 disabled:cursor-not-allowed disabled:opacity-60"
     />
   );
+}
+
+function formatNumberForInput(value, { allowDecimals }) {
+  const rawValue = String(value ?? "");
+
+  if (!rawValue) return "";
+
+  const [integerValue, decimalValue] = rawValue.split(".");
+  const integerDigits = integerValue.replace(/\D/g, "");
+  const formattedInteger = integerDigits.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+
+  if (!allowDecimals || decimalValue === undefined) {
+    return formattedInteger;
+  }
+
+  return `${formattedInteger || "0"},${decimalValue}`;
+}
+
+function normalizeNumberInput(value, { allowDecimals, decimalScale }) {
+  const cleanValue = String(value || "").replace(/[^\d.,]/g, "");
+
+  if (!cleanValue) return "";
+
+  if (!allowDecimals) {
+    return normalizeInteger(cleanValue);
+  }
+
+  const decimalSeparatorIndex = getDecimalSeparatorIndex(cleanValue, decimalScale);
+
+  if (decimalSeparatorIndex === -1) {
+    return normalizeInteger(cleanValue);
+  }
+
+  const integerValue = normalizeInteger(cleanValue.slice(0, decimalSeparatorIndex));
+  const decimalValue = cleanValue
+    .slice(decimalSeparatorIndex + 1)
+    .replace(/\D/g, "")
+    .slice(0, decimalScale);
+
+  return `${integerValue || "0"}.${decimalValue}`;
+}
+
+function normalizeInteger(value) {
+  const digits = String(value || "").replace(/\D/g, "");
+
+  return digits.replace(/^0+(?=\d)/, "");
+}
+
+function getDecimalSeparatorIndex(value, decimalScale) {
+  const lastCommaIndex = value.lastIndexOf(",");
+  const lastDotIndex = value.lastIndexOf(".");
+  const separatorIndex = Math.max(lastCommaIndex, lastDotIndex);
+
+  if (separatorIndex === -1) return -1;
+
+  const separator = value[separatorIndex];
+  const decimalsLength = value.slice(separatorIndex + 1).replace(/\D/g, "").length;
+
+  if (separator === ",") return separatorIndex;
+  if (decimalsLength > 0 && decimalsLength <= decimalScale) return separatorIndex;
+
+  return -1;
 }
 
 export function SelectInput(props) {

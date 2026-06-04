@@ -9,7 +9,7 @@ import coins from "@/assets/coins.webp";
 import { formatNumber } from "../lib/market-utils";
 
 export default function ProductCard({ product, onRedeem, disabled }) {
-  const outOfStock = product.stock <= 0;
+  const outOfStock = !product.infiniteStock && product.stock <= 0;
   const isDisabled = product.status === "disabled";
   const unavailable = product.status !== "active" || outOfStock;
 
@@ -108,7 +108,11 @@ function ProductPrice({ product, outOfStock, unavailable }) {
       </p>
       <div className="text-center text-xs font-black uppercase text-neutral-600">
         <p className={outOfStock ? "text-red-200" : ""}>
-          {outOfStock ? "Sin stock" : `${product.stock} restantes`}
+          {outOfStock
+            ? "Sin stock"
+            : product.infiniteStock
+              ? "Ilimitado"
+              : `${product.stock} restantes`}
         </p>
         <p className={`mt-1 normal-case ${unavailable ? "text-neutral-600" : "text-green-300"}`}>
           {outOfStock

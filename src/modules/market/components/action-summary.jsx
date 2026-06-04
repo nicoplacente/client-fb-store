@@ -1,11 +1,17 @@
 import { IconMinus, IconPlus } from "@tabler/icons-react";
-import { clampRedemptionQuantity, formatNumber } from "../lib/market-utils";
+import {
+  clampRedemptionQuantity,
+  formatNumber,
+  getRedemptionQuantity,
+  hasSingleRedemptionEffect,
+} from "../lib/market-utils";
 
 export default function ActionSummary({ action, onQuantityChange }) {
   const isPurchase = action.type === "purchase";
   const item = action.item;
-  const quantity = clampRedemptionQuantity(action.quantity, item.stock);
+  const quantity = getRedemptionQuantity(action.quantity, item);
   const totalCost = Number(item.price || 0) * quantity;
+  const isSingleRedemption = hasSingleRedemptionEffect(item);
 
   return (
     <div className="grid gap-3 text-sm text-neutral-300">
@@ -17,8 +23,15 @@ export default function ActionSummary({ action, onQuantityChange }) {
       />
       {isPurchase ? (
         <SummaryRow label="Creditos que recibis" value={formatNumber(item.credits)} />
+      ) : isSingleRedemption ? (
+        <SummaryRow label="Unidades" value="1 canje" />
       ) : (
-        <QuantityControl value={quantity} max={item.stock} onChange={onQuantityChange} />
+        <QuantityControl
+          value={quantity}
+          max={item.stock}
+          infiniteStock={item.infiniteStock}
+          onChange={onQuantityChange}
+        />
       )}
     </div>
   );
@@ -33,12 +46,25 @@ function SummaryRow({ label, value, valueClassName = "text-white" }) {
   );
 }
 
-function QuantityControl({ value, max, onChange }) {
+function QuantityControl({ value, max, infiniteStock, onChange }) {
   const stock = Math.max(0, Number(max || 0));
-  const safeValue = clampRedemptionQuantity(value, stock);
+  const numericValue = Math.floor(Number(value || 1));
+  const safeValue = infiniteStock
+    ? Number.isFinite(numericValue)
+      ? Math.max(1, numericValue)
+      : 1
+    : clampRedemptionQuantity(value, stock);
 
   function updateQuantity(nextValue) {
-    onChange(clampRedemptionQuantity(nextValue, stock));
+    const nextQuantity = Math.floor(Number(nextValue || 1));
+
+    onChange(
+      infiniteStock
+        ? Number.isFinite(nextQuantity)
+          ? Math.max(1, nextQuantity)
+          : 1
+        : clampRedemptionQuantity(nextValue, stock)
+    );
   }
 
   return (
@@ -48,7 +74,7 @@ function QuantityControl({ value, max, onChange }) {
           Unidades
         </label>
         <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-black text-neutral-400">
-          Disponible: {formatNumber(stock)}
+          Disponible: {infiniteStock ? "Ilimitado" : formatNumber(stock)}
         </span>
       </div>
 
@@ -66,7 +92,7 @@ function QuantityControl({ value, max, onChange }) {
           id="redeem-quantity"
           type="number"
           min="1"
-          max={stock}
+          max={infiniteStock ? undefined : stock}
           value={safeValue}
           onChange={(event) => updateQuantity(event.target.value)}
           className="h-12 w-full bg-transparent px-3 text-center text-lg font-black text-white outline-none"
@@ -75,7 +101,7 @@ function QuantityControl({ value, max, onChange }) {
         <button
           type="button"
           onClick={() => updateQuantity(safeValue + 1)}
-          disabled={safeValue >= stock}
+          disabled={!infiniteStock && safeValue >= stock}
           className="grid h-12 cursor-pointer place-items-center border-l border-white/10 text-neutral-300 transition hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:text-neutral-700"
           aria-label="Aumentar unidades"
         >
@@ -84,7 +110,9 @@ function QuantityControl({ value, max, onChange }) {
       </div>
 
       <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
-        <span>Maximo segun stock disponible</span>
+        <span>
+          {infiniteStock ? "Sin limite de stock" : "Maximo segun stock disponible"}
+        </span>
         <strong className="font-black text-amber-200">
           {safeValue} {safeValue === 1 ? "unidad" : "unidades"}
         </strong>

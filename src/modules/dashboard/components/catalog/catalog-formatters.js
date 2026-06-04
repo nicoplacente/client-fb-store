@@ -7,6 +7,10 @@ const rewardEffectLabels = {
 };
 
 export function formatProductRewardEffect(product) {
+  if (product.rewardEffectType === "restore_stream_streak") {
+    return "Recupera racha perdida";
+  }
+
   if (product.rewardEffectType !== "stream_special_hour") return "";
 
   const label = rewardEffectLabels[product.rewardEffectValue] || "Hora especial";
@@ -30,9 +34,12 @@ export function formatProductAlert(product) {
 export function getProductCardDetails(product) {
   const rewardEffect = formatProductRewardEffect(product);
   const streamAlert = formatProductAlert(product);
-  const stockDetail = `${
-    product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
-  } - ${formatProductStatus(product.status)}`;
+  const stockLabel = product.infiniteStock
+    ? "Stock infinito"
+    : product.stock > 0
+      ? `${product.stock} disponibles`
+      : "Sin stock";
+  const stockDetail = `${stockLabel} - ${formatProductStatus(product.status)}`;
 
   return [stockDetail, rewardEffect, streamAlert].filter(Boolean).join(" - ");
 }

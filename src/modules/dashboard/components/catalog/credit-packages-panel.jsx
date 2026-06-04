@@ -1,6 +1,14 @@
 import { IconCoins } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
-import { Field, PanelHeader, SelectInput, SubmitButton, TextArea, TextInput } from "../form-controls";
+import {
+  Field,
+  FormattedNumberInput,
+  PanelHeader,
+  SelectInput,
+  SubmitButton,
+  TextArea,
+  TextInput,
+} from "../form-controls";
 import ItemGrid from "../item-grid";
 import { CreateButton, ModalForm, PanelTitle } from "./catalog-layout";
 
@@ -78,25 +86,21 @@ function CreditPackageFormFields({ form, setForm }) {
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Creditos que recibe">
-          <TextInput
-            type="number"
+          <FormattedNumberInput
             min="1"
             value={form.credits}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, credits: event.target.value }))
-            }
+            onValueChange={(credits) => setForm((current) => ({ ...current, credits }))}
             required
           />
         </Field>
         <Field label="Costo en puntos">
-          <TextInput
-            type="number"
+          <FormattedNumberInput
             min="1"
-            step="0.01"
             value={form.pointsCost}
-            onChange={(event) =>
-              setForm((current) => ({ ...current, pointsCost: event.target.value }))
+            onValueChange={(pointsCost) =>
+              setForm((current) => ({ ...current, pointsCost }))
             }
+            allowDecimals
             required
           />
         </Field>

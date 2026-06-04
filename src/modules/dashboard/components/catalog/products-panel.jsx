@@ -1,6 +1,14 @@
-import { IconPackage } from "@tabler/icons-react";
+import { IconInfinity, IconPackage } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
-import { Field, PanelHeader, SelectInput, SubmitButton, TextArea, TextInput } from "../form-controls";
+import {
+  Field,
+  FormattedNumberInput,
+  PanelHeader,
+  SelectInput,
+  SubmitButton,
+  TextArea,
+  TextInput,
+} from "../form-controls";
 import ItemGrid from "../item-grid";
 import { CreateButton, ModalForm, PanelTitle } from "./catalog-layout";
 import { getProductCardDetails } from "./catalog-formatters";
@@ -41,7 +49,10 @@ export default function ProductsPanel({
             detail={getProductCardDetails(product)}
             imageUrl={product.imageUrl}
             featured={product.featured}
-            unavailable={product.stock <= 0 || product.status !== "active"}
+            unavailable={
+              (!product.infiniteStock && product.stock <= 0) ||
+              product.status !== "active"
+            }
             icon={<IconPackage size={42} />}
             onEdit={() => onEdit(product)}
             onDelete={() => onDelete(product)}
@@ -86,23 +97,14 @@ function ProductFormFields({ form, setForm }) {
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Precio">
-          <TextInput
-            type="number"
+          <FormattedNumberInput
             min="0"
             value={form.price}
-            onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
+            onValueChange={(price) => setForm((current) => ({ ...current, price }))}
             required
           />
         </Field>
-        <Field label="Stock">
-          <TextInput
-            type="number"
-            min="0"
-            value={form.stock}
-            onChange={(event) => setForm((current) => ({ ...current, stock: event.target.value }))}
-            required
-          />
-        </Field>
+        <StockField form={form} setForm={setForm} />
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Categoria">
@@ -148,5 +150,42 @@ function ProductFormFields({ form, setForm }) {
         <StreamAlertFields form={form} setForm={setForm} />
       */}
     </div>
+  );
+}
+
+function StockField({ form, setForm }) {
+  return (
+    <Field label="Stock">
+      <div className="grid gap-2">
+        <TextInput
+          type="number"
+          min="0"
+          value={form.stock}
+          disabled={form.infiniteStock}
+          onChange={(event) =>
+            setForm((current) => ({ ...current, stock: event.target.value }))
+          }
+          required
+        />
+        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/70 px-3 py-2 text-sm font-bold text-neutral-300 transition hover:border-red-300/25 hover:bg-white/[0.03]">
+          <span className="inline-flex items-center gap-2">
+            <IconInfinity size={17} className="text-red-100" />
+            Stock infinito
+          </span>
+          <input
+            type="checkbox"
+            checked={form.infiniteStock}
+            onChange={(event) =>
+              setForm((current) => ({
+                ...current,
+                infiniteStock: event.target.checked,
+                stock: event.target.checked ? current.stock || "0" : current.stock,
+              }))
+            }
+            className="size-4 accent-red-500"
+          />
+        </label>
+      </div>
+    </Field>
   );
 }
