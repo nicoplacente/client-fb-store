@@ -8,10 +8,10 @@ export function buildProductPayload(productForm) {
     status: productForm.status,
     featured: productForm.featured,
     rewardEffectType: productForm.rewardEffectType,
-    rewardEffectValue: productForm.rewardEffectType
+    rewardEffectValue: productForm.rewardEffectType === "stream_special_hour"
       ? productForm.rewardEffectValue
       : "",
-    rewardEffectDurationMinutes: productForm.rewardEffectType
+    rewardEffectDurationMinutes: productForm.rewardEffectType === "stream_special_hour"
       ? Number(productForm.rewardEffectDurationMinutes || 60)
       : "",
     alertEnabled: false,

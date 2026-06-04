@@ -207,7 +207,13 @@ function filterProducts(products, category, query) {
 
       return matchesCategory && matchesQuery;
     })
-    .toSorted((a, b) => Number(b.featured) - Number(a.featured));
+    .toSorted((a, b) => {
+      const featuredOrder = Number(b.featured) - Number(a.featured);
+
+      if (featuredOrder !== 0) return featuredOrder;
+
+      return Number(b.price || 0) - Number(a.price || 0);
+    });
 }
 
 async function confirmProductRedemption({

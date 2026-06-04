@@ -1,6 +1,14 @@
 import { IconPackage } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
-import { Field, PanelHeader, SelectInput, SubmitButton, TextArea, TextInput } from "../form-controls";
+import {
+  Field,
+  FormattedNumberInput,
+  PanelHeader,
+  SelectInput,
+  SubmitButton,
+  TextArea,
+  TextInput,
+} from "../form-controls";
 import ItemGrid from "../item-grid";
 import { CreateButton, ModalForm, PanelTitle } from "./catalog-layout";
 import { getProductCardDetails } from "./catalog-formatters";
@@ -86,11 +94,10 @@ function ProductFormFields({ form, setForm }) {
       </Field>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Precio">
-          <TextInput
-            type="number"
+          <FormattedNumberInput
             min="0"
             value={form.price}
-            onChange={(event) => setForm((current) => ({ ...current, price: event.target.value }))}
+            onValueChange={(price) => setForm((current) => ({ ...current, price }))}
             required
           />
         </Field>

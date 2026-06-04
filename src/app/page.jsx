@@ -1,5 +1,8 @@
 import SectionContainer from "@/modules/ui/section-container";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 export const metadata = {
   title: {
     absolute: "FrancoBertello74 Store",
@@ -40,8 +43,8 @@ export default function Home() {
             height="701"
             src="https://kick.com/francobertello74"
             title="FrancoBertello74"
-            loading="lazy"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            loading="eager"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; storage-access; web-share"
             referrerPolicy="strict-origin-when-cross-origin"
             allowFullScreen
           ></iframe>

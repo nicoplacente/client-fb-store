@@ -1,6 +1,14 @@
 import { IconGift } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
-import { Field, PanelHeader, SelectInput, SubmitButton, TextArea, TextInput } from "../form-controls";
+import {
+  Field,
+  FormattedNumberInput,
+  PanelHeader,
+  SelectInput,
+  SubmitButton,
+  TextArea,
+  TextInput,
+} from "../form-controls";
 import ItemGrid from "../item-grid";
 import { CreateButton, ModalForm, PanelTitle } from "./catalog-layout";
 import ImageInput from "./image-input";
@@ -72,15 +80,11 @@ function GiveawayFormFields({ form, setForm }) {
         />
       </Field>
       <Field label="Costo para participar (creditos)">
-        <TextInput
-          type="number"
+        <FormattedNumberInput
           min="0"
-          step="1"
           value={form.entryCost}
           placeholder="0"
-          onChange={(event) =>
-            setForm((current) => ({ ...current, entryCost: event.target.value }))
-          }
+          onValueChange={(entryCost) => setForm((current) => ({ ...current, entryCost }))}
         />
       </Field>
       <Field label="Descripcion">

@@ -7,6 +7,10 @@ const rewardEffectLabels = {
 };
 
 export function formatProductRewardEffect(product) {
+  if (product.rewardEffectType === "restore_stream_streak") {
+    return "Recupera racha perdida";
+  }
+
   if (product.rewardEffectType !== "stream_special_hour") return "";
 
   const label = rewardEffectLabels[product.rewardEffectValue] || "Hora especial";
