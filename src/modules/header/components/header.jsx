@@ -283,10 +283,10 @@ function MobileHeaderMenu({
           <div className="mt-5 grid gap-3">
             <Link
               href="/profile"
-              className="flex items-center gap-3 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-100 transition hover:bg-red-500/15"
+              className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-start gap-3 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/40"
             >
-              <span className="inline-flex size-10 items-center justify-center rounded-md bg-red-500/15">
-                <IconUser size={22} />
+              <span className="inline-flex size-8 shrink-0 items-center justify-center">
+                <IconUser size={18} />
               </span>
               <span className="grid">
                 <span className="text-xs text-red-200/70">Perfil</span>
