@@ -21,6 +21,13 @@ export const menuItems = [
   { name: "Tienda", icon: <IconCoinBitcoin size={20} />, href: "/market" },
   { name: "Sorteos", icon: <IconGift size={20} />, href: "/gifts" },
   { name: "Soporte", icon: <IconHelpHexagon size={20} />, href: "/support" },
+  {
+    name: "Codeluxe",
+    imageSrc: "/logo-cd-3d.webp",
+    href: "https://codeluxe.tech",
+    external: true,
+    accent: "blue",
+  },
 ];
 
 export const legalMenuItems = [

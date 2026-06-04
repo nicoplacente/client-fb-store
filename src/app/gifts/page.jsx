@@ -66,7 +66,7 @@ export default function GiftsPage() {
       const data = await getGiveaways();
       setGiveaways(data);
     } catch {
-      setError(err.message || "No se pudieron cargar los sorteos");
+      setError("No se pudieron cargar los sorteos");
       setGiveaways([]);
     } finally {
       if (showLoading) setLoading(false);

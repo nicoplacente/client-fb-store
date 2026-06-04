@@ -385,7 +385,7 @@ function ProfileInfoForm({ profile, isPending, onSubmit, onFieldChange }) {
       <div className="mt-10 flex justify-center">
         <button
           disabled={isPending}
-          className="inline-flex min-w-32 items-center justify-center cursor-pointer gap-2 rounded-md bg-red-600/70 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <IconDeviceFloppy size={18} />
           Guardar

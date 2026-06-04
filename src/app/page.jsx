@@ -95,7 +95,7 @@ export default function Home() {
 
       <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-white/[0.08] bg-[#121212]/88 p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)] sm:flex-row sm:items-center">
         <div>
-          <p className="text-xs font-black uppercase text-red-300">Extension</p>
+          <p className="text-xs font-black uppercase text-red-300">Extensión</p>
           <h2 className="mt-1 text-xl font-black text-white">
             Suma la experiencia FrancoBertello Points a tu Navegador.
           </h2>
@@ -108,7 +108,7 @@ export default function Home() {
           target="_blank"
         >
           <IconBrandChrome size={18} />
-          Instalar extension
+          Instalar extensión
         </a>
       </div>
       <SpotlightGroup className="grid gap-4 md:grid-cols-3">

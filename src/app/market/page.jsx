@@ -83,7 +83,7 @@ export default function MarketPage() {
       setProducts(productData);
       setCreditPackages(creditPackageData);
     } catch {
-      setError(err.message || "No se pudo cargar la tienda");
+      setError("No se pudo cargar la tienda");
       setProducts([]);
       setCreditPackages([]);
     } finally {
