@@ -50,22 +50,24 @@ export default function MarketPage() {
       products
         .map(normalizeProduct)
         .filter((product) => product.id && product.status !== "hidden"),
-    [products]
+    [products],
   );
   const normalizedCreditPackages = useMemo(
     () =>
       creditPackages
         .map(normalizeCreditPackage)
         .filter((creditPackage) => creditPackage.id && creditPackage.enabled),
-    [creditPackages]
+    [creditPackages],
   );
   const categories = useMemo(() => {
-    const names = new Set(normalizedProducts.map((product) => product.category));
+    const names = new Set(
+      normalizedProducts.map((product) => product.category),
+    );
     return ["all", ...names];
   }, [normalizedProducts]);
   const filteredProducts = useMemo(
     () => filterProducts(normalizedProducts, category, deferredQuery),
-    [category, deferredQuery, normalizedProducts]
+    [category, deferredQuery, normalizedProducts],
   );
 
   const loadMarket = useCallback(async ({ showLoading = true } = {}) => {
@@ -80,7 +82,7 @@ export default function MarketPage() {
 
       setProducts(productData);
       setCreditPackages(creditPackageData);
-    } catch (err) {
+    } catch {
       setError(err.message || "No se pudo cargar la tienda");
       setProducts([]);
       setCreditPackages([]);
@@ -133,7 +135,7 @@ export default function MarketPage() {
         await purchaseCreditPackage(action.item.id);
         toast.success("Creditos acreditados");
         await Promise.resolve(refreshUser?.()).catch(() => {});
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo completar la operacion");
 
         if (action.type === "redeem") {
@@ -184,7 +186,7 @@ export default function MarketPage() {
             action={pendingAction}
             onQuantityChange={(quantity) =>
               setPendingAction((current) =>
-                current ? { ...current, quantity } : current
+                current ? { ...current, quantity } : current,
               )
             }
           />
@@ -199,7 +201,8 @@ function filterProducts(products, category, query) {
 
   return products
     .filter((product) => {
-      const matchesCategory = category === "all" || product.category === category;
+      const matchesCategory =
+        category === "all" || product.category === category;
       const matchesQuery =
         !term ||
         product.title.toLowerCase().includes(term) ||
@@ -235,8 +238,8 @@ async function confirmProductRedemption({
   if (result?.product) {
     setProducts((current) =>
       current.map((item) =>
-        Number(item.id) === Number(result.product.id) ? result.product : item
-      )
+        Number(item.id) === Number(result.product.id) ? result.product : item,
+      ),
     );
   } else {
     await loadMarket({ showLoading: false });
@@ -247,11 +250,17 @@ async function confirmProductRedemption({
 }
 
 function getRedemptionSuccessMessage(result, product) {
-  if (result?.restoredStreak || product.rewardEffectType === "restore_stream_streak") {
+  if (
+    result?.restoredStreak ||
+    product.rewardEffectType === "restore_stream_streak"
+  ) {
     return "Racha recuperada";
   }
 
-  if (result?.specialHour || product.rewardEffectType === "stream_special_hour") {
+  if (
+    result?.specialHour ||
+    product.rewardEffectType === "stream_special_hour"
+  ) {
     return "Hora activada";
   }
 

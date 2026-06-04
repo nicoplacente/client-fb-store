@@ -22,7 +22,6 @@ export default function useVerifyListener(onClose) {
         });
 
         if (!res.ok) {
-          console.error("Error en complete-verify", await res.json());
           toast.error("No se pudo completar la verificacion");
           return;
         }
@@ -32,8 +31,7 @@ export default function useVerifyListener(onClose) {
 
         toast.success("Sesion iniciada");
         if (onClose) onClose();
-      } catch (err) {
-        console.error("Error en complete-verify:", err);
+      } catch {
         toast.error("No se pudo iniciar sesion");
       }
     };

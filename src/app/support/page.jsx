@@ -38,7 +38,7 @@ export default function SupportPage() {
       tickets
         .map(normalizeTicket)
         .filter((ticket) => ticket.id && ticket.category !== "market"),
-    [tickets]
+    [tickets],
   );
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export default function SupportPage() {
           setTickets((current) => [result.ticket, ...current]);
           setExpandedTicketId(result.ticket.id);
         }
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo enviar la consulta");
       }
     });
@@ -109,10 +109,12 @@ export default function SupportPage() {
         setReplyDrafts((current) => ({ ...current, [ticket.id]: "" }));
         if (result?.ticket) {
           setTickets((current) =>
-            current.map((item) => (item.id === ticket.id ? result.ticket : item))
+            current.map((item) =>
+              item.id === ticket.id ? result.ticket : item,
+            ),
           );
         }
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo responder");
       }
     });
@@ -124,7 +126,9 @@ export default function SupportPage() {
         <p className="text-sm font-semibold uppercase text-red-300/80">
           Soporte
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Centro de ayuda</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+          Centro de ayuda
+        </h1>
         <p className="mt-3 max-w-2xl text-neutral-400">
           Enviá consultas sobre canjes, créditos, sorteos o problemas de cuenta.
         </p>
@@ -140,7 +144,9 @@ export default function SupportPage() {
               <IconHeadset size={22} />
             </span>
             <div>
-              <h2 className="text-xl font-semibold text-white">Nueva consulta</h2>
+              <h2 className="text-xl font-semibold text-white">
+                Nueva consulta
+              </h2>
               <p className="text-sm text-neutral-500">
                 {user
                   ? "Te respondemos desde el backend configurado."
@@ -151,7 +157,8 @@ export default function SupportPage() {
 
           {!user ? (
             <div className="mb-5 rounded-md border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium text-red-100">
-              Para enviar una consulta necesitas iniciar sesion. Asi soporte puede responderte en tu ticket.
+              Para enviar una consulta necesitas iniciar sesion. Asi soporte
+              puede responderte en tu ticket.
             </div>
           ) : null}
 
@@ -170,7 +177,9 @@ export default function SupportPage() {
               Categoría
               <select
                 value={form.category}
-                onChange={(event) => updateField("category", event.target.value)}
+                onChange={(event) =>
+                  updateField("category", event.target.value)
+                }
                 className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
                 disabled={!user || isPending}
               >
@@ -227,7 +236,7 @@ export default function SupportPage() {
                     type="button"
                     onClick={() =>
                       setExpandedTicketId((current) =>
-                        current === ticket.id ? null : ticket.id
+                        current === ticket.id ? null : ticket.id,
                       )
                     }
                     className="flex w-full items-start justify-between gap-3 text-left"
@@ -279,7 +288,7 @@ export default function SupportPage() {
 function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
   const hasInitialMessage = ticket.messages.some(
     (message) =>
-      message.senderRole === "user" && message.message === ticket.message
+      message.senderRole === "user" && message.message === ticket.message,
   );
   const messages = hasInitialMessage
     ? ticket.messages
@@ -301,14 +310,18 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
           return (
             <div
               key={message.id}
-                  className={`rounded-md border p-3 ${
+              className={`rounded-md border p-3 ${
                 fromAdmin
                   ? "border-red-400/20 bg-red-500/10"
                   : "ml-auto border-white/10 bg-neutral-950/70"
               } max-w-full sm:max-w-[90%]`}
             >
               <p
-                className={fromAdmin ? "text-xs text-red-200" : "text-xs text-neutral-500"}
+                className={
+                  fromAdmin
+                    ? "text-xs text-red-200"
+                    : "text-xs text-neutral-500"
+                }
               >
                 {fromAdmin ? "Soporte" : "Vos"}
               </p>

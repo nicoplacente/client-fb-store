@@ -64,7 +64,7 @@ export default function ProductCard({
         )}
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-between gap-4 pt-4">
+      <div className="flex w-full flex-1 flex-col items-center justify-between gap-4 pt-4">
         <ProductInfo product={product} />
         <ProductPrice
           product={product}

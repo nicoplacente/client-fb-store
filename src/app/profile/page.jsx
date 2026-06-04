@@ -73,19 +73,24 @@ export default function ProfilePage() {
         setLoadingSubscriptions(true);
         setLoadingLevelStats(true);
 
-        const [data, localData, ticketData, subscriptions, stats] = await Promise.all([
-          getMyProductRedemptions().catch(() => []),
-          Promise.resolve(getLocalRedemptions()),
-          getDashboardTicketRedemptions(user),
-          getMySubscriptions().catch(() => ({
-            subscription: null,
-            timeline: [],
-          })),
-          apiRequest(envConfig.API_STATS_ME).catch(() => ({ data: emptyLevelStats })),
-        ]);
+        const [data, localData, ticketData, subscriptions, stats] =
+          await Promise.all([
+            getMyProductRedemptions().catch(() => []),
+            Promise.resolve(getLocalRedemptions()),
+            getDashboardTicketRedemptions(user),
+            getMySubscriptions().catch(() => ({
+              subscription: null,
+              timeline: [],
+            })),
+            apiRequest(envConfig.API_STATS_ME).catch(() => ({
+              data: emptyLevelStats,
+            })),
+          ]);
 
         if (!cancelled) {
-          setRedemptions(mergeRedemptions(mergeRedemptions(data, ticketData), localData));
+          setRedemptions(
+            mergeRedemptions(mergeRedemptions(data, ticketData), localData),
+          );
           setSubscriptionsData(subscriptions);
           setLevelStats(normalizeLevelStats(stats.data));
         }
@@ -114,13 +119,16 @@ export default function ProfilePage() {
     };
   }, [user]);
 
-  const displayName = useMemo(() => user?.username || "usuario", [user?.username]);
+  const displayName = useMemo(
+    () => user?.username || "usuario",
+    [user?.username],
+  );
   const normalizedRedemptions = useMemo(
     () =>
       redemptions
         .map(normalizeProductRedemption)
         .filter((redemption) => redemption.id),
-    [redemptions]
+    [redemptions],
   );
 
   function updateField(field, value) {
@@ -138,8 +146,8 @@ export default function ProfilePage() {
         });
         toast.success("Perfil actualizado");
         await Promise.resolve(refreshUser?.()).catch(() => {});
-      } catch (err) {
-        toast.error(err.message || "No se pudo guardar el perfil");
+      } catch {
+        toast.error("No se pudo guardar el perfil");
       }
     });
   }
@@ -153,8 +161,8 @@ export default function ProfilePage() {
       toast.success("Premio de sub reclamado");
       const subscriptions = await getMySubscriptions();
       setSubscriptionsData(subscriptions);
-    } catch (err) {
-      toast.error(err.message || "No se pudo reclamar el premio de sub");
+    } catch {
+      toast.error("No se pudo reclamar el premio de sub");
     } finally {
       setClaimingRewardId(null);
     }
@@ -243,8 +251,12 @@ function ProfileXpCard({ stats, loading }) {
             </span>
           </div>
           <div>
-            <p className="text-xs font-bold uppercase text-neutral-500">Mi nivel</p>
-            <h2 className="mt-1 text-2xl font-black text-white">{stats.levelTier}</h2>
+            <p className="text-xs font-bold uppercase text-neutral-500">
+              Mi nivel
+            </p>
+            <h2 className="mt-1 text-2xl font-black text-white">
+              {stats.levelTier}
+            </h2>
             <p className="mt-1 text-sm font-bold text-violet-200">
               {formatCompactNumber(stats.xp)} XP acumulado
             </p>
@@ -273,7 +285,10 @@ function ProfileXpCard({ stats, loading }) {
           </div>
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-bold text-neutral-400">
             <span>{progress}% completado</span>
-            <span>{formatCompactNumber(stats.levelRemainingXp)} XP para el nivel {stats.level + 1}</span>
+            <span>
+              {formatCompactNumber(stats.levelRemainingXp)} XP para el nivel{" "}
+              {stats.level + 1}
+            </span>
           </div>
         </div>
       </div>
@@ -294,7 +309,9 @@ function ProfileXpCard({ stats, loading }) {
                 <p className="text-[11px] font-bold uppercase text-neutral-500">
                   {source.label}
                 </p>
-                <p className="truncate text-sm font-black text-white">{source.value}</p>
+                <p className="truncate text-sm font-black text-white">
+                  {source.value}
+                </p>
               </div>
             </div>
           );
@@ -335,15 +352,26 @@ function ProfileInfoForm({ profile, isPending, onSubmit, onFieldChange }) {
     ["province", "Provincia", <IconMapPin key="province" size={18} />],
     ["direction", "Direccion", <IconMapPin key="direction" size={18} />],
     ["postalCode", "Codigo Postal", <IconMapPin key="postalCode" size={18} />],
-    ["instagram", "Usuario de Twitter/X", <IconBrandX key="instagram" size={18} />],
-    ["discord", "Usuario de Discord", <IconBrandDiscord key="discord" size={18} />],
+    [
+      "instagram",
+      "Usuario de Twitter/X",
+      <IconBrandX key="instagram" size={18} />,
+    ],
+    [
+      "discord",
+      "Usuario de Discord",
+      <IconBrandDiscord key="discord" size={18} />,
+    ],
   ];
 
   return (
     <form onSubmit={onSubmit}>
       <div className="grid gap-5 lg:grid-cols-2">
         {fields.map(([field, label, icon]) => (
-          <div key={field} className={field === "discord" ? "lg:col-span-2" : undefined}>
+          <div
+            key={field}
+            className={field === "discord" ? "lg:col-span-2" : undefined}
+          >
             <ProfileField
               label={label}
               value={profile[field]}
@@ -357,7 +385,7 @@ function ProfileInfoForm({ profile, isPending, onSubmit, onFieldChange }) {
       <div className="mt-10 flex justify-center">
         <button
           disabled={isPending}
-          className="inline-flex min-w-32 items-center justify-center gap-2 rounded-md bg-green-600/70 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-green-500 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-w-32 items-center justify-center cursor-pointer gap-2 rounded-md bg-red-600/70 px-5 py-2.5 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <IconDeviceFloppy size={18} />
           Guardar
@@ -375,8 +403,9 @@ async function getDashboardTicketRedemptions(user) {
       .filter((ticket) => {
         const sameUser =
           Number(ticket.user?.id) === Number(user?.id) ||
-          String(ticket.user?.username || ticket.username || "").toLowerCase() ===
-            String(user?.username || "").toLowerCase();
+          String(
+            ticket.user?.username || ticket.username || "",
+          ).toLowerCase() === String(user?.username || "").toLowerCase();
 
         return ticket.category === "market" && sameUser;
       })

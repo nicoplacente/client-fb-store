@@ -46,7 +46,7 @@ export default function useVerifyToken() {
 
       if (!viewerId) {
         setError(
-          "No se encontro el viewerId de la extension. Instala o recarga la extension."
+          "No se encontro el viewerId de la extension. Instala o recarga la extension.",
         );
         return;
       }
@@ -63,14 +63,13 @@ export default function useVerifyToken() {
       const data = await res.json();
 
       if (!res.ok || data.error) {
-        setError(data.error || "Error generando token");
+        setError("Error generando token");
         return;
       }
 
       setToken(data.token);
       socket.emit("join", data.token);
-    } catch (err) {
-      console.error("Error generando token:", err);
+    } catch {
       setError("Error generando token");
     }
   }

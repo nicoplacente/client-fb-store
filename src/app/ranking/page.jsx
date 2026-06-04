@@ -87,7 +87,6 @@ export default function RankingPage() {
       const data = await res.json();
       setRanking(Array.isArray(data) ? data : data.ranking || []);
     } catch (error) {
-      console.error(error);
       setRanking([]);
     }
   }, []);
@@ -109,20 +108,22 @@ export default function RankingPage() {
     if (!term) return ranking;
 
     return ranking.filter((user) =>
-      String(user.username || "").toLowerCase().includes(term)
+      String(user.username || "")
+        .toLowerCase()
+        .includes(term),
     );
   }, [deferredSearchTerm, ranking]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredRanking.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredRanking.length / ITEMS_PER_PAGE),
   );
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedRanking = useMemo(
     () => filteredRanking.slice(startIndex, endIndex),
-    [endIndex, filteredRanking, startIndex]
+    [endIndex, filteredRanking, startIndex],
   );
 
   return (
@@ -131,20 +132,17 @@ export default function RankingPage() {
         <p className="text-sm font-semibold uppercase text-red-300/80">
           Ranking
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Tabla de puntos</h1>
+        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+          Tabla de puntos
+        </h1>
       </div>
 
       <div className="overflow-x-auto rounded-xl ">
-        <table
-          className="mx-auto w-full min-w-[760px] table border-separate overflow-hidden [border-spacing:0_4px] sm:min-w-[880px]"
-        >
+        <table className="mx-auto w-full min-w-[760px] table border-separate overflow-hidden [border-spacing:0_4px] sm:min-w-[880px]">
           <thead className="bg-neutral-900">
             <tr>
               <TH>
-                <RankingSearchBar
-                  value={searchTerm}
-                  onSearch={setSearchTerm}
-                />
+                <RankingSearchBar value={searchTerm} onSearch={setSearchTerm} />
               </TH>
               <TH>Watchtime</TH>
               <TH>Puntos</TH>
@@ -179,9 +177,7 @@ export default function RankingPage() {
                   <tr
                     key={user.id || user._id || user.username}
                     className={`w-full bg-gradient-to-r from-neutral-800/90 to-neutral-900/70 shadow-2xl [&>td]:px-2 [&>td]:text-center ${
-                      isPodium
-                        ? "text-base [&>td]:py-4"
-                        : "text-sm [&>td]:py-3"
+                      isPodium ? "text-base [&>td]:py-4" : "text-sm [&>td]:py-3"
                     }`}
                   >
                     <td className="flex items-center gap-2">

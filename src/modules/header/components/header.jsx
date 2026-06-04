@@ -83,8 +83,8 @@ export default function Header() {
             setHasLoadedPoints(true);
           }
         }
-      } catch (err) {
-        console.error("Error obteniendo puntos:", err);
+      } catch {
+        console.error("Error obteniendo puntos");
       } finally {
         isFetchingPointsRef.current = false;
 
@@ -198,9 +198,9 @@ export default function Header() {
 
           <Link
             href="/profile"
-            className="flex shrink-0 items-center gap-1 rounded-lg border border-red-500/50 bg-gradient-to-br from-neutral-900 via-primary/20 to-neutral-900 px-3 py-2 font-mono font-semibold text-red-500 shadow-[4px_4px_10px_rgba(0,0,0,0.4)] saturate-150 transition-all duration-300 hover:translate-y-0.5 hover:saturate-200 sm:px-6"
+            className="gamer-border-link inline-flex min-h-12 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/40"
           >
-            <IconUser />
+            <IconUser size={18} />
             <span className="max-w-28 truncate sm:max-w-44">
               {user.username}
             </span>
@@ -213,7 +213,6 @@ export default function Header() {
       )}
 
       <div className="ml-auto flex items-center gap-2 lg:hidden">
-        {!user ? <HandleShowLogin variant="compact" /> : null}
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -328,7 +327,11 @@ function MobileHeaderMenu({
               </div>
             </div>
           </div>
-        ) : null}
+        ) : (
+          <div className="mt-5">
+            <HandleShowLogin variant="menu" />
+          </div>
+        )}
 
         <nav className="mt-5 grid gap-2">
           {visibleMenuItems.map((item) => {

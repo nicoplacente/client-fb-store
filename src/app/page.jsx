@@ -97,12 +97,12 @@ export default function Home() {
         <div>
           <p className="text-xs font-black uppercase text-red-300">Extension</p>
           <h2 className="mt-1 text-xl font-black text-white">
-            Suma la experiencia Bertellitos a Chrome
+            Suma la experiencia FrancoBertello Points a tu Navegador.
           </h2>
         </div>
         <a
           href="https://chromewebstore.google.com/detail/bertellitos/aeghpachelnjfcckdhdgeegpacgbnpng?hl=es-419"
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-400/35 bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/12 focus:outline-none focus:ring-2 focus:ring-red-300/40 sm:w-fit"
+          className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/40 sm:w-fit"
           aria-label="Instalar extensión"
           rel="noopener noreferrer nofollow"
           target="_blank"
@@ -116,23 +116,26 @@ export default function Home() {
           icon={IconShoppingBag}
           title="Canjes directos"
           text="Productos, codigos y beneficios organizados para encontrar rapido lo que queres desbloquear."
+          href="/market"
         />
         <HomeFeature
           icon={IconTrophy}
           title="Competencia viva"
           text="Ranking, puntos y creditos conectados a la actividad real de la comunidad."
+          href="/ranking"
         />
         <HomeFeature
           icon={IconGift}
           title="Sorteos activos"
           text="Participa con creditos, revisa estados y consulta resultados desde el mismo ecosistema."
+          href="/gifts"
         />
       </SpotlightGroup>
     </SectionContainer>
   );
 }
 
-function HomeFeature({ icon: Icon, title, text }) {
+function HomeFeature({ icon: Icon, title, text, href }) {
   const hueByTitle = {
     "Canjes directos": 165,
     "Competencia viva": 291.34,
@@ -153,12 +156,13 @@ function HomeFeature({ icon: Icon, title, text }) {
           {text}
         </p>
       </div>
-      <span
+      <Link
+        href={href}
         data-spotlight-cta
         className="spotlight-cta mt-auto block rounded-[10px] px-4 py-3 text-center text-sm font-black"
       >
         Explorar
-      </span>
+      </Link>
     </SpotlightCard>
   );
 }

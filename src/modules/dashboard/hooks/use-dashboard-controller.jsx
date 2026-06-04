@@ -65,7 +65,8 @@ export default function useDashboardController() {
   const [streamRewards, setStreamRewards] = useState(null);
   const [liveStatus, setLiveStatus] = useState(null);
   const [productForm, setProductForm] = useState(emptyProduct);
-  const [creditPackageForm, setCreditPackageForm] = useState(emptyCreditPackage);
+  const [creditPackageForm, setCreditPackageForm] =
+    useState(emptyCreditPackage);
   const [giveawayForm, setGiveawayForm] = useState(emptyGiveaway);
   const [selectedProductId, setSelectedProductId] = useState(null);
   const [selectedCreditPackageId, setSelectedCreditPackageId] = useState(null);
@@ -82,33 +83,33 @@ export default function useDashboardController() {
 
   const normalizedProducts = useMemo(
     () => products.map(normalizeProduct).filter((product) => product.id),
-    [products]
+    [products],
   );
   const normalizedCreditPackages = useMemo(
     () =>
       creditPackages
         .map(normalizeCreditPackage)
         .filter((creditPackage) => creditPackage.id),
-    [creditPackages]
+    [creditPackages],
   );
   const normalizedGiveaways = useMemo(
     () => giveaways.map(normalizeGiveaway).filter((giveaway) => giveaway.id),
-    [giveaways]
+    [giveaways],
   );
   const normalizedTickets = useMemo(
     () => tickets.map(normalizeTicket).filter((ticket) => ticket.id),
-    [tickets]
+    [tickets],
   );
   const redemptionTickets = useMemo(
     () => normalizedTickets.filter((ticket) => ticket.category === "market"),
-    [normalizedTickets]
+    [normalizedTickets],
   );
   const openSupportTickets = useMemo(
     () =>
       normalizedTickets.filter(
-        (ticket) => ticket.category !== "market" && ticket.status !== "closed"
+        (ticket) => ticket.category !== "market" && ticket.status !== "closed",
       ),
-    [normalizedTickets]
+    [normalizedTickets],
   );
   const stats = useMemo(
     () => ({
@@ -116,8 +117,9 @@ export default function useDashboardController() {
       credits: normalizedCreditPackages.length,
       giveaways: normalizedGiveaways.length,
       tickets: openSupportTickets.length,
-      purchases: redemptionTickets.filter((ticket) => ticket.status !== "closed")
-        .length,
+      purchases: redemptionTickets.filter(
+        (ticket) => ticket.status !== "closed",
+      ).length,
     }),
     [
       normalizedProducts,
@@ -125,7 +127,7 @@ export default function useDashboardController() {
       normalizedGiveaways,
       openSupportTickets,
       redemptionTickets,
-    ]
+    ],
   );
 
   async function loadDashboard({ showLoading = true } = {}) {
@@ -142,7 +144,7 @@ export default function useDashboardController() {
       if (data.streamRewards) setStreamRewards(data.streamRewards);
       if (data.liveStatus) setLiveStatus(data.liveStatus);
       trackDashboardNotifications(data.ticketData);
-    } catch (err) {
+    } catch {
       setError(err.message || "No se pudo cargar el dashboard");
     } finally {
       if (showLoading) setLoading(false);
@@ -211,7 +213,7 @@ export default function useDashboardController() {
 
         resetProductForm();
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo guardar el producto");
       }
     });
@@ -222,7 +224,11 @@ export default function useDashboardController() {
 
     const payload = buildCreditPackagePayload(creditPackageForm);
 
-    if (!payload.name || Number.isNaN(payload.credits) || Number.isNaN(payload.pointsCost)) {
+    if (
+      !payload.name ||
+      Number.isNaN(payload.credits) ||
+      Number.isNaN(payload.pointsCost)
+    ) {
       toast.error("Completa nombre, creditos y costo");
       return;
     }
@@ -239,7 +245,7 @@ export default function useDashboardController() {
 
         resetCreditPackageForm();
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo guardar el pack");
       }
     });
@@ -280,7 +286,7 @@ export default function useDashboardController() {
 
         resetGiveawayForm();
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo guardar el sorteo");
       }
     });
@@ -293,7 +299,7 @@ export default function useDashboardController() {
         toast.success("Producto eliminado");
         if (selectedProductId === product.id) resetProductForm();
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo eliminar el producto");
       }
     });
@@ -321,7 +327,7 @@ export default function useDashboardController() {
         toast.success("Sorteo eliminado");
         if (selectedGiveawayId === giveaway.id) resetGiveawayForm();
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo eliminar el sorteo");
       }
     });
@@ -338,7 +344,7 @@ export default function useDashboardController() {
         });
         toast.success("Ticket actualizado");
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo actualizar el ticket");
       }
     });
@@ -358,7 +364,7 @@ export default function useDashboardController() {
         setSupportReplies((current) => ({ ...current, [ticket.id]: "" }));
         toast.success("Respuesta enviada");
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo responder");
       }
     });
@@ -370,7 +376,7 @@ export default function useDashboardController() {
         await deleteSupportTicket(ticket.id);
         toast.success("Ticket eliminado");
         await loadDashboard();
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo eliminar el ticket");
       }
     });
@@ -386,7 +392,7 @@ export default function useDashboardController() {
         });
         setStreamHour(normalizeStreamHourState(data));
         toast.success("Hora especial activada");
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo activar la hora especial");
       }
     });
@@ -400,7 +406,7 @@ export default function useDashboardController() {
         });
         setStreamHour(normalizeStreamHourState(data));
         toast.success("Modo automatico activado");
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo activar el modo automatico");
       }
     });
@@ -414,7 +420,7 @@ export default function useDashboardController() {
         });
         setStreamHour(normalizeStreamHourState(data));
         toast.success("Horas especiales desactivadas");
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo desactivar la hora especial");
       }
     });
@@ -426,7 +432,7 @@ export default function useDashboardController() {
         const data = await createStreamChest();
         setStreamRewards(normalizeStreamRewardState(data));
         toast.success(data?.chest ? "Cofre activo" : "Cofre creado");
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo activar el cofre");
       }
     });
@@ -437,8 +443,10 @@ export default function useDashboardController() {
       try {
         const data = await createStreamChatReward();
         setStreamRewards(normalizeStreamRewardState(data));
-        toast.success(data?.chatReward ? "Recompensa de chat activa" : "Recompensa creada");
-      } catch (err) {
+        toast.success(
+          data?.chatReward ? "Recompensa de chat activa" : "Recompensa creada",
+        );
+      } catch {
         toast.error(err.message || "No se pudo activar la recompensa de chat");
       }
     });
@@ -504,11 +512,13 @@ export default function useDashboardController() {
       try {
         const data = await resetRankingPoints();
         toast.success(
-          `Puntos y creditos reiniciados para ${data.updated || 0} usuarios`
+          `Puntos y creditos reiniciados para ${data.updated || 0} usuarios`,
         );
         await loadDashboard();
-      } catch (err) {
-        toast.error(err.message || "No se pudieron reiniciar puntos y creditos");
+      } catch {
+        toast.error(
+          err.message || "No se pudieron reiniciar puntos y creditos",
+        );
       }
     });
   }

@@ -10,7 +10,7 @@ body {
   min-width: 0;
   scrollbar-width: thin;
   scroll-behavior: smooth;
-  scrollbar-color: #500 #000;
+  scrollbar-color: #f00 #000;
   color-scheme: dark;
 }
 
@@ -34,6 +34,98 @@ body {
 
 * {
   min-width: 0;
+}
+
+@property --gamer-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes gamer-border-spin {
+  to {
+    --gamer-angle: 360deg;
+  }
+}
+
+@keyframes gamer-border-pulse {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0.6rem rgba(255, 255, 255, 0.2),
+      0 0 1.2rem rgba(255, 0, 0, 0.28),
+      inset 0 0 0.9rem rgba(255, 0, 0, 0.12);
+  }
+
+  50% {
+    box-shadow:
+      0 0 1rem rgba(255, 255, 255, 0.38),
+      0 0 2.1rem rgba(255, 0, 0, 0.48),
+      inset 0 0 1.3rem rgba(255, 255, 255, 0.1);
+  }
+}
+
+.gamer-border-link {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  animation: gamer-border-pulse 2.4s ease-in-out infinite;
+}
+
+.gamer-border-link::before {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  content: "";
+  padding: 2px;
+  border-radius: inherit;
+  background: conic-gradient(
+    from var(--gamer-angle),
+    #ff1f1f 0deg,
+    #ffffff 54deg,
+    #080808 108deg,
+    #ff0000 162deg,
+    #ffffff 216deg,
+    #111111 288deg,
+    #ff1f1f 360deg
+  );
+  filter: blur(0.08rem);
+  animation: gamer-border-spin 2.8s linear infinite;
+  pointer-events: none;
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.gamer-border-link::after {
+  position: absolute;
+  inset: 2px;
+  z-index: -1;
+  content: "";
+  border-radius: calc(0.75rem - 2px);
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08), transparent 32%), #1a1a1a;
+}
+
+.gamer-border-link > svg {
+  position: relative;
+  z-index: 1;
+}
+
+.gamer-border-link:hover::before {
+  animation-duration: 1.45s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gamer-border-link,
+  .gamer-border-link::before {
+    animation: none;
+  }
 }
 
 @keyframes mobile-menu-backdrop-in {

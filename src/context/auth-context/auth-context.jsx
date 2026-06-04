@@ -30,8 +30,8 @@ export function AuthProvider({ children, initialUser }) {
       });
 
       linkedViewerIdRef.current = safeViewerId;
-    } catch (err) {
-      console.error("Error vinculando extension:", err);
+    } catch {
+      console.error("Error vinculando extension");
     }
   }, []);
 
@@ -45,8 +45,8 @@ export function AuthProvider({ children, initialUser }) {
       try {
         const data = await apiRequest(envConfig.API_USER);
         setUser(data.user);
-      } catch (err) {
-        console.error("Error verificando sesion:", err);
+      } catch {
+        console.error("Error verificando sesion");
         setUser(null);
       } finally {
         setLoading(false);
@@ -95,7 +95,10 @@ export function AuthProvider({ children, initialUser }) {
     window.addEventListener("kickBridgeViewerIdReady", handleViewerIdReady);
 
     return () => {
-      window.removeEventListener("kickBridgeViewerIdReady", handleViewerIdReady);
+      window.removeEventListener(
+        "kickBridgeViewerIdReady",
+        handleViewerIdReady,
+      );
     };
   }, [linkExtensionViewer, user]);
 
@@ -109,8 +112,8 @@ export function AuthProvider({ children, initialUser }) {
         method: "POST",
         skipRefresh: true,
       });
-    } catch (err) {
-      console.error("Error en logout:", err);
+    } catch {
+      console.error("Error en logout");
     } finally {
       setUser(null);
       router.replace("/");
@@ -121,8 +124,8 @@ export function AuthProvider({ children, initialUser }) {
     try {
       const data = await apiRequest(envConfig.API_USER);
       setUser(data.user);
-    } catch (err) {
-      console.error("Error refrescando usuario:", err);
+    } catch {
+      console.error("Error refrescando usuario");
     }
   };
 

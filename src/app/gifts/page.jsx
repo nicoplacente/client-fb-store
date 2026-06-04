@@ -1,6 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  useTransition,
+} from "react";
 import Image from "next/image";
 import {
   IconCalendarDue,
@@ -50,7 +56,7 @@ export default function GiftsPage() {
 
   const normalizedGiveaways = useMemo(
     () => giveaways.map(normalizeGiveaway).filter((giveaway) => giveaway.id),
-    [giveaways]
+    [giveaways],
   );
 
   const loadGiveaways = useCallback(async ({ showLoading = true } = {}) => {
@@ -59,7 +65,7 @@ export default function GiftsPage() {
       setError("");
       const data = await getGiveaways();
       setGiveaways(data);
-    } catch (err) {
+    } catch {
       setError(err.message || "No se pudieron cargar los sorteos");
       setGiveaways([]);
     } finally {
@@ -78,11 +84,11 @@ export default function GiftsPage() {
         toast.success(
           result?.alreadyJoined
             ? "Ya estabas participando"
-            : "Participacion registrada"
+            : "Participacion registrada",
         );
         await loadGiveaways({ showLoading: false });
         await Promise.resolve(refreshUser?.()).catch(() => {});
-      } catch (err) {
+      } catch {
         toast.error(err.message || "No se pudo participar");
       }
     });
@@ -101,7 +107,8 @@ export default function GiftsPage() {
               Premios en juego
             </h1>
             <p className="mt-3 max-w-2xl text-neutral-400">
-              Entra a los sorteos activos, revisa el costo de participacion y consulta ganadores desde el mismo lugar.
+              Entra a los sorteos activos, revisa el costo de participacion y
+              consulta ganadores desde el mismo lugar.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:flex">
@@ -113,7 +120,7 @@ export default function GiftsPage() {
                   (giveaway) =>
                     giveaway.status === "active" &&
                     hasStarted(giveaway.startsAt) &&
-                    !giveaway.finalizedAt
+                    !giveaway.finalizedAt,
                 ).length
               }
             />
@@ -155,8 +162,12 @@ export default function GiftsPage() {
 function HeroStat({ label, value }) {
   return (
     <div className="rounded-2xl border border-white/10 bg-black/25 px-4 py-3 shadow-inner shadow-black/20">
-      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">{label}</p>
-      <strong className="mt-1 block text-2xl font-black text-white">{value}</strong>
+      <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+        {label}
+      </p>
+      <strong className="mt-1 block text-2xl font-black text-white">
+        {value}
+      </strong>
     </div>
   );
 }
@@ -168,7 +179,9 @@ function StatePanel({ text, tone = "default" }) {
       : "border-white/10 bg-neutral-950/70 text-neutral-400";
 
   return (
-    <div className={`rounded-2xl border p-10 text-center shadow-xl shadow-black/15 ${classes}`}>
+    <div
+      className={`rounded-2xl border p-10 text-center shadow-xl shadow-black/15 ${classes}`}
+    >
       {text}
     </div>
   );
@@ -178,11 +191,21 @@ const CARD_HUES = [165, 291.34, 338.69];
 const CARD_SATURATIONS = ["82.26%", "95.9%", "100%"];
 const CARD_LIGHTNESSES = ["51.37%", "61.76%", "48.04%"];
 
-function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin, index = 0 }) {
+function GiveawayCard({
+  giveaway,
+  onOpenResult,
+  isPending,
+  onJoin,
+  index = 0,
+}) {
   const started = hasStarted(giveaway.startsAt);
-  const isFinalized = giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+  const isFinalized =
+    giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
   const canJoin =
-    giveaway.status === "active" && started && !isFinalized && !giveaway.hasJoined;
+    giveaway.status === "active" &&
+    started &&
+    !isFinalized &&
+    !giveaway.hasJoined;
   const entryLabel =
     giveaway.entryCost > 0
       ? `${formatNumber(giveaway.entryCost)} creditos`
@@ -245,10 +268,12 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin, index = 0 }) 
                 {formatNumber(giveaway.participants)}
               </span>
             </p>
-           
+
             <p className="inline-flex items-center justify-center gap-2 text-xs text-neutral-600">
               <IconCalendarDue size={15} />
-              {started ? formatDate(giveaway.endsAt) : formatDate(giveaway.startsAt)}
+              {started
+                ? formatDate(giveaway.endsAt)
+                : formatDate(giveaway.startsAt)}
             </p>
           </div>
           <p className="flex items-center justify-center gap-2 text-2xl font-black text-amber-300">
@@ -281,7 +306,7 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin, index = 0 }) 
             type="button"
             onClick={() => onOpenResult(giveaway)}
             aria-label={`Ver resultado del sorteo ${giveaway.title}`}
-            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-black/25 px-5 py-3 text-xs font-black text-neutral-200 transition hover:-translate-y-0.5 hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-200/50"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(13,13,13,0.72))] px-5 py-3 text-xs font-black text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/45 hover:bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(13,13,13,0.78))] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-200/45"
           >
             <IconTrophy size={17} />
             {isFinalized ? "Ver resultado" : "Resultado pendiente"}
@@ -293,7 +318,8 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin, index = 0 }) 
 }
 
 function GiveawayResultModal({ giveaway, onClose }) {
-  const isFinalized = giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+  const isFinalized =
+    giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
@@ -307,7 +333,9 @@ function GiveawayResultModal({ giveaway, onClose }) {
             <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
               Resultado
             </p>
-            <h2 className="mt-1 text-2xl font-bold text-white">{giveaway.title}</h2>
+            <h2 className="mt-1 text-2xl font-bold text-white">
+              {giveaway.title}
+            </h2>
           </div>
           <button
             type="button"
@@ -337,7 +365,8 @@ function GiveawayResultModal({ giveaway, onClose }) {
               )
             ) : (
               <p className="text-sm leading-6 text-neutral-400">
-                El ganador se sortea automaticamente cuando llega la fecha de fin.
+                El ganador se sortea automaticamente cuando llega la fecha de
+                fin.
               </p>
             )}
           </div>
