@@ -341,14 +341,34 @@ function MobileHeaderMenu({
               <Link
                 key={item.href}
                 href={item.href}
+                target={item.external ? "_blank" : undefined}
+                rel={item.external ? "noopener noreferrer" : undefined}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-3 text-sm font-semibold transition ${
                   active
-                    ? "border-red-400/40 bg-red-500/15 text-white"
-                    : "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-white/20 hover:text-white"
+                    ? item.accent === "blue"
+                      ? "border-cyan-300/40 bg-cyan-400/15 text-white"
+                      : "border-red-400/40 bg-red-500/15 text-white"
+                    : item.accent === "blue"
+                      ? "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-cyan-300/25 hover:text-cyan-100"
+                      : "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-white/20 hover:text-white"
                 }`}
               >
-                <span className="inline-flex size-9 items-center justify-center rounded-md bg-white/5">
-                  {item.icon}
+                <span
+                  className={`inline-flex size-9 items-center justify-center ${
+                    item.imageSrc ? "" : "rounded-md bg-white/5"
+                  }`}
+                >
+                  {item.imageSrc ? (
+                    <Image
+                      src={item.imageSrc}
+                      alt=""
+                      width={36}
+                      height={36}
+                      className="size-8 object-contain"
+                    />
+                  ) : (
+                    item.icon
+                  )}
                 </span>
                 <span className="truncate">{item.name}</span>
               </Link>

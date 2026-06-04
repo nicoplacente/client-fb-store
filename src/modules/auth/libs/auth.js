@@ -7,15 +7,20 @@ export async function getUserFromSession() {
 
   if (!accessToken) return null;
 
-  const res = await fetch(`${envConfig.API_USER}`, {
-    headers: {
-      cookie: `accessToken=${accessToken}`,
-    },
-    credentials: "include",
-    cache: "no-store",
-  });
+  try {
+    const res = await fetch(`${envConfig.API_USER}`, {
+      headers: {
+        cookie: `accessToken=${accessToken}`,
+      },
+      credentials: "include",
+      cache: "no-store",
+    });
 
-  if (!res.ok) return null;
-  const data = await res.json();
-  return data.user;
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.user;
+  } catch (error) {
+    console.warn("No se pudo obtener el usuario de la sesion:", error);
+    return null;
+  }
 }
