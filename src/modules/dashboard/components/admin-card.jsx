@@ -14,7 +14,9 @@ export default function AdminCard({
   return (
     <article
       className={`group overflow-hidden rounded-2xl border bg-neutral-950/80 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:bg-neutral-950 ${
-        featured ? "border-amber-300/40 hover:border-amber-300/60" : "border-white/10 hover:border-red-300/25"
+        featured
+          ? "border-amber-300/40 hover:border-amber-300/60"
+          : "border-white/10 hover:border-red-300/25"
       } ${unavailable ? "opacity-75" : ""}`}
     >
       <div className="relative aspect-[5/3] overflow-hidden bg-neutral-900">

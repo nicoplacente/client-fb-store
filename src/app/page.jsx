@@ -1,4 +1,5 @@
 import SectionContainer from "@/modules/ui/section-container";
+import SpotlightCard, { SpotlightGroup } from "@/modules/ui/spotlight-card";
 import Link from "next/link";
 import {
   IconArrowRight,
@@ -110,7 +111,7 @@ export default function Home() {
           Instalar extension
         </a>
       </div>
-      <div className="grid gap-4 md:grid-cols-3">
+      <SpotlightGroup className="grid gap-4 md:grid-cols-3">
         <HomeFeature
           icon={IconShoppingBag}
           title="Canjes directos"
@@ -126,21 +127,38 @@ export default function Home() {
           title="Sorteos activos"
           text="Participa con creditos, revisa estados y consulta resultados desde el mismo ecosistema."
         />
-      </div>
+      </SpotlightGroup>
     </SectionContainer>
   );
 }
 
 function HomeFeature({ icon: Icon, title, text }) {
+  const hueByTitle = {
+    "Canjes directos": 165,
+    "Competencia viva": 291.34,
+    "Sorteos activos": 338.69,
+  };
+
   return (
-    <article className="rounded-2xl border border-white/[0.08] bg-[#121212]/88 p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)] transition duration-200 hover:-translate-y-1 hover:border-red-300/25 hover:bg-[#1A1A1A]/90">
-      <span className="grid size-11 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
+    <SpotlightCard
+      className="grid min-h-64 gap-5 rounded-[15px] p-6"
+      hue={hueByTitle[title] || 338.69}
+    >
+      <span className="grid size-11 place-items-center rounded-xl border border-white/15 bg-black/25 text-white">
         <Icon size={21} />
       </span>
-      <h2 className="mt-5 text-lg font-black text-white">{title}</h2>
-      <p className="mt-2 text-sm font-medium leading-6 text-neutral-400">
-        {text}
-      </p>
-    </article>
+      <div>
+        <h2 className="text-lg font-black text-[#eceff1]">{title}</h2>
+        <p className="mt-3 text-sm font-medium leading-6 text-neutral-300">
+          {text}
+        </p>
+      </div>
+      <span
+        data-spotlight-cta
+        className="spotlight-cta mt-auto block rounded-[10px] px-4 py-3 text-center text-sm font-black"
+      >
+        Explorar
+      </span>
+    </SpotlightCard>
   );
 }

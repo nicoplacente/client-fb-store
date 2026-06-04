@@ -1,4 +1,5 @@
 import Image from "next/image";
+import SpotlightCard from "@/modules/ui/spotlight-card";
 import {
   IconLock,
   IconPackage,
@@ -8,23 +9,36 @@ import {
 import coins from "@/assets/coins.webp";
 import { formatNumber } from "../lib/market-utils";
 
-export default function ProductCard({ product, onRedeem, disabled }) {
+const CARD_HUES = [165, 291.34, 338.69];
+const CARD_SATURATIONS = ["82.26%", "95.9%", "100%"];
+const CARD_LIGHTNESSES = ["51.37%", "61.76%", "48.04%"];
+
+export default function ProductCard({
+  product,
+  onRedeem,
+  disabled,
+  index = 0,
+}) {
   const outOfStock = !product.infiniteStock && product.stock <= 0;
   const isDisabled = product.status === "disabled";
   const unavailable = product.status !== "active" || outOfStock;
+  const colorIndex = index % CARD_HUES.length;
 
   return (
-    <article
-      className={`group relative flex min-h-[356px] flex-col items-center overflow-visible rounded-[14px] border bg-[#090b10]/90 p-5 pb-0 text-center shadow-xl shadow-black/25 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:bg-[#0c0e14] ${
-        product.featured
-          ? "border-amber-300/45 shadow-[0_0_0_1px_rgba(251,191,36,0.14)] hover:border-amber-300/60"
-          : "border-white/10 hover:border-red-300/25"
-      } ${outOfStock ? "opacity-75" : ""}`}
+    <SpotlightCard
+      hue={CARD_HUES[colorIndex]}
+      saturation={CARD_SATURATIONS[colorIndex]}
+      lightness={CARD_LIGHTNESSES[colorIndex]}
+      className={`group flex min-h-[390px] flex-col items-center rounded-[15px] p-5 text-center ${
+        outOfStock ? "opacity-75" : ""
+      }`}
     >
       {product.featured ? <FeaturedBadge /> : null}
-      {outOfStock || isDisabled ? <UnavailableBadge outOfStock={outOfStock} /> : null}
+      {outOfStock || isDisabled ? (
+        <UnavailableBadge outOfStock={outOfStock} />
+      ) : null}
 
-      <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.045),transparent_58%)] sm:h-44">
+      <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-black/20 sm:h-44">
         {product.imageUrl ? (
           <img
             src={product.imageUrl}
@@ -42,7 +56,11 @@ export default function ProductCard({ product, onRedeem, disabled }) {
 
       <div className="flex flex-1 flex-col items-center justify-between gap-4 pt-4">
         <ProductInfo product={product} />
-        <ProductPrice product={product} outOfStock={outOfStock} unavailable={unavailable} />
+        <ProductPrice
+          product={product}
+          outOfStock={outOfStock}
+          unavailable={unavailable}
+        />
         <RedeemButton
           product={product}
           disabled={disabled || unavailable}
@@ -52,13 +70,13 @@ export default function ProductCard({ product, onRedeem, disabled }) {
           onRedeem={onRedeem}
         />
       </div>
-    </article>
+    </SpotlightCard>
   );
 }
 
 function FeaturedBadge() {
   return (
-    <div className="absolute left-3 top-3 z-10 inline-flex items-center gap-1 rounded-full border border-amber-300/40 bg-amber-300/15 px-3 py-1 text-xs font-bold text-amber-100 backdrop-blur">
+    <div className="flex absolute left-3 top-3 z-10 shrink-0 items-center gap-2 rounded-full border-2 border-orange-300/50 bg-gradient-to-br from-neutral-900 via-orange-300/30 backdrop-blur-3xl to-neutral-900 px-2 py-1 font-mono font-semibold shadow-[4px_4px_10px_rgba(0,0,0,0.4)] saturate-150  hover:saturate-200 sm:px-4 sm:py-0.5 text-orange-300">
       <IconStarFilled size={13} />
       Destacado
     </div>
@@ -67,7 +85,7 @@ function FeaturedBadge() {
 
 function UnavailableBadge({ outOfStock }) {
   return (
-    <div className="absolute right-3 top-3 z-10 rounded-full border border-neutral-500/40 bg-neutral-950/80 px-3 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
+    <div className="absolute right-3 top-3 z-10 rounded-full border border-neutral-500/40 bg-black/55 px-3 py-1 text-xs font-bold uppercase text-neutral-300 backdrop-blur">
       {outOfStock ? "Agotado" : "Deshabilitado"}
     </div>
   );
@@ -77,13 +95,13 @@ function ProductInfo({ product }) {
   return (
     <div>
       <div className="grid justify-items-center gap-2">
-        <h2 className="line-clamp-2 text-lg font-black leading-tight text-white">
+        <h2 className="line-clamp-2 text-lg font-black leading-tight text-[#eceff1]">
           {product.title}
         </h2>
         <span
           className={`rounded-full border px-3 py-1 text-[11px] font-bold uppercase ${
             product.featured
-              ? "border-amber-300/30 bg-amber-300/10 text-amber-100"
+              ? "border-white/15 bg-white/[0.06] text-neutral-200"
               : "border-white/10 bg-white/[0.03] text-neutral-400"
           }`}
         >
@@ -114,7 +132,9 @@ function ProductPrice({ product, outOfStock, unavailable }) {
               ? "Ilimitado"
               : `${product.stock} restantes`}
         </p>
-        <p className={`mt-1 normal-case ${unavailable ? "text-neutral-600" : "text-green-300"}`}>
+        <p
+          className={`mt-1 normal-case ${unavailable ? "text-neutral-600" : "text-green-300"}`}
+        >
           {outOfStock
             ? "Agotado"
             : isDisabled
@@ -141,7 +161,8 @@ function RedeemButton({
       disabled={disabled}
       onClick={() => onRedeem(product)}
       aria-label={`Canjear producto ${product.title}`}
-      className="relative -bottom-4 inline-flex min-w-36 cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-red-600 px-5 py-3 text-xs font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+      data-spotlight-cta
+      className="spotlight-cta mt-auto inline-flex min-h-11 min-w-36 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
     >
       {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
       {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}

@@ -10,6 +10,7 @@ import {
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
+import SpotlightCard, { SpotlightGroup } from "@/modules/ui/spotlight-card";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import useAppContext from "@/context/use-app-context";
 import {
@@ -127,17 +128,18 @@ export default function GiftsPage() {
       ) : normalizedGiveaways.length === 0 ? (
         <StatePanel text="No hay sorteos publicados por ahora." />
       ) : (
-        <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
-          {normalizedGiveaways.map((giveaway) => (
+        <SpotlightGroup className="grid gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
+          {normalizedGiveaways.map((giveaway, index) => (
             <GiveawayCard
               key={giveaway.id}
               giveaway={giveaway}
+              index={index}
               onOpenResult={setResultGiveaway}
               isPending={isPending}
               onJoin={handleJoin}
             />
           ))}
-        </div>
+        </SpotlightGroup>
       )}
 
       {resultGiveaway ? (
@@ -172,7 +174,11 @@ function StatePanel({ text, tone = "default" }) {
   );
 }
 
-function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
+const CARD_HUES = [165, 291.34, 338.69];
+const CARD_SATURATIONS = ["82.26%", "95.9%", "100%"];
+const CARD_LIGHTNESSES = ["51.37%", "61.76%", "48.04%"];
+
+function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin, index = 0 }) {
   const started = hasStarted(giveaway.startsAt);
   const isFinalized = giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
   const canJoin =
@@ -190,8 +196,13 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
         : giveaway.status;
 
   return (
-    <article className="group relative flex min-h-[410px] flex-col items-center overflow-visible rounded-[14px] border border-white/10 bg-[#090b10]/90 p-5 pb-0 text-center shadow-xl shadow-black/25 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:border-red-300/25 hover:bg-[#0c0e14]">
-      <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.045),transparent_58%)] sm:h-44">
+    <SpotlightCard
+      hue={CARD_HUES[index % CARD_HUES.length]}
+      saturation={CARD_SATURATIONS[index % CARD_SATURATIONS.length]}
+      lightness={CARD_LIGHTNESSES[index % CARD_LIGHTNESSES.length]}
+      className="group flex min-h-[410px] flex-col items-center rounded-[15px] p-5 text-center"
+    >
+      <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-black/20 sm:h-44">
         {/* <span className="absolute left-3 top-3 z-10 rounded-full border border-white/10 bg-neutral-950/75 px-3 py-1 text-xs font-bold text-neutral-200 shadow-lg shadow-black/20 backdrop-blur">
           {statusLabel}
         </span> */}
@@ -246,12 +257,13 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
           </p>
         </div>
 
-        <div className="relative -bottom-4 grid w-full gap-2">
+        <div className="grid w-full gap-2">
           <button
             disabled={isPending || !canJoin}
             onClick={() => onJoin(giveaway)}
             aria-label={`Participar en el sorteo ${giveaway.title}`}
-            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-white/10 bg-red-600 px-5 py-3 text-xs font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+            data-spotlight-cta
+            className="spotlight-cta inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
           >
             <IconGift size={18} />
             {giveaway.hasJoined
@@ -269,14 +281,14 @@ function GiveawayCard({ giveaway, onOpenResult, isPending, onJoin }) {
             type="button"
             onClick={() => onOpenResult(giveaway)}
             aria-label={`Ver resultado del sorteo ${giveaway.title}`}
-            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-red-300/30 bg-red-500 px-5 py-3 text-xs font-black text-neutral-950 shadow-lg shadow-red-950/20 transition hover:-translate-y-0.5 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-red-200/50"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 bg-black/25 px-5 py-3 text-xs font-black text-neutral-200 transition hover:-translate-y-0.5 hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-200/50"
           >
             <IconTrophy size={17} />
             {isFinalized ? "Ver resultado" : "Resultado pendiente"}
           </button>
         </div>
       </div>
-    </article>
+    </SpotlightCard>
   );
 }
 

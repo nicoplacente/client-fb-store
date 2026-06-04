@@ -1,4 +1,5 @@
 import ProductCard from "./product-card";
+import { SpotlightGroup } from "@/modules/ui/spotlight-card";
 
 export default function ProductsGrid({
   loading,
@@ -33,15 +34,16 @@ export default function ProductsGrid({
   }
 
   return (
-    <div className="grid gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-      {products.map((product) => (
+    <SpotlightGroup className="grid gap-x-5 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+      {products.map((product, index) => (
         <ProductCard
           key={product.id}
           product={product}
+          index={index}
           onRedeem={onRedeem}
           disabled={isPending || Boolean(pendingAction)}
         />
       ))}
-    </div>
+    </SpotlightGroup>
   );
 }
