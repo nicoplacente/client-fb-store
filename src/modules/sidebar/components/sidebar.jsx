@@ -82,7 +82,7 @@ export default function Sidebar() {
           >
             <div
               className={`flex items-center rounded-lg border border-red-400/15 bg-red-500/10 text-red-100 transition-[background,border-color,color] duration-200 hover:border-red-300/35 hover:bg-red-500/16 ${
-                isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-center p-0"
+                isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-start px-3"
               }`}
             >
               <div className="flex size-7 items-center justify-center rounded-md bg-red-400/10">

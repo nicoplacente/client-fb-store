@@ -159,7 +159,7 @@ function HomeFeature({ icon: Icon, title, text, href }) {
       <Link
         href={href}
         data-spotlight-cta
-        className="spotlight-cta mt-auto block rounded-[10px] px-4 py-3 text-center text-sm font-black"
+        className="spotlight-cta mt-auto block cursor-pointer rounded-[10px] px-4 py-3 text-center text-sm font-black"
       >
         Explorar
       </Link>

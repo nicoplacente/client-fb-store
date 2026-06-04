@@ -6,7 +6,7 @@ export default function LinkSidebar({ item, isActive, isOpen, compact = false })
       href={item.href}
       title={!isOpen ? item.name : undefined}
       className={`group relative flex items-center overflow-hidden rounded-lg border text-sm font-semibold transition-[background,border-color,color,transform] duration-200 ease-out focus:outline-none focus:ring-2 focus:ring-red-300/40 [&_svg]:size-5 [&_svg]:shrink-0 ${
-        isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-center px-0"
+        isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-start px-3"
       } ${
         compact ? "text-xs" : "text-sm"
       } ${
