@@ -17,7 +17,7 @@ import coins from "@/assets/coins.webp";
 import Image from "next/image";
 import { envConfig } from "@/config";
 import { apiRequest } from "@/modules/api/client";
-import { menuItems } from "@/modules/sidebar/libs/menu-items";
+import { legalMenuItems, menuItems } from "@/modules/sidebar/libs/menu-items";
 import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
 
 function formatExactNumber(value) {
@@ -342,6 +342,32 @@ function MobileHeaderMenu({
                   active
                     ? "border-red-400/40 bg-red-500/15 text-white"
                     : "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-white/20 hover:text-white"
+                }`}
+              >
+                <span className="inline-flex size-9 items-center justify-center rounded-md bg-white/5">
+                  {item.icon}
+                </span>
+                <span className="truncate">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+
+        <nav
+          className="mt-5 grid gap-2 border-t border-white/10 pt-5"
+          aria-label="Enlaces legales"
+        >
+          {legalMenuItems.map((item) => {
+            const active = pathname === item.href;
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`flex items-center gap-3 rounded-lg border px-3 py-3 text-sm font-semibold transition ${
+                  active
+                    ? "border-red-400/35 bg-red-500/12 text-white"
+                    : "border-white/10 bg-neutral-900/45 text-neutral-400 hover:border-white/20 hover:text-white"
                 }`}
               >
                 <span className="inline-flex size-9 items-center justify-center rounded-md bg-white/5">

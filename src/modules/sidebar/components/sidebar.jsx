@@ -1,5 +1,5 @@
 "use client";
-import { menuItems } from "@/modules/sidebar/libs/menu-items";
+import { legalMenuItems, menuItems } from "@/modules/sidebar/libs/menu-items";
 import { IconPin, IconPower } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import useAppContext from "@/context/use-app-context";
@@ -16,14 +16,14 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] border-r border-neutral-800 bg-neutral-950 text-gray-100 transition-all duration-300 lg:block
+      className={`fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] border-r border-white/10 bg-neutral-950/95 text-gray-100 shadow-2xl shadow-black/20 backdrop-blur transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:block
         ${isOpen ? "lg:w-72" : "lg:w-20"}`}
       onMouseEnter={() => !expanded && setHovered(true)}
       onMouseLeave={() => !expanded && setHovered(false)}
     >
       <button
-        className={`absolute -right-3 top-6 z-30 hidden h-6 w-6 cursor-pointer items-center justify-center rounded-full border border-neutral-800 bg-neutral-900 transition-all duration-300 hover:scale-110 hover:shadow-[inset_0px_1px_5px_#f005] lg:flex ${
-          expanded ? "rotate-12" : "-rotate-45"
+        className={`absolute -right-3 top-6 z-30 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-300 shadow-lg shadow-black/30 transition-[opacity,transform,background,color] duration-300 ease-out hover:scale-110 hover:bg-red-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 lg:flex ${
+          expanded ? "rotate-12 text-red-100" : "-rotate-45"
         } ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         aria-label={expanded ? "Desfijar sidebar" : "Fijar sidebar"}
         onClick={() => setExpanded(!expanded)}
@@ -31,8 +31,8 @@ export default function Sidebar() {
         <IconPin size={14} />
       </button>
 
-      <div className="flex h-full flex-col p-2">
-        <nav className="flex flex-1 flex-col items-stretch gap-2">
+      <div className="flex h-full flex-col p-3">
+        <nav className="flex flex-1 flex-col items-stretch gap-1.5" aria-label="Navegacion principal">
           {menuItems.map((item, idx) => {
             if (item.requiresAuth && !user) return null;
             if (item.requiresDashboardAccess && !hasDashboardAccess(user)) {
@@ -53,23 +53,46 @@ export default function Sidebar() {
           })}
         </nav>
 
+        <div className="mt-3 border-t border-white/10 pt-3">
+          <div
+            className={`mb-2 overflow-hidden whitespace-nowrap px-3 text-[10px] font-black uppercase text-neutral-600 transition-[max-height,opacity] duration-300 ${
+              isOpen ? "max-h-5 opacity-100" : "max-h-0 opacity-0"
+            }`}
+          >
+            Legal
+          </div>
+          <nav className="grid gap-1.5" aria-label="Enlaces legales">
+            {legalMenuItems.map((item) => (
+              <LinkSidebar
+                key={item.href}
+                item={item}
+                isActive={pathname === item.href}
+                isOpen={isOpen}
+                compact
+              />
+            ))}
+          </nav>
+        </div>
+
         {user && (
           <button
             aria-label="Cerrar sesión"
             onClick={logout}
-            className="shrink-0 cursor-pointer border-t border-gray-800 pt-2"
+            className="mt-3 shrink-0 cursor-pointer border-t border-white/10 pt-3"
           >
             <div
-              className={`flex items-center rounded-lg bg-red-800/50 transition-colors duration-300 hover:bg-red-800/70 ${
-                isOpen ? "h-11 justify-start px-3" : "w-full h-11 justify-center p-0"
+              className={`flex items-center rounded-lg border border-red-400/15 bg-red-500/10 text-red-100 transition-[background,border-color,color] duration-200 hover:border-red-300/35 hover:bg-red-500/16 ${
+                isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-center p-0"
               }`}
             >
-              <div className="flex size-6 items-center justify-center">
+              <div className="flex size-7 items-center justify-center rounded-md bg-red-400/10">
                 <IconPower size={isOpen ? 18 : 20} />
               </div>
               <div
-                className={`overflow-hidden whitespace-nowrap transition-all duration-300 ${
-                  isOpen ? "ml-3 max-w-44 opacity-100" : "ml-0 max-w-0 opacity-0"
+                className={`overflow-hidden whitespace-nowrap text-sm font-bold transition-[max-width,opacity,transform,margin] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                  isOpen
+                    ? "ml-3 max-w-44 translate-x-0 opacity-100"
+                    : "ml-0 max-w-0 -translate-x-2 opacity-0"
                 }`}
               >
                 Cerrar sesión

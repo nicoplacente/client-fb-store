@@ -1,6 +1,5 @@
 "use client";
 
-import { IconRefresh } from "@tabler/icons-react";
 import SectionContainer from "@/modules/ui/section-container";
 import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import {
@@ -22,7 +21,12 @@ export default function DashboardPage() {
   const dashboard = useDashboardController();
 
   if (!dashboard.user) {
-    return <DashboardMessage title="Dashboard" text="Inicia sesion para acceder al panel de gestion." />;
+    return (
+      <DashboardMessage
+        title="Dashboard"
+        text="Inicia sesion para acceder al panel de gestion."
+      />
+    );
   }
 
   if (!dashboard.canManageDashboard) {
@@ -43,7 +47,10 @@ export default function DashboardPage() {
         onRefresh={dashboard.loadDashboard}
       />
       <DashboardStats stats={dashboard.stats} />
-      <DashboardTabs activeTab={dashboard.activeTab} onChange={dashboard.setActiveTab} />
+      <DashboardTabs
+        activeTab={dashboard.activeTab}
+        onChange={dashboard.setActiveTab}
+      />
 
       {dashboard.error ? (
         <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-6 text-center text-red-200 shadow-xl shadow-black/15">
@@ -62,9 +69,17 @@ function DashboardMessage({ eyebrow, title, text }) {
     <SectionContainer className="space-y-6">
       <div className="mx-auto max-w-2xl rounded-3xl border border-white/10 bg-[linear-gradient(135deg,rgba(220,38,38,0.14),rgba(10,10,10,0.88)_42%,rgba(10,10,10,0.96))] p-6 text-center shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-8">
         {eyebrow ? (
-          <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">{eyebrow}</p>
+          <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
+            {eyebrow}
+          </p>
         ) : null}
-        <h1 className={eyebrow ? "mt-2 text-2xl font-bold text-white sm:text-3xl" : "text-2xl font-bold text-white sm:text-3xl"}>
+        <h1
+          className={
+            eyebrow
+              ? "mt-2 text-2xl font-bold text-white sm:text-3xl"
+              : "text-2xl font-bold text-white sm:text-3xl"
+          }
+        >
           {title}
         </h1>
         <p className="mt-3 text-neutral-400">{text}</p>
@@ -82,19 +97,14 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
           <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
             Administracion
           </p>
-          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">Dashboard</h1>
+          <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
+            Dashboard
+          </h1>
           <p className="mt-3 max-w-2xl text-neutral-400">
-            Gestiona catalogo, sorteos, canjes, consultas y herramientas del stream desde un solo panel.
+            Gestiona catalogo, sorteos, canjes, consultas y herramientas del
+            stream desde un solo panel.
           </p>
         </div>
-        <button
-          onClick={onRefresh}
-          disabled={loading || isPending}
-          className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-4 py-3 text-sm font-bold text-white shadow-lg shadow-black/15 transition hover:-translate-y-0.5 hover:border-red-300/50 hover:bg-white/[0.04] hover:text-red-100 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50 sm:w-fit"
-        >
-          <IconRefresh size={18} />
-          Actualizar
-        </button>
       </div>
     </div>
   );
@@ -257,7 +267,9 @@ function DashboardConfirmationDialog({ dashboard }) {
       variant="danger"
       title={confirmation?.title}
       description={confirmation?.description}
-      confirmLabel={dashboard.isPending ? "Procesando..." : confirmation?.confirmLabel}
+      confirmLabel={
+        dashboard.isPending ? "Procesando..." : confirmation?.confirmLabel
+      }
       cancelLabel={confirmation?.cancelLabel}
       confirmDisabled={dashboard.isPending}
       onCancel={dashboard.cancelConfirmation}
