@@ -4,15 +4,16 @@ export function buildProductPayload(productForm) {
     description: productForm.description.trim(),
     price: Number(productForm.price),
     stock: Number(productForm.stock),
+    infiniteStock: Boolean(productForm.infiniteStock),
     category: productForm.category.trim() || "General",
     status: productForm.status,
     featured: productForm.featured,
     rewardEffectType: productForm.rewardEffectType,
     rewardEffectValue: productForm.rewardEffectType === "stream_special_hour"
-      ? productForm.rewardEffectValue
+      ? "happy"
       : "",
     rewardEffectDurationMinutes: productForm.rewardEffectType === "stream_special_hour"
-      ? Number(productForm.rewardEffectDurationMinutes || 60)
+      ? 60
       : "",
     alertEnabled: false,
     alertType: productForm.alertType || "confetti",

@@ -34,9 +34,12 @@ export function formatProductAlert(product) {
 export function getProductCardDetails(product) {
   const rewardEffect = formatProductRewardEffect(product);
   const streamAlert = formatProductAlert(product);
-  const stockDetail = `${
-    product.stock > 0 ? `${product.stock} disponibles` : "Sin stock"
-  } - ${formatProductStatus(product.status)}`;
+  const stockLabel = product.infiniteStock
+    ? "Stock infinito"
+    : product.stock > 0
+      ? `${product.stock} disponibles`
+      : "Sin stock";
+  const stockDetail = `${stockLabel} - ${formatProductStatus(product.status)}`;
 
   return [stockDetail, rewardEffect, streamAlert].filter(Boolean).join(" - ");
 }

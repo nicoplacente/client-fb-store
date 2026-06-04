@@ -28,8 +28,8 @@ import CreditPackagesSection from "@/modules/market/components/credit-packages-s
 import MarketToolbar from "@/modules/market/components/market-toolbar";
 import ProductsGrid from "@/modules/market/components/products-grid";
 import {
-  clampRedemptionQuantity,
   getActionConfirmation,
+  getRedemptionQuantity,
   saveLocalRedemption,
 } from "@/modules/market/lib/market-utils";
 
@@ -222,7 +222,7 @@ async function confirmProductRedemption({
   refreshUser,
   setProducts,
 }) {
-  const quantity = clampRedemptionQuantity(action.quantity, action.item.stock);
+  const quantity = getRedemptionQuantity(action.quantity, action.item);
   const result = await redeemProduct(action.item.id, { quantity });
 
   if (result?.redemption) {
@@ -242,6 +242,18 @@ async function confirmProductRedemption({
     await loadMarket({ showLoading: false });
   }
 
-  toast.success("Canje solicitado");
+  toast.success(getRedemptionSuccessMessage(result, action.item));
   await Promise.resolve(refreshUser?.()).catch(() => {});
+}
+
+function getRedemptionSuccessMessage(result, product) {
+  if (result?.restoredStreak || product.rewardEffectType === "restore_stream_streak") {
+    return "Racha recuperada";
+  }
+
+  if (result?.specialHour || product.rewardEffectType === "stream_special_hour") {
+    return "Hora activada";
+  }
+
+  return "Canje solicitado";
 }

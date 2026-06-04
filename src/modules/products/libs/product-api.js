@@ -79,6 +79,7 @@ export function normalizeProduct(product) {
     description: product.description || "",
     price: Number(product.price || product.cost || 0),
     stock: Number(product.stock || product.quantity || 0),
+    infiniteStock: Boolean(product.infiniteStock),
     category: product.category || "General",
     imageUrl: product.imageUrl || product.image || product.img || "",
     status,

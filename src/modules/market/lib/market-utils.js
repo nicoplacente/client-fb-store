@@ -11,6 +11,25 @@ export function clampRedemptionQuantity(value, stock) {
   return Math.min(Math.max(quantity, 1), maxStock);
 }
 
+export function hasSingleRedemptionEffect(product) {
+  return (
+    product?.rewardEffectType === "stream_special_hour" ||
+    product?.rewardEffectType === "restore_stream_streak"
+  );
+}
+
+export function getRedemptionQuantity(value, product) {
+  if (hasSingleRedemptionEffect(product)) return 1;
+
+  if (product?.infiniteStock) {
+    const quantity = Math.floor(Number(value || 1));
+
+    return Number.isFinite(quantity) ? Math.max(quantity, 1) : 1;
+  }
+
+  return clampRedemptionQuantity(value, product?.stock);
+}
+
 export function saveLocalRedemption(redemption) {
   if (typeof window === "undefined" || !redemption?.id) return;
 
@@ -47,12 +66,15 @@ export function getActionConfirmation(action) {
     };
   }
 
-  const quantity = clampRedemptionQuantity(action.quantity, action.item.stock);
+  const quantity = getRedemptionQuantity(action.quantity, action.item);
   const totalCost = Number(action.item.price || 0) * quantity;
+  const singleRedemption = hasSingleRedemptionEffect(action.item);
 
   return {
     title: "Confirmar canje",
-    description: `Vas a usar ${formatNumber(totalCost)} creditos para solicitar ${quantity} ${quantity === 1 ? "unidad" : "unidades"} de este producto.`,
+    description: singleRedemption
+      ? `Vas a usar ${formatNumber(totalCost)} creditos para activar este canje.`
+      : `Vas a usar ${formatNumber(totalCost)} creditos para solicitar ${quantity} ${quantity === 1 ? "unidad" : "unidades"} de este producto.`,
     confirmLabel: "Canjear",
   };
 }

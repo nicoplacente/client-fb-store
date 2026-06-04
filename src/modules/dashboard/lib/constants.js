@@ -23,6 +23,7 @@ export const emptyProduct = {
   description: "",
   price: "",
   stock: "",
+  infiniteStock: false,
   category: "",
   imageUrl: "",
   imageFile: null,

@@ -74,9 +74,9 @@ export function RewardEffectFields({ form, setForm }) {
               : {
                   ...current,
                   rewardEffectType: "stream_special_hour",
-                  rewardEffectValue: current.rewardEffectValue || "happy",
-                  rewardEffectDurationMinutes:
-                    current.rewardEffectDurationMinutes || "60",
+                  rewardEffectValue: "happy",
+                  rewardEffectDurationMinutes: "60",
+                  infiniteStock: true,
                 }
           )
         }
@@ -110,9 +110,9 @@ export function RewardEffectFields({ form, setForm }) {
               setForm((current) => ({
                 ...current,
                 rewardEffectType: "stream_special_hour",
-                rewardEffectValue: current.rewardEffectValue || "happy",
-                rewardEffectDurationMinutes:
-                  current.rewardEffectDurationMinutes || "60",
+                rewardEffectValue: "happy",
+                rewardEffectDurationMinutes: "60",
+                infiniteStock: true,
               }))
             }
           />
@@ -127,13 +127,18 @@ export function RewardEffectFields({ form, setForm }) {
                 rewardEffectType: "restore_stream_streak",
                 rewardEffectValue: "",
                 rewardEffectDurationMinutes: "",
+                infiniteStock: true,
               }))
             }
           />
         </div>
       ) : null}
 
-      {hasRewardEffect ? <StreamHourOptions form={form} setForm={setForm} /> : null}
+      {hasRewardEffect ? (
+        <div className="rounded-2xl border border-yellow-300/25 bg-yellow-400/10 p-4 text-sm font-medium leading-6 text-yellow-100">
+          Este premio activa Happy Hour durante 60 minutos al canjearse.
+        </div>
+      ) : null}
 
       {restoresStreamStreak ? (
         <div className="rounded-2xl border border-sky-300/20 bg-sky-400/10 p-4 text-sm font-medium leading-6 text-sky-100">
@@ -177,85 +182,6 @@ export function StreamAlertFields({ form, setForm }) {
       </button>
 
       {form.alertEnabled ? <StreamAlertOptions form={form} setForm={setForm} /> : null}
-    </div>
-  );
-}
-
-function StreamHourOptions({ form, setForm }) {
-  const streamHourOptions = [
-    {
-      id: "happy",
-      title: "Happy Hour",
-      detail: "Bonus de watchtime durante el stream.",
-      className: "border-yellow-300/30 bg-yellow-400/10 text-yellow-100",
-    },
-    {
-      id: "opening",
-      title: "Opening Hour",
-      detail: "Empuja la participacion del chat.",
-      className: "border-sky-300/30 bg-sky-400/10 text-sky-100",
-    },
-    {
-      id: "bertello_snack",
-      title: "Bertello-Snack Hour",
-      detail: "Bonus fuerte de watchtime y chat.",
-      className: "border-red-300/30 bg-red-500/10 text-red-100",
-    },
-  ];
-
-  return (
-    <div className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4 shadow-lg shadow-black/10">
-      <div>
-        <p className="text-sm font-black text-white">Hora especial que se activa</p>
-        <p className="mt-1 text-xs font-medium text-neutral-500">
-          Elegi el bonus que el usuario va a prender cuando compre este premio.
-        </p>
-      </div>
-
-      <div className="grid gap-3 lg:grid-cols-3">
-        {streamHourOptions.map((option) => (
-          <OptionCard
-            key={option.id}
-            active={form.rewardEffectValue === option.id}
-            className={option.className}
-            icon={<IconSparkles size={17} />}
-            title={option.title}
-            detail={option.detail}
-            onClick={() =>
-              setForm((current) => ({
-                ...current,
-                rewardEffectValue: option.id,
-              }))
-            }
-          />
-        ))}
-      </div>
-
-      <Field label="Duracion del evento">
-        <div className="grid gap-3 rounded-xl border border-white/10 bg-neutral-900/70 p-3 sm:grid-cols-[1fr_auto] sm:items-center">
-          <p className="text-sm text-neutral-500">
-            Tiempo activo despues del canje. El valor recomendado es 60 minutos.
-          </p>
-          <div className="flex items-center gap-2">
-            <TextInput
-              type="number"
-              min="1"
-              max="1440"
-              step="1"
-              value={form.rewardEffectDurationMinutes}
-              onChange={(event) =>
-                setForm((current) => ({
-                  ...current,
-                  rewardEffectDurationMinutes: event.target.value,
-                }))
-              }
-              className="w-28"
-              required
-            />
-            <span className="text-sm font-bold text-neutral-400">min</span>
-          </div>
-        </div>
-      </Field>
     </div>
   );
 }
