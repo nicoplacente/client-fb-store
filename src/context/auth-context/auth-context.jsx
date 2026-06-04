@@ -46,7 +46,6 @@ export function AuthProvider({ children, initialUser }) {
         const data = await apiRequest(envConfig.API_USER);
         setUser(data.user);
       } catch {
-        console.error("Error verificando sesion");
         setUser(null);
       } finally {
         setLoading(false);
