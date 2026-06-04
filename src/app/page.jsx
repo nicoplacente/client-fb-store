@@ -116,23 +116,26 @@ export default function Home() {
           icon={IconShoppingBag}
           title="Canjes directos"
           text="Productos, codigos y beneficios organizados para encontrar rapido lo que queres desbloquear."
+          link="/market"
         />
         <HomeFeature
           icon={IconTrophy}
           title="Competencia viva"
           text="Ranking, puntos y creditos conectados a la actividad real de la comunidad."
+          link="/ranking"
         />
         <HomeFeature
           icon={IconGift}
           title="Sorteos activos"
           text="Participa con creditos, revisa estados y consulta resultados desde el mismo ecosistema."
+          link="/gifts"
         />
       </SpotlightGroup>
     </SectionContainer>
   );
 }
 
-function HomeFeature({ icon: Icon, title, text }) {
+function HomeFeature({ icon: Icon, title, text , link }) {
   const hueByTitle = {
     "Canjes directos": 165,
     "Competencia viva": 291.34,
@@ -153,12 +156,13 @@ function HomeFeature({ icon: Icon, title, text }) {
           {text}
         </p>
       </div>
-      <span
+      <Link
         data-spotlight-cta
-        className="spotlight-cta mt-auto block rounded-[10px] px-4 py-3 text-center text-sm font-black"
+        className="spotlight-cta mt-auto block cursor-pointer rounded-[10px] px-4 py-3 text-center text-sm font-black"
+        href={link}
       >
         Explorar
-      </span>
+      </Link>
     </SpotlightCard>
   );
 }
