@@ -12,6 +12,9 @@ import { formatNumber } from "../lib/market-utils";
 const CARD_HUES = [165, 291.34, 338.69];
 const CARD_SATURATIONS = ["82.26%", "95.9%", "100%"];
 const CARD_LIGHTNESSES = ["51.37%", "61.76%", "48.04%"];
+const FEATURED_HUE = 38;
+const FEATURED_SATURATION = "95%";
+const FEATURED_LIGHTNESS = "56%";
 
 export default function ProductCard({
   product,
@@ -23,12 +26,19 @@ export default function ProductCard({
   const isDisabled = product.status === "disabled";
   const unavailable = product.status !== "active" || outOfStock;
   const colorIndex = index % CARD_HUES.length;
+  const spotlightHue = product.featured ? FEATURED_HUE : CARD_HUES[colorIndex];
+  const spotlightSaturation = product.featured
+    ? FEATURED_SATURATION
+    : CARD_SATURATIONS[colorIndex];
+  const spotlightLightness = product.featured
+    ? FEATURED_LIGHTNESS
+    : CARD_LIGHTNESSES[colorIndex];
 
   return (
     <SpotlightCard
-      hue={CARD_HUES[colorIndex]}
-      saturation={CARD_SATURATIONS[colorIndex]}
-      lightness={CARD_LIGHTNESSES[colorIndex]}
+      hue={spotlightHue}
+      saturation={spotlightSaturation}
+      lightness={spotlightLightness}
       className={`group flex min-h-[390px] flex-col items-center rounded-[15px] p-5 text-center ${
         outOfStock ? "opacity-75" : ""
       }`}
@@ -162,7 +172,7 @@ function RedeemButton({
       onClick={() => onRedeem(product)}
       aria-label={`Canjear producto ${product.title}`}
       data-spotlight-cta
-      className="spotlight-cta mt-auto inline-flex min-h-11 min-w-36 cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+      className="spotlight-cta mt-auto inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 min-w-full disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
     >
       {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
       {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}
