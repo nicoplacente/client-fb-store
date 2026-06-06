@@ -153,7 +153,6 @@ function DashboardActivePanel({ dashboard }) {
     return (
       <ProductsPanel
         form={dashboard.productForm}
-        setForm={dashboard.setProductForm}
         items={dashboard.products}
         loading={dashboard.loading}
         isPending={dashboard.isPending}
@@ -190,7 +189,6 @@ function DashboardActivePanel({ dashboard }) {
     return (
       <GiveawaysPanel
         form={dashboard.giveawayForm}
-        setForm={dashboard.setGiveawayForm}
         items={dashboard.giveaways}
         loading={dashboard.loading}
         isPending={dashboard.isPending}

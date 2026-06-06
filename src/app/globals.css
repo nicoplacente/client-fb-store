@@ -159,6 +159,7 @@ body {
   position: relative;
   isolation: isolate;
   overflow: hidden;
+  contain: layout paint;
   color: #eceff1;
   background: #2b2b2b60;
   border: 1px solid rgba(236, 239, 241, 0.2);
@@ -166,7 +167,6 @@ body {
     transform 220ms ease,
     background 400ms ease,
     box-shadow 220ms ease;
-  will-change: transform;
 }
 
 .spotlight-card::before {
@@ -188,7 +188,6 @@ body {
     transparent 58%
   );
   transition: opacity 180ms ease;
-  will-change: opacity, mask;
 }
 
 .spotlight-card::after {

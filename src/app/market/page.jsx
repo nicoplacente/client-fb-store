@@ -96,7 +96,9 @@ export default function MarketPage() {
     loadMarket();
   }, [loadMarket]);
 
-  function handleRequestRedeem(product) {
+  const actionsDisabled = isPending || Boolean(pendingAction);
+
+  const handleRequestRedeem = useCallback((product) => {
     if (isPending) return;
 
     setPendingAction({
@@ -104,18 +106,28 @@ export default function MarketPage() {
       item: product,
       quantity: 1,
     });
-  }
+  }, [isPending]);
 
-  function handleRequestPurchase(creditPackage) {
+  const handleRequestPurchase = useCallback((creditPackage) => {
     if (isPending) return;
 
     setPendingAction({
       type: "purchase",
       item: creditPackage,
     });
-  }
+  }, [isPending]);
 
-  function handleConfirmAction() {
+  const handleCancelAction = useCallback(() => {
+    setPendingAction(null);
+  }, []);
+
+  const handleQuantityChange = useCallback((quantity) => {
+    setPendingAction((current) =>
+      current ? { ...current, quantity } : current,
+    );
+  }, []);
+
+  const handleConfirmAction = useCallback(() => {
     const action = pendingAction;
     if (!action) return;
 
@@ -146,16 +158,18 @@ export default function MarketPage() {
         }
       }
     });
-  }
+  }, [loadMarket, pendingAction, refreshUser, startTransition]);
 
-  const confirmation = getActionConfirmation(pendingAction);
+  const confirmation = useMemo(
+    () => getActionConfirmation(pendingAction),
+    [pendingAction],
+  );
 
   return (
     <SectionContainer className="space-y-8">
       <CreditPackagesSection
         creditPackages={normalizedCreditPackages}
-        pendingAction={pendingAction}
-        isPending={isPending}
+        disabled={actionsDisabled}
         onPurchase={handleRequestPurchase}
       />
 
@@ -171,8 +185,7 @@ export default function MarketPage() {
         loading={loading}
         error={error}
         products={filteredProducts}
-        pendingAction={pendingAction}
-        isPending={isPending}
+        disabled={actionsDisabled}
         onRedeem={handleRequestRedeem}
       />
 
@@ -182,16 +195,12 @@ export default function MarketPage() {
         description={confirmation?.description}
         confirmLabel={confirmation?.confirmLabel}
         onConfirm={handleConfirmAction}
-        onCancel={() => setPendingAction(null)}
+        onCancel={handleCancelAction}
       >
         {pendingAction ? (
           <ActionSummary
             action={pendingAction}
-            onQuantityChange={(quantity) =>
-              setPendingAction((current) =>
-                current ? { ...current, quantity } : current,
-              )
-            }
+            onQuantityChange={handleQuantityChange}
           />
         ) : null}
       </ConfirmationDialog>

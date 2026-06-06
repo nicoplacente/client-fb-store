@@ -46,7 +46,7 @@ export default function ConfirmationDialog({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
       onClick={(event) => {
         if (event.target === event.currentTarget) {
           onCancel();
@@ -58,7 +58,7 @@ export default function ConfirmationDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70"
+        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70 [contain:layout_paint]"
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-white/[0.03] p-5 sm:p-6">
           <div className="space-y-3">

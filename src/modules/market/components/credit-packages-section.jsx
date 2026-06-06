@@ -1,10 +1,10 @@
+import { memo } from "react";
 import { IconBolt } from "@tabler/icons-react";
 import CreditPackageCard from "./credit-package-card";
 
-export default function CreditPackagesSection({
+function CreditPackagesSection({
   creditPackages,
-  pendingAction,
-  isPending,
+  disabled,
   onPurchase,
 }) {
   if (creditPackages.length === 0) return null;
@@ -37,7 +37,7 @@ export default function CreditPackagesSection({
               key={creditPackage.id}
               creditPackage={creditPackage}
               onPurchase={onPurchase}
-              disabled={isPending || Boolean(pendingAction)}
+              disabled={disabled}
             />
           ))}
         </div>
@@ -45,3 +45,5 @@ export default function CreditPackagesSection({
     </section>
   );
 }
+
+export default memo(CreditPackagesSection);

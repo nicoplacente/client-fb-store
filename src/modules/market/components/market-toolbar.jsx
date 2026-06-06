@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { IconCheck, IconChevronDown, IconSearch } from "@tabler/icons-react";
 
-export default function MarketToolbar({
+function MarketToolbar({
   query,
   category,
   categories,
@@ -127,3 +127,5 @@ export default function MarketToolbar({
 function getCategoryLabel(category) {
   return category === "all" ? "Todas" : category;
 }
+
+export default memo(MarketToolbar);

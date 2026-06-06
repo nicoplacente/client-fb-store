@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { IconGift } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
 import {
@@ -15,7 +16,6 @@ import ImageInput from "./image-input";
 
 export default function GiveawaysPanel({
   form,
-  setForm,
   items,
   loading,
   isPending,
@@ -54,18 +54,43 @@ export default function GiveawaysPanel({
       />
 
       {isFormOpen ? (
-        <ModalForm onSubmit={onSubmit}>
-          <PanelHeader
-            title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
-            subtitle="Participacion y fechas"
-            canCancel
-            onCancel={onCancel}
-          />
-          <GiveawayFormFields form={form} setForm={setForm} />
-          <SubmitButton isPending={isPending} selectedId={selectedId} />
-        </ModalForm>
+        <GiveawayFormDialog
+          key={selectedId || "new-giveaway"}
+          initialForm={form}
+          isPending={isPending}
+          selectedId={selectedId}
+          onSubmit={onSubmit}
+          onCancel={onCancel}
+        />
       ) : null}
     </div>
+  );
+}
+
+function GiveawayFormDialog({
+  initialForm,
+  isPending,
+  selectedId,
+  onSubmit,
+  onCancel,
+}) {
+  const [draftForm, setDraftForm] = useState(initialForm);
+
+  function handleSubmit(event) {
+    onSubmit(event, draftForm);
+  }
+
+  return (
+    <ModalForm onSubmit={handleSubmit}>
+      <PanelHeader
+        title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
+        subtitle="Participacion y fechas"
+        canCancel
+        onCancel={onCancel}
+      />
+      <GiveawayFormFields form={draftForm} setForm={setDraftForm} />
+      <SubmitButton isPending={isPending} selectedId={selectedId} />
+    </ModalForm>
   );
 }
 

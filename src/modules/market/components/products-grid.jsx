@@ -1,12 +1,12 @@
+import { memo } from "react";
 import ProductCard from "./product-card";
 import { SpotlightGroup } from "@/modules/ui/spotlight-card";
 
-export default function ProductsGrid({
+function ProductsGrid({
   loading,
   error,
   products,
-  pendingAction,
-  isPending,
+  disabled,
   onRedeem,
 }) {
   if (loading) {
@@ -41,9 +41,11 @@ export default function ProductsGrid({
           product={product}
           index={index}
           onRedeem={onRedeem}
-          disabled={isPending || Boolean(pendingAction)}
+          disabled={disabled}
         />
       ))}
     </SpotlightGroup>
   );
 }
+
+export default memo(ProductsGrid);

@@ -183,10 +183,10 @@ export default function useDashboardController() {
     setGiveawayModalOpen(false);
   }
 
-  function submitProduct(event) {
+  function submitProduct(event, formSnapshot = productForm) {
     event.preventDefault();
 
-    const payloadBase = buildProductPayload(productForm);
+    const payloadBase = buildProductPayload(formSnapshot);
 
     if (!payloadBase.title || Number.isNaN(payloadBase.price)) {
       toast.error("Completa nombre y precio");
@@ -195,9 +195,9 @@ export default function useDashboardController() {
 
     startTransition(async () => {
       try {
-        const imageUrl = productForm.imageFile
-          ? await uploadImage(productForm.imageFile)
-          : productForm.imageUrl.trim();
+        const imageUrl = formSnapshot.imageFile
+          ? await uploadImage(formSnapshot.imageFile)
+          : formSnapshot.imageUrl.trim();
         const payload = {
           ...payloadBase,
           imageUrl,
@@ -251,10 +251,10 @@ export default function useDashboardController() {
     });
   }
 
-  function submitGiveaway(event) {
+  function submitGiveaway(event, formSnapshot = giveawayForm) {
     event.preventDefault();
 
-    const payloadBase = buildGiveawayPayload(giveawayForm);
+    const payloadBase = buildGiveawayPayload(formSnapshot);
 
     if (!payloadBase.title) {
       toast.error("Completa titulo");
@@ -268,9 +268,9 @@ export default function useDashboardController() {
 
     startTransition(async () => {
       try {
-        const imageUrl = giveawayForm.imageFile
-          ? await uploadImage(giveawayForm.imageFile)
-          : giveawayForm.imageUrl.trim();
+        const imageUrl = formSnapshot.imageFile
+          ? await uploadImage(formSnapshot.imageFile)
+          : formSnapshot.imageUrl.trim();
         const payload = {
           ...payloadBase,
           imageUrl,
@@ -543,7 +543,6 @@ export default function useDashboardController() {
     setSupportReplies,
     loadDashboard,
     productForm,
-    setProductForm,
     selectedProductId,
     productModalOpen,
     createProductForm: () => {
@@ -576,7 +575,6 @@ export default function useDashboardController() {
       setCreditPackageModalOpen(true);
     },
     giveawayForm,
-    setGiveawayForm,
     selectedGiveawayId,
     giveawayModalOpen,
     createGiveawayForm: () => {

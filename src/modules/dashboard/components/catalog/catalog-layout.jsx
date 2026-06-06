@@ -27,12 +27,12 @@ export function PanelTitle({ title, subtitle, action }) {
 
 export function ModalForm({ children, onSubmit }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/75 p-2 backdrop-blur-md sm:items-center sm:p-4">
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-2 sm:items-center sm:p-4">
       <form
         onSubmit={onSubmit}
         role="dialog"
         aria-modal="true"
-        className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black ring-1 ring-white/[0.03] sm:max-h-[90vh] sm:p-5"
+        className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black ring-1 ring-white/[0.03] [contain:layout_paint] sm:max-h-[90vh] sm:p-5"
       >
         {children}
       </form>

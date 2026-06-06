@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Image from "next/image";
 import SpotlightCard from "@/modules/ui/spotlight-card";
 import {
@@ -16,7 +17,7 @@ const FEATURED_HUE = 38;
 const FEATURED_SATURATION = "95%";
 const FEATURED_LIGHTNESS = "56%";
 
-export default function ProductCard({
+function ProductCard({
   product,
   onRedeem,
   disabled,
@@ -83,6 +84,8 @@ export default function ProductCard({
     </SpotlightCard>
   );
 }
+
+export default memo(ProductCard);
 
 function FeaturedBadge() {
   return (

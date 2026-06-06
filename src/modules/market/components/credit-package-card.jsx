@@ -1,9 +1,10 @@
+import { memo } from "react";
 import Image from "next/image";
 import { IconArrowRight, IconBrandKick, IconCoins, IconPlus } from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import { formatNumber } from "../lib/market-utils";
 
-export default function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
+function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
   return (
     <article className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(145deg,rgba(255,255,255,0.045),rgba(18,18,18,0.94)_42%,rgba(8,8,8,0.98))] p-4 shadow-xl shadow-black/25 ring-1 ring-white/[0.03] transition duration-300 hover:-translate-y-1 hover:border-amber-200/35 hover:shadow-[0_24px_60px_rgba(251,191,36,0.08)] sm:p-5">
       <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-amber-200/70 to-transparent" />
@@ -55,6 +56,8 @@ export default function CreditPackageCard({ creditPackage, onPurchase, disabled 
     </article>
   );
 }
+
+export default memo(CreditPackageCard);
 
 function CreditMetric({ label, value, icon, tone }) {
   const toneClass =
