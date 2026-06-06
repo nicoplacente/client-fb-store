@@ -24,6 +24,7 @@ import {
   joinGiveaway,
   normalizeGiveaway,
 } from "@/modules/giveaways/libs/giveaway-api";
+import { getErrorMessage } from "@/modules/api/error-message";
 import coins from "@/assets/coins.webp";
 
 function formatDate(value) {
@@ -88,8 +89,8 @@ export default function GiftsPage() {
         );
         await loadGiveaways({ showLoading: false });
         await Promise.resolve(refreshUser?.()).catch(() => {});
-      } catch {
-        toast.error(err.message || "No se pudo participar");
+      } catch (error) {
+        toast.error(getErrorMessage(error, "No se pudo participar"));
       }
     });
   }

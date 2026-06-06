@@ -18,6 +18,7 @@ import {
   normalizeProduct,
   redeemProduct,
 } from "@/modules/products/libs/product-api";
+import { getErrorMessage } from "@/modules/api/error-message";
 import {
   getCreditPackages,
   normalizeCreditPackage,
@@ -135,8 +136,10 @@ export default function MarketPage() {
         await purchaseCreditPackage(action.item.id);
         toast.success("Creditos acreditados");
         await Promise.resolve(refreshUser?.()).catch(() => {});
-      } catch {
-        toast.error(err.message || "No se pudo completar la operacion");
+      } catch (error) {
+        toast.error(
+          getErrorMessage(error, "No se pudo completar la operacion"),
+        );
 
         if (action.type === "redeem") {
           await loadMarket({ showLoading: false });

@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import SectionContainer from "@/modules/ui/section-container";
+import { getErrorMessage } from "@/modules/api/error-message";
 import {
   createSupportMessage,
   createSupportTicket,
@@ -87,8 +88,10 @@ export default function SupportPage() {
           setTickets((current) => [result.ticket, ...current]);
           setExpandedTicketId(result.ticket.id);
         }
-      } catch {
-        toast.error(err.message || "No se pudo enviar la consulta");
+      } catch (error) {
+        toast.error(
+          getErrorMessage(error, "No se pudo enviar la consulta"),
+        );
       }
     });
   }
@@ -114,8 +117,8 @@ export default function SupportPage() {
             ),
           );
         }
-      } catch {
-        toast.error(err.message || "No se pudo responder");
+      } catch (error) {
+        toast.error(getErrorMessage(error, "No se pudo responder"));
       }
     });
   }

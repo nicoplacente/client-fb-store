@@ -25,8 +25,8 @@ export default function ConfirmationDialog({
     ? "focus:ring-red-300/40"
     : "focus:ring-amber-300/40";
   const confirmClassName = isDanger
-    ? "bg-red-500 text-white hover:bg-red-400 focus:ring-red-200/70"
-    : "bg-amber-400 text-neutral-950 hover:bg-amber-300 focus:ring-amber-200/70";
+    ? "border border-red-300/40 bg-red-500 text-white shadow-[0_14px_36px_rgba(239,68,68,0.16)] hover:border-red-300/25 hover:bg-red-950/35 hover:text-red-100 focus:ring-red-200/70"
+    : "border border-amber-200/55 bg-amber-300/12 text-white shadow-[0_14px_36px_rgba(251,191,36,0.12)] hover:border-amber-200/30 hover:bg-black/35 hover:text-amber-100 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] focus:ring-amber-200/70";
 
   useEffect(() => {
     if (!open) return undefined;
@@ -100,7 +100,7 @@ export default function ConfirmationDialog({
             <button
               type="button"
               onClick={onCancel}
-              className="inline-flex items-center justify-center rounded-md border border-white/10 bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
+              className="inline-flex cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
             >
               {cancelLabel}
             </button>
@@ -108,7 +108,7 @@ export default function ConfirmationDialog({
               type="button"
               onClick={onConfirm}
               disabled={confirmDisabled}
-              className={`inline-flex items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-black transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 ${confirmClassName}`}
+              className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-black transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 ${confirmClassName}`}
             >
               <IconCheck size={18} />
               {confirmLabel}
