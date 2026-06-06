@@ -104,7 +104,7 @@ export default function Home() {
           href="https://chromewebstore.google.com/detail/bertellitos/aeghpachelnjfcckdhdgeegpacgbnpng?hl=es-419"
           className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/40 sm:w-fit"
           aria-label="Instalar extensión"
-          rel="noopener noreferrer nofollow"
+          rel="noopener noreferrer"
           target="_blank"
         >
           <IconBrandChrome size={18} />

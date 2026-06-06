@@ -342,7 +342,7 @@ function MobileHeaderMenu({
                 key={item.href}
                 href={item.href}
                 target={item.external ? "_blank" : undefined}
-                rel={item.external ? "noopener noreferrer" : undefined}
+                rel={item.external ? "noopener" : undefined}
                 className={`flex items-center gap-3 rounded-lg border px-3 py-3 text-sm font-semibold transition ${
                   active
                     ? item.accent === "blue"
