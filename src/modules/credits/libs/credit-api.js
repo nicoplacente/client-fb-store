@@ -23,6 +23,12 @@ export async function updateCreditPackage(packageId, creditPackage) {
   });
 }
 
+export async function deleteCreditPackage(packageId) {
+  return apiRequest(buildResourceUrl(envConfig.API_CREDIT_PACKAGES, packageId), {
+    method: "DELETE",
+  });
+}
+
 export async function purchaseCreditPackage(packageId, { quantity = 1 } = {}) {
   return apiRequest(
     `${buildResourceUrl(envConfig.API_CREDIT_PACKAGES, packageId)}/purchase`,

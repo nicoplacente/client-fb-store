@@ -36,6 +36,28 @@ body {
   min-width: 0;
 }
 
+.credit-packages-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #171717 transparent;
+}
+
+.credit-packages-scroll::-webkit-scrollbar {
+  height: 0.35rem;
+}
+
+.credit-packages-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.credit-packages-scroll::-webkit-scrollbar-thumb {
+  background: #171717;
+  border-radius: 999px;
+}
+
+.credit-packages-scroll::-webkit-scrollbar-thumb:hover {
+  background: #1f1f1f;
+}
+
 @property --gamer-angle {
   syntax: "<angle>";
   inherits: false;

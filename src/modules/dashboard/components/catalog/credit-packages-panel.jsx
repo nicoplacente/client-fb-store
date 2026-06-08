@@ -24,6 +24,7 @@ export default function CreditPackagesPanel({
   onSubmit,
   onCancel,
   onEdit,
+  onDelete,
 }) {
   return (
     <div className="space-y-5">
@@ -45,6 +46,7 @@ export default function CreditPackagesPanel({
             detail={`${creditPackage.pointsCost.toLocaleString()} puntos - ${creditPackage.status}`}
             icon={<IconCoins size={42} />}
             onEdit={() => onEdit(creditPackage)}
+            onDelete={() => onDelete(creditPackage)}
           />
         )}
       />

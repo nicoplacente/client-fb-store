@@ -11,6 +11,7 @@ import {
 } from "@/modules/products/libs/product-api";
 import {
   createCreditPackage,
+  deleteCreditPackage,
   normalizeCreditPackage,
   updateCreditPackage,
 } from "@/modules/credits/libs/credit-api";
@@ -305,6 +306,19 @@ export default function useDashboardController() {
     });
   }
 
+  function deleteCreditPackageById(creditPackage) {
+    startTransition(async () => {
+      try {
+        await deleteCreditPackage(creditPackage.id);
+        toast.success("Pack de creditos eliminado");
+        if (selectedCreditPackageId === creditPackage.id) resetCreditPackageForm();
+        await loadDashboard();
+      } catch {
+        toast.error("No se pudo eliminar el pack");
+      }
+    });
+  }
+
   function removeProduct(product) {
     setConfirmation({
       type: "delete-product",
@@ -317,6 +331,21 @@ export default function useDashboardController() {
         "Esta accion puede afectar la gestion del market.",
       ],
       target: product,
+    });
+  }
+
+  function removeCreditPackage(creditPackage) {
+    setConfirmation({
+      type: "delete-credit-package",
+      title: "Eliminar pack de creditos",
+      description: `Vas a eliminar "${creditPackage.name}" del listado de packs.`,
+      confirmLabel: "Eliminar pack",
+      cancelLabel: "Conservar pack",
+      details: [
+        "El pack dejara de estar disponible para nuevas compras.",
+        "Tambien se eliminara el historial de compras asociado a este pack.",
+      ],
+      target: creditPackage,
     });
   }
 
@@ -482,6 +511,11 @@ export default function useDashboardController() {
       return;
     }
 
+    if (current.type === "delete-credit-package") {
+      deleteCreditPackageById(current.target);
+      return;
+    }
+
     if (current.type === "delete-giveaway") {
       deleteGiveawayById(current.target);
       return;
@@ -574,6 +608,7 @@ export default function useDashboardController() {
       setCreditPackageForm(creditPackageToForm(creditPackage));
       setCreditPackageModalOpen(true);
     },
+    removeCreditPackage,
     giveawayForm,
     selectedGiveawayId,
     giveawayModalOpen,

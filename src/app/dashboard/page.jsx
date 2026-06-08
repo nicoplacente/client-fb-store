@@ -181,6 +181,7 @@ function DashboardActivePanel({ dashboard }) {
         onSubmit={dashboard.submitCreditPackage}
         onCancel={dashboard.resetCreditPackageForm}
         onEdit={dashboard.editCreditPackage}
+        onDelete={dashboard.removeCreditPackage}
       />
     );
   }

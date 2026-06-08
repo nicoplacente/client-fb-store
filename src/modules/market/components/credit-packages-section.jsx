@@ -5,8 +5,16 @@ import CreditPackageCard from "./credit-package-card";
 function CreditPackagesSection({ creditPackages, disabled, onPurchase }) {
   if (creditPackages.length === 0) return null;
 
+  const hasHorizontalScroll = creditPackages.length > 3;
+  const layoutClassName = hasHorizontalScroll
+    ? "credit-packages-scroll flex flex-col gap-4 md:-mx-1 md:flex-row md:overflow-x-auto md:px-1 md:pb-3"
+    : `grid w-full gap-4 ${getCenteredGridClassName(creditPackages.length)}`;
+  const itemClassName = hasHorizontalScroll
+    ? "w-full md:flex-[0_0_min(25rem,calc((100%_-_1.5rem)_/_3.25))]"
+    : "w-full";
+
   return (
-    <section className="relative overflow-hidden rounded-2xl p-4 sm:p-5">
+    <section className="relative overflow-hidden rounded-2xl p-4 sm:p-0">
       {/* <section className="relative overflow-hidden rounded-2xl border border-white/10 bg-[linear-gradient(135deg,rgba(251,191,36,0.08),rgba(10,10,10,0.82)_36%,rgba(10,10,10,0.94))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-5"> */}
       <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-amber-200/45 to-transparent" />
       <div className="relative space-y-5">
@@ -29,19 +37,18 @@ function CreditPackagesSection({ creditPackages, disabled, onPurchase }) {
           </span>
         </div>
 
-        <div className="flex flex-col gap-4 md:-mx-1 md:flex-row md:overflow-x-auto md:px-1 md:pb-3">
-          {creditPackages.map((creditPackage) => (
-            <div
-              key={creditPackage.id}
-              className="w-full md:w-[min(24rem,calc(100vw-7rem))] md:shrink-0"
-            >
-              <CreditPackageCard
-                creditPackage={creditPackage}
-                onPurchase={onPurchase}
-                disabled={disabled}
-              />
-            </div>
-          ))}
+        <div>
+          <div className={layoutClassName}>
+            {creditPackages.map((creditPackage) => (
+              <div key={creditPackage.id} className={itemClassName}>
+                <CreditPackageCard
+                  creditPackage={creditPackage}
+                  onPurchase={onPurchase}
+                  disabled={disabled}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -49,3 +56,9 @@ function CreditPackagesSection({ creditPackages, disabled, onPurchase }) {
 }
 
 export default memo(CreditPackagesSection);
+
+function getCenteredGridClassName(itemsCount) {
+  if (itemsCount === 1) return "md:grid-cols-1";
+  if (itemsCount === 2) return "md:grid-cols-2";
+  return "md:grid-cols-3";
+}
