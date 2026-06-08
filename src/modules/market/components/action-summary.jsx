@@ -1,4 +1,6 @@
-import { IconMinus, IconPlus, IconSparkles } from "@tabler/icons-react";
+import Image from "next/image";
+import { IconBrandKick, IconMinus, IconPlus, IconSparkles } from "@tabler/icons-react";
+import coins from "@/assets/coins.webp";
 import {
   clampRedemptionQuantity,
   formatNumber,
@@ -36,9 +38,10 @@ export default function ActionSummary({
         value={isPurchase ? item.name : item.title}
       />
       <SummaryRow
-        label={isPurchase ? "Puntos por pack" : "Creditos a usar"}
+        label={isPurchase ? "Costo unitario del pack" : "Creditos necesarios"}
         value={formatNumber(isPurchase ? item.pointsCost : totalCost)}
-        valueClassName="text-amber-200"
+        valueClassName={isPurchase ? "text-green-300" : "text-amber-200"}
+        icon={isPurchase ? <PointsIcon /> : <CreditsIcon />}
       />
       {isPurchase ? (
         <>
@@ -50,13 +53,15 @@ export default function ActionSummary({
             onChange={onQuantityChange}
           />
           <SummaryRow
-            label="Total de puntos"
+            label="Total a descontar de tus puntos"
             value={formatNumber(totalCost)}
-            valueClassName="text-amber-200"
+            valueClassName="text-green-300"
+            icon={<PointsIcon />}
           />
           <SummaryRow
-            label="Creditos que recibis"
+            label="Creditos acreditados al instante"
             value={formatNumber(totalCredits)}
+            icon={<CreditsIcon />}
           />
         </>
       ) : isSingleRedemption ? (
@@ -81,17 +86,19 @@ function BulkCreditPurchaseSummary({ plan }) {
         value={`${formatNumber(plan.totalPacks)} ${plan.totalPacks === 1 ? "pack" : "packs"}`}
       />
       <SummaryRow
-        label="Total de puntos"
+        label="Total a descontar de tus puntos"
         value={formatNumber(plan.totalPointsCost)}
-        valueClassName="text-amber-200"
+        valueClassName="text-green-300"
+        icon={<PointsIcon />}
       />
       <SummaryRow
-        label="Creditos que recibis"
+        label="Creditos acreditados al instante"
         value={formatNumber(plan.totalCredits)}
+        icon={<CreditsIcon />}
       />
 
       <div className="grid gap-2 border-t border-white/10 pt-3">
-        <p className="text-sm font-semibold text-neutral-300">Detalle</p>
+        <p className="text-sm font-semibold text-neutral-300">Detalle de packs seleccionados</p>
         <div className="grid gap-2">
           {plan.items.map((item) => (
             <div
@@ -107,8 +114,16 @@ function BulkCreditPurchaseSummary({ plan }) {
                 </strong>
               </div>
               <div className="mt-1 flex items-center justify-between gap-3 text-xs text-neutral-500">
-                <span>{formatNumber(item.pointsCost)} puntos</span>
-                <span>{formatNumber(item.credits)} creditos</span>
+                <CurrencyValue
+                  icon={<PointsIcon size={14} />}
+                  value={`${formatNumber(item.pointsCost)} puntos usados`}
+                  className="text-green-300/80"
+                />
+                <CurrencyValue
+                  icon={<CreditsIcon size="size-4" />}
+                  value={`${formatNumber(item.credits)} creditos recibidos`}
+                  className="text-neutral-300"
+                />
               </div>
             </div>
           ))}
@@ -117,22 +132,44 @@ function BulkCreditPurchaseSummary({ plan }) {
 
       {plan.remainingPoints > 0 ? (
         <SummaryRow
-          label="Puntos restantes"
+          label="Puntos que conservas despues de la compra"
           value={formatNumber(plan.remainingPoints)}
-          valueClassName="text-neutral-400"
+          valueClassName="text-green-300/80"
+          icon={<PointsIcon />}
         />
       ) : null}
     </div>
   );
 }
 
-function SummaryRow({ label, value, valueClassName = "text-white" }) {
+function SummaryRow({ label, value, valueClassName = "text-white", icon }) {
   return (
     <div className="flex items-center justify-between gap-4">
       <span className="text-neutral-400">{label}</span>
-      <strong className={`text-right ${valueClassName}`}>{value}</strong>
+      <CurrencyValue
+        icon={icon}
+        value={value}
+        className={`justify-end text-right font-black ${valueClassName}`}
+      />
     </div>
   );
+}
+
+function CurrencyValue({ icon, value, className = "" }) {
+  return (
+    <span className={`inline-flex items-center gap-1.5 ${className}`}>
+      {icon}
+      <span>{value}</span>
+    </span>
+  );
+}
+
+function PointsIcon({ size = 16 }) {
+  return <IconBrandKick size={size} className="shrink-0 text-green-400" />;
+}
+
+function CreditsIcon({ size = "size-4" }) {
+  return <Image src={coins} alt="Creditos" className={`shrink-0 ${size}`} />;
 }
 
 function CreditPurchaseQuantityControl({
@@ -176,7 +213,7 @@ function CreditPurchaseQuantityControl({
         </span>
       </div>
 
-      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-amber-300/50 focus-within:ring-2 focus-within:ring-amber-300/15">
+      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-green-300/50 focus-within:ring-2 focus-within:ring-green-300/15">
         <button
           type="button"
           onClick={() => updateQuantity(safeValue - 1)}
@@ -208,18 +245,11 @@ function CreditPurchaseQuantityControl({
         </button>
       </div>
 
-      <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
-        <span>Limite segun tus puntos actuales</span>
-        <strong className="font-black text-amber-200">
-          {safeValue} {safeValue === 1 ? "pack" : "packs"}
-        </strong>
-      </div>
-
       <button
         type="button"
         onClick={onMaxPurchase}
         disabled={!canMaxPurchase}
-        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:border-amber-200/55 hover:bg-amber-300/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-200/60 disabled:cursor-not-allowed disabled:border-amber-200/15 disabled:bg-black/20 disabled:text-amber-100/40"
+        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-500/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:border-green-300/55 hover:bg-green-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-300/60 disabled:cursor-not-allowed disabled:border-green-300/15 disabled:bg-black/20 disabled:text-green-100/40"
         aria-label="Comprar el maximo de creditos posible"
       >
         <IconSparkles size={18} />

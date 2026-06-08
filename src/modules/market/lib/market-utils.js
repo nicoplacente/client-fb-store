@@ -274,7 +274,7 @@ export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
     return {
       title: "Confirmar compra maxima",
       description: hasPurchases
-        ? `Vas a usar ${formatNumber(plan.totalPointsCost)} puntos y recibir ${formatNumber(plan.totalCredits)} creditos al instante.`
+        ? `Se descontaran ${formatNumber(plan.totalPointsCost)} puntos de Kick y se acreditaran ${formatNumber(plan.totalCredits)} creditos en tu cuenta.`
         : `No tenes puntos suficientes para comprar packs de creditos.`,
       confirmLabel: "Comprar maximo",
       confirmDisabled: !hasPurchases,
@@ -294,7 +294,7 @@ export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
     return {
       title: "Confirmar compra",
       description: hasEnoughPoints
-        ? `Vas a usar ${formatNumber(totalPointsCost)} puntos y recibir ${formatNumber(totalCredits)} creditos al instante.`
+        ? `Se descontaran ${formatNumber(totalPointsCost)} puntos de Kick y se acreditaran ${formatNumber(totalCredits)} creditos en tu cuenta.`
         : `No tenes puntos suficientes para comprar este pack.`,
       confirmLabel: "Comprar",
       confirmDisabled: !hasEnoughPoints,
