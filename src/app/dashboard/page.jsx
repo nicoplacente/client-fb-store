@@ -124,7 +124,7 @@ function DashboardStats({ stats }) {
 
 function DashboardTabs({ activeTab, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-neutral-950/75 p-2 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] lg:flex lg:gap-2">
+    <div className="grid grid-cols-3 gap-2 rounded-2xl p-2 lg:flex lg:gap-2">
       {dashboardTabs.map((tab) => {
         const Icon = tab.icon;
         const active = activeTab === tab.id;
@@ -133,7 +133,7 @@ function DashboardTabs({ activeTab, onChange }) {
           <button
             key={tab.id}
             onClick={() => onChange(tab.id)}
-            className={`flex min-h-16 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-red-300/40 lg:min-h-0 lg:flex-row lg:gap-2 lg:px-4 lg:py-3 lg:text-sm ${
+            className={`flex min-h-16 grow cursor-pointer flex-col shadow-xl shadow-black/20 items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-red-300/40 lg:min-h-0 lg:flex-row lg:gap-2 lg:px-4 lg:py-3 lg:text-sm ${
               active
                 ? "border-red-300/45 bg-red-500/15 text-white shadow-lg shadow-red-950/20"
                 : "border-white/10 bg-neutral-900/55 text-neutral-500 hover:-translate-y-0.5 hover:border-red-300/25 hover:bg-white/[0.04] hover:text-neutral-200"

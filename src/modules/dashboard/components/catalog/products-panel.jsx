@@ -88,7 +88,7 @@ function ProductFormDialog({
   }
 
   return (
-    <ModalForm onSubmit={handleSubmit}>
+    <ModalForm onCancel={onCancel} onSubmit={handleSubmit}>
       <PanelHeader
         title={selectedId ? "Editar producto" : "Nuevo producto"}
         subtitle="Market y carousel"

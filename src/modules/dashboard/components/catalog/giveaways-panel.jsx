@@ -81,7 +81,7 @@ function GiveawayFormDialog({
   }
 
   return (
-    <ModalForm onSubmit={handleSubmit}>
+    <ModalForm onCancel={onCancel} onSubmit={handleSubmit}>
       <PanelHeader
         title={selectedId ? "Editar sorteo" : "Nuevo sorteo"}
         subtitle="Participacion y fechas"

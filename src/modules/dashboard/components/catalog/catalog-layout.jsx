@@ -5,7 +5,7 @@ export function CreateButton({ children, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 sm:w-fit"
+      className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
     >
       <IconPlus size={18} />
       {children}
@@ -25,11 +25,15 @@ export function PanelTitle({ title, subtitle, action }) {
   );
 }
 
-export function ModalForm({ children, onSubmit }) {
+export function ModalForm({ children, onCancel, onSubmit }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-2 sm:items-center sm:p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/80 p-2 sm:items-center sm:p-4"
+      onClick={onCancel}
+    >
       <form
         onSubmit={onSubmit}
+        onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
         className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black ring-1 ring-white/[0.03] [contain:layout_paint] sm:max-h-[90vh] sm:p-5"

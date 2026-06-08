@@ -1,6 +1,11 @@
 import { memo } from "react";
 import Image from "next/image";
-import { IconArrowRight, IconBrandKick, IconCoins, IconPlus } from "@tabler/icons-react";
+import {
+  IconArrowRight,
+  IconBrandKick,
+  IconCoins,
+  IconPlus,
+} from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import { formatNumber } from "../lib/market-utils";
 

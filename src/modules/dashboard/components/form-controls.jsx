@@ -41,7 +41,7 @@ export function FormattedNumberInput({
           normalizeNumberInput(event.target.value, {
             allowDecimals,
             decimalScale,
-          })
+          }),
         )
       }
       className={`font-mono tabular-nums ${className}`}
@@ -83,13 +83,18 @@ function normalizeNumberInput(value, { allowDecimals, decimalScale }) {
     return normalizeInteger(cleanValue);
   }
 
-  const decimalSeparatorIndex = getDecimalSeparatorIndex(cleanValue, decimalScale);
+  const decimalSeparatorIndex = getDecimalSeparatorIndex(
+    cleanValue,
+    decimalScale,
+  );
 
   if (decimalSeparatorIndex === -1) {
     return normalizeInteger(cleanValue);
   }
 
-  const integerValue = normalizeInteger(cleanValue.slice(0, decimalSeparatorIndex));
+  const integerValue = normalizeInteger(
+    cleanValue.slice(0, decimalSeparatorIndex),
+  );
   const decimalValue = cleanValue
     .slice(decimalSeparatorIndex + 1)
     .replace(/\D/g, "")
@@ -112,10 +117,13 @@ function getDecimalSeparatorIndex(value, decimalScale) {
   if (separatorIndex === -1) return -1;
 
   const separator = value[separatorIndex];
-  const decimalsLength = value.slice(separatorIndex + 1).replace(/\D/g, "").length;
+  const decimalsLength = value
+    .slice(separatorIndex + 1)
+    .replace(/\D/g, "").length;
 
   if (separator === ",") return separatorIndex;
-  if (decimalsLength > 0 && decimalsLength <= decimalScale) return separatorIndex;
+  if (decimalsLength > 0 && decimalsLength <= decimalScale)
+    return separatorIndex;
 
   return -1;
 }
@@ -155,7 +163,7 @@ export function SubmitButton({ isPending, selectedId }) {
     <button
       type="submit"
       disabled={isPending}
-      className="mt-6 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-red-600 px-4 py-3 text-sm font-black text-white shadow-lg shadow-red-950/25 transition hover:-translate-y-0.5 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
+      className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
     >
       {selectedId ? <IconDeviceFloppy size={18} /> : <IconPlus size={18} />}
       {selectedId ? "Guardar cambios" : "Crear"}

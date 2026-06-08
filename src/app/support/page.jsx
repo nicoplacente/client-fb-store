@@ -89,9 +89,7 @@ export default function SupportPage() {
           setExpandedTicketId(result.ticket.id);
         }
       } catch (error) {
-        toast.error(
-          getErrorMessage(error, "No se pudo enviar la consulta"),
-        );
+        toast.error(getErrorMessage(error, "No se pudo enviar la consulta"));
       }
     });
   }
@@ -152,7 +150,7 @@ export default function SupportPage() {
               </h2>
               <p className="text-sm text-neutral-500">
                 {user
-                  ? "Te respondemos desde el backend configurado."
+                  ? "Te respondemos a la brevedad."
                   : "Inicia sesion para que podamos responderte."}
               </p>
             </div>
@@ -254,7 +252,11 @@ export default function SupportPage() {
                     </span>
                     <span className="flex items-center gap-2">
                       <span className="rounded bg-white/5 px-2 py-1 text-xs text-neutral-400">
-                        {ticket.status}
+                        {ticket.status == "in_progress"
+                          ? "En proceso"
+                          : ticket.status == "closed"
+                            ? "Cerrado"
+                            : "Abierto"}
                       </span>
                       <IconChevronDown
                         size={16}
@@ -348,7 +350,7 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
           type="button"
           disabled={disabled || !reply.trim()}
           onClick={onReply}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-bold text-white transition hover:bg-red-500 disabled:cursor-not-allowed disabled:bg-neutral-800 disabled:text-neutral-500"
+          className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
         >
           <IconSend size={17} />
           Responder

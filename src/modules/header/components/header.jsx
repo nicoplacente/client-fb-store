@@ -85,7 +85,11 @@ export default function Header() {
           }
         }
       } catch {
-        console.error("Error obteniendo puntos");
+        if (!cancelled) {
+          setKickPoints(0);
+          setHasLoadedPoints(true);
+          hasLoadedPointsRef.current = true;
+        }
       } finally {
         isFetchingPointsRef.current = false;
 
@@ -171,7 +175,7 @@ export default function Header() {
           src="/logo.webp"
           alt="Logo Franco Bertello"
           className="
-          size-10 lg:size-12 p-1
+          size-10 min-[1501px]:size-12 p-1
           transition-all duration-300
           hover:[filter:brightness(2)_drop-shadow(0_0_8px_#FFD700)_drop-shadow(0_0_20px_#FFD700)_drop-shadow(0_0_40px_#FFC107)]
         "
@@ -183,7 +187,7 @@ export default function Header() {
       </Link>
 
       {user ? (
-        <div className="ml-auto hidden max-w-full items-center gap-2 py-2 lg:flex lg:gap-4">
+        <div className="ml-auto hidden max-w-full items-center gap-2 py-2 min-[1501px]:flex min-[1501px]:gap-4">
           <Link
             href="/market"
             className="flex shrink-0 items-center gap-2 rounded-lg border-2 border-dashed border-orange-300/50 bg-gradient-to-br from-neutral-900 via-orange-300/30 to-neutral-900 px-2 py-1 font-mono font-semibold shadow-[4px_4px_10px_rgba(0,0,0,0.4)] saturate-150 transition-all duration-300 hover:translate-y-0.5 hover:saturate-200 sm:px-4 sm:py-0.5"
@@ -230,12 +234,12 @@ export default function Header() {
           </Link>
         </div>
       ) : (
-        <div className="ml-auto hidden lg:block">
+        <div className="ml-auto hidden min-[1501px]:block">
           <HandleShowLogin />
         </div>
       )}
 
-      <div className="ml-auto flex items-center gap-2 lg:hidden">
+      <div className="ml-auto flex items-center gap-2 min-[1501px]:hidden">
         <button
           type="button"
           onClick={() => setMenuOpen(true)}
@@ -276,7 +280,7 @@ function MobileHeaderMenu({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 lg:hidden">
+    <div className="fixed inset-0 z-50 min-[1501px]:hidden">
       <button
         type="button"
         className="absolute inset-0 bg-black/75 backdrop-blur-sm [animation:mobile-menu-backdrop-in_180ms_ease-out]"

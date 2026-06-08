@@ -65,21 +65,23 @@ function ProductCard({
         )}
       </div>
 
-      <div className="flex w-full flex-1 flex-col items-center justify-between gap-4 pt-4">
+      <div className="flex w-full flex-1 flex-col items-center gap-4 pt-4">
         <ProductInfo product={product} />
-        <ProductPrice
-          product={product}
-          outOfStock={outOfStock}
-          unavailable={unavailable}
-        />
-        <RedeemButton
-          product={product}
-          disabled={disabled || unavailable}
-          outOfStock={outOfStock}
-          isDisabled={isDisabled}
-          unavailable={unavailable}
-          onRedeem={onRedeem}
-        />
+        <div className="mt-auto grid w-full gap-4">
+          <ProductPrice
+            product={product}
+            outOfStock={outOfStock}
+            unavailable={unavailable}
+          />
+          <RedeemButton
+            product={product}
+            disabled={disabled || unavailable}
+            outOfStock={outOfStock}
+            isDisabled={isDisabled}
+            unavailable={unavailable}
+            onRedeem={onRedeem}
+          />
+        </div>
       </div>
     </SpotlightCard>
   );
@@ -121,7 +123,7 @@ function ProductInfo({ product }) {
           {product.category}
         </span>
       </div>
-      <p className="mx-auto mt-3 line-clamp-2 min-h-10 max-w-[16rem] text-sm font-semibold leading-5 text-neutral-500">
+      <p className="mx-auto mt-3 max-w-[16rem] text-sm font-semibold leading-5 text-neutral-500">
         {product.description || "Producto disponible en la tienda."}
       </p>
     </div>
@@ -175,7 +177,7 @@ function RedeemButton({
       onClick={() => onRedeem(product)}
       aria-label={`Canjear producto ${product.title}`}
       data-spotlight-cta
-      className="spotlight-cta mt-auto inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 min-w-full disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+      className="spotlight-cta inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 min-w-full disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
     >
       {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
       {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}

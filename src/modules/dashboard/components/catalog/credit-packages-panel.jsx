@@ -50,7 +50,7 @@ export default function CreditPackagesPanel({
       />
 
       {isFormOpen ? (
-        <ModalForm onSubmit={onSubmit}>
+        <ModalForm onCancel={onCancel} onSubmit={onSubmit}>
           <PanelHeader
             title={selectedId ? "Editar pack" : "Nuevo pack"}
             subtitle="Creditos comprados con puntos"

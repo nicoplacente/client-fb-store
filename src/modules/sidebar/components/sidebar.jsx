@@ -16,13 +16,13 @@ export default function Sidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] border-r border-white/10 bg-neutral-950/95 text-gray-100 shadow-2xl shadow-black/20 backdrop-blur transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:block
-        ${isOpen ? "lg:w-72" : "lg:w-20"}`}
+      className={`fixed left-0 top-16 z-20 hidden h-[calc(100vh-4rem)] border-r border-white/10 bg-neutral-950/95 text-gray-100 shadow-2xl shadow-black/20 backdrop-blur transition-[width] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] min-[1501px]:block
+        ${isOpen ? "min-[1501px]:w-72" : "min-[1501px]:w-20"}`}
       onMouseEnter={() => !expanded && setHovered(true)}
       onMouseLeave={() => !expanded && setHovered(false)}
     >
       <button
-        className={`absolute -right-3 top-6 z-30 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-300 shadow-lg shadow-black/30 transition-[opacity,transform,background,color] duration-300 ease-out hover:scale-110 hover:bg-red-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 lg:flex ${
+        className={`absolute -right-3 top-6 z-30 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-300 shadow-lg shadow-black/30 transition-[opacity,transform,background,color] duration-300 ease-out hover:scale-110 hover:bg-red-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 min-[1501px]:flex ${
           expanded ? "rotate-12 text-red-100" : "-rotate-45"
         } ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         aria-label={expanded ? "Desfijar sidebar" : "Fijar sidebar"}
