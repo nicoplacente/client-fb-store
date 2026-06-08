@@ -25,6 +25,7 @@ import {
   purchaseCreditPackage,
 } from "@/modules/credits/libs/credit-api";
 import { getMyRanking } from "@/modules/ranking/libs/ranking-api";
+import { emitKickPointsUpdated } from "@/modules/ranking/libs/points-events";
 import ActionSummary from "@/modules/market/components/action-summary";
 import CreditPackagesSection from "@/modules/market/components/credit-packages-section";
 import MarketToolbar from "@/modules/market/components/market-toolbar";
@@ -32,6 +33,7 @@ import ProductsGrid from "@/modules/market/components/products-grid";
 import {
   getActionConfirmation,
   getCreditPurchaseQuantity,
+  getMaxCreditPurchasePlan,
   getRedemptionQuantity,
   saveLocalRedemption,
 } from "@/modules/market/lib/market-utils";
@@ -73,6 +75,10 @@ export default function MarketPage() {
   const filteredProducts = useMemo(
     () => filterProducts(normalizedProducts, category, deferredQuery),
     [category, deferredQuery, normalizedProducts],
+  );
+  const maxPurchasePlan = useMemo(
+    () => getMaxCreditPurchasePlan(normalizedCreditPackages, availablePoints),
+    [availablePoints, normalizedCreditPackages],
   );
 
   const loadMarket = useCallback(async ({ showLoading = true } = {}) => {
@@ -144,6 +150,15 @@ export default function MarketPage() {
     });
   }, [availablePoints, isPending]);
 
+  const handleRequestMaxPurchase = useCallback(() => {
+    if (isPending || !maxPurchasePlan) return;
+
+    setPendingAction({
+      type: "bulkPurchase",
+      plan: maxPurchasePlan,
+    });
+  }, [isPending, maxPurchasePlan]);
+
   const handleCancelAction = useCallback(() => {
     setPendingAction(null);
   }, []);
@@ -172,6 +187,16 @@ export default function MarketPage() {
           return;
         }
 
+        if (action.type === "bulkPurchase") {
+          await confirmBulkCreditPurchase({
+            action,
+            loadAvailablePoints,
+            refreshUser,
+            setAvailablePoints,
+          });
+          return;
+        }
+
         const quantity = getCreditPurchaseQuantity(
           action.quantity,
           action.item,
@@ -190,8 +215,10 @@ export default function MarketPage() {
 
         if (Number.isFinite(nextPoints)) {
           setAvailablePoints(nextPoints);
+          emitKickPointsUpdated(nextPoints);
         } else {
-          await loadAvailablePoints();
+          const points = await loadAvailablePoints();
+          emitKickPointsUpdated(points);
         }
 
         toast.success("Creditos acreditados");
@@ -203,6 +230,10 @@ export default function MarketPage() {
 
         if (action.type === "redeem") {
           await loadMarket({ showLoading: false });
+        }
+
+        if (action.type === "bulkPurchase") {
+          await loadAvailablePoints();
         }
       }
     });
@@ -257,6 +288,8 @@ export default function MarketPage() {
           <ActionSummary
             action={pendingAction}
             availablePoints={availablePoints}
+            maxPurchasePlan={maxPurchasePlan}
+            onMaxPurchase={handleRequestMaxPurchase}
             onQuantityChange={handleQuantityChange}
           />
         ) : null}
@@ -286,6 +319,34 @@ function filterProducts(products, category, query) {
 
       return Number(b.price || 0) - Number(a.price || 0);
     });
+}
+
+async function confirmBulkCreditPurchase({
+  action,
+  loadAvailablePoints,
+  refreshUser,
+  setAvailablePoints,
+}) {
+  let lastResult = null;
+
+  for (const item of action.plan.items) {
+    lastResult = await purchaseCreditPackage(item.creditPackage.id, {
+      quantity: item.quantity,
+    });
+  }
+
+  const nextPoints = Number(lastResult?.ranking?.points);
+
+  if (Number.isFinite(nextPoints)) {
+    setAvailablePoints(nextPoints);
+    emitKickPointsUpdated(nextPoints);
+  } else {
+    const points = await loadAvailablePoints();
+    emitKickPointsUpdated(points);
+  }
+
+  toast.success("Creditos acreditados");
+  await Promise.resolve(refreshUser?.()).catch(() => {});
 }
 
 async function confirmProductRedemption({

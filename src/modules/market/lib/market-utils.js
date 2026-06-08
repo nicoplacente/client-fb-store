@@ -50,6 +50,195 @@ export function getCreditPurchaseQuantity(value, creditPackage, availablePoints)
   return Math.min(safeQuantity, limit);
 }
 
+export function getMaxCreditPurchasePlan(creditPackages, availablePoints) {
+  const points = Math.max(0, Math.floor(Number(availablePoints || 0)));
+  const packages = creditPackages
+    .filter((creditPackage) => {
+      const pointsCost = Number(creditPackage?.pointsCost || 0);
+      const credits = Number(creditPackage?.credits || 0);
+
+      return (
+        creditPackage?.status === "active" &&
+        Number.isSafeInteger(pointsCost) &&
+        Number.isSafeInteger(credits) &&
+        pointsCost > 0 &&
+        credits > 0 &&
+        pointsCost <= points
+      );
+    })
+    .map((creditPackage) => ({
+      ...creditPackage,
+      pointsCost: Math.floor(Number(creditPackage.pointsCost || 0)),
+      credits: Math.floor(Number(creditPackage.credits || 0)),
+    }))
+    .toSorted((first, second) => {
+      if (second.pointsCost !== first.pointsCost) {
+        return second.pointsCost - first.pointsCost;
+      }
+
+      return second.credits - first.credits;
+    });
+
+  if (packages.length === 0) return null;
+
+  const plan = buildExactCreditPurchasePlan(packages, points) ||
+    buildGreedyCreditPurchasePlan(packages, points);
+
+  if (!plan || plan.totalPacks <= 0) return null;
+
+  return plan;
+}
+
+function buildExactCreditPurchasePlan(creditPackages, availablePoints) {
+  const divisor = creditPackages
+    .map((creditPackage) => creditPackage.pointsCost)
+    .reduce(greatestCommonDivisor);
+  const limit = Math.floor(availablePoints / divisor);
+
+  if (limit > 250000) return null;
+
+  const packages = creditPackages.map((creditPackage) => ({
+    ...creditPackage,
+    scaledCost: Math.floor(creditPackage.pointsCost / divisor),
+  }));
+  const states = Array(limit + 1).fill(null);
+  states[0] = {
+    totalCredits: 0,
+    packCount: 0,
+    previousAmount: null,
+    packageIndex: null,
+  };
+
+  for (let amount = 0; amount <= limit; amount += 1) {
+    const state = states[amount];
+
+    if (!state) continue;
+
+    packages.forEach((creditPackage, packageIndex) => {
+      const nextAmount = amount + creditPackage.scaledCost;
+
+      if (nextAmount > limit) return;
+
+      const nextState = {
+        totalCredits: state.totalCredits + creditPackage.credits,
+        packCount: state.packCount + 1,
+        previousAmount: amount,
+        packageIndex,
+      };
+
+      if (isBetterState(nextState, states[nextAmount])) {
+        states[nextAmount] = nextState;
+      }
+    });
+  }
+
+  const bestAmount = states.reduce((bestIndex, state, amount) => {
+    if (!state || amount === 0) return bestIndex;
+    if (bestIndex === 0) return amount;
+
+    const bestState = states[bestIndex];
+    const pointsSpent = amount * divisor;
+    const bestPointsSpent = bestIndex * divisor;
+
+    if (pointsSpent !== bestPointsSpent) {
+      return pointsSpent > bestPointsSpent ? amount : bestIndex;
+    }
+
+    if (state.totalCredits !== bestState.totalCredits) {
+      return state.totalCredits > bestState.totalCredits ? amount : bestIndex;
+    }
+
+    return state.packCount < bestState.packCount ? amount : bestIndex;
+  }, 0);
+
+  if (bestAmount === 0) return null;
+
+  const counts = Array(packages.length).fill(0);
+  let currentAmount = bestAmount;
+
+  while (currentAmount > 0) {
+    const state = states[currentAmount];
+
+    if (!state || state.packageIndex === null) break;
+
+    counts[state.packageIndex] += 1;
+    currentAmount = state.previousAmount;
+  }
+
+  return buildCreditPurchasePlan(packages, counts, availablePoints);
+}
+
+function buildGreedyCreditPurchasePlan(creditPackages, availablePoints) {
+  let remainingPoints = availablePoints;
+  const counts = Array(creditPackages.length).fill(0);
+
+  creditPackages.forEach((creditPackage, index) => {
+    const quantity = Math.floor(remainingPoints / creditPackage.pointsCost);
+
+    if (quantity <= 0) return;
+
+    counts[index] = quantity;
+    remainingPoints -= quantity * creditPackage.pointsCost;
+  });
+
+  return buildCreditPurchasePlan(creditPackages, counts, availablePoints);
+}
+
+function buildCreditPurchasePlan(creditPackages, counts, availablePoints) {
+  const items = creditPackages
+    .map((creditPackage, index) => {
+      const quantity = counts[index];
+
+      if (quantity <= 0) return null;
+
+      return {
+        creditPackage,
+        quantity,
+        pointsCost: creditPackage.pointsCost * quantity,
+        credits: creditPackage.credits * quantity,
+      };
+    })
+    .filter(Boolean);
+
+  const totalPointsCost = items.reduce(
+    (total, item) => total + item.pointsCost,
+    0
+  );
+  const totalCredits = items.reduce((total, item) => total + item.credits, 0);
+  const totalPacks = items.reduce((total, item) => total + item.quantity, 0);
+
+  return {
+    items,
+    totalCredits,
+    totalPacks,
+    totalPointsCost,
+    remainingPoints: Math.max(0, availablePoints - totalPointsCost),
+  };
+}
+
+function isBetterState(candidate, current) {
+  if (!current) return true;
+
+  if (candidate.totalCredits !== current.totalCredits) {
+    return candidate.totalCredits > current.totalCredits;
+  }
+
+  return candidate.packCount < current.packCount;
+}
+
+function greatestCommonDivisor(firstValue, secondValue) {
+  let first = Math.abs(Math.floor(Number(firstValue || 0)));
+  let second = Math.abs(Math.floor(Number(secondValue || 0)));
+
+  while (second > 0) {
+    const next = first % second;
+    first = second;
+    second = next;
+  }
+
+  return first || 1;
+}
+
 export function saveLocalRedemption(redemption) {
   if (typeof window === "undefined" || !redemption?.id) return;
 
@@ -77,6 +266,20 @@ export function saveLocalRedemption(redemption) {
 
 export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
   if (!action) return null;
+
+  if (action.type === "bulkPurchase") {
+    const plan = action.plan;
+    const hasPurchases = plan?.totalPacks > 0;
+
+    return {
+      title: "Confirmar compra maxima",
+      description: hasPurchases
+        ? `Vas a usar ${formatNumber(plan.totalPointsCost)} puntos y recibir ${formatNumber(plan.totalCredits)} creditos al instante.`
+        : `No tenes puntos suficientes para comprar packs de creditos.`,
+      confirmLabel: "Comprar maximo",
+      confirmDisabled: !hasPurchases,
+    };
+  }
 
   if (action.type === "purchase") {
     const quantity = getCreditPurchaseQuantity(

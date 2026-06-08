@@ -1,4 +1,4 @@
-import { IconMinus, IconPlus } from "@tabler/icons-react";
+import { IconMinus, IconPlus, IconSparkles } from "@tabler/icons-react";
 import {
   clampRedemptionQuantity,
   formatNumber,
@@ -11,8 +11,14 @@ import {
 export default function ActionSummary({
   action,
   availablePoints = 0,
+  maxPurchasePlan,
+  onMaxPurchase,
   onQuantityChange,
 }) {
+  if (action.type === "bulkPurchase") {
+    return <BulkCreditPurchaseSummary plan={action.plan} />;
+  }
+
   const isPurchase = action.type === "purchase";
   const item = action.item;
   const quantity = isPurchase
@@ -39,6 +45,8 @@ export default function ActionSummary({
           <CreditPurchaseQuantityControl
             value={quantity}
             max={getCreditPurchaseLimit(item, availablePoints)}
+            maxPurchasePlan={maxPurchasePlan}
+            onMaxPurchase={onMaxPurchase}
             onChange={onQuantityChange}
           />
           <SummaryRow
@@ -65,6 +73,59 @@ export default function ActionSummary({
   );
 }
 
+function BulkCreditPurchaseSummary({ plan }) {
+  return (
+    <div className="grid gap-3 text-sm text-neutral-300">
+      <SummaryRow
+        label="Packs"
+        value={`${formatNumber(plan.totalPacks)} ${plan.totalPacks === 1 ? "pack" : "packs"}`}
+      />
+      <SummaryRow
+        label="Total de puntos"
+        value={formatNumber(plan.totalPointsCost)}
+        valueClassName="text-amber-200"
+      />
+      <SummaryRow
+        label="Creditos que recibis"
+        value={formatNumber(plan.totalCredits)}
+      />
+
+      <div className="grid gap-2 border-t border-white/10 pt-3">
+        <p className="text-sm font-semibold text-neutral-300">Detalle</p>
+        <div className="grid gap-2">
+          {plan.items.map((item) => (
+            <div
+              key={item.creditPackage.id}
+              className="rounded-xl border border-white/10 bg-neutral-950 px-3 py-2"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <span className="font-semibold text-neutral-300">
+                  {item.creditPackage.name}
+                </span>
+                <strong className="text-right text-amber-200">
+                  {formatNumber(item.quantity)}x
+                </strong>
+              </div>
+              <div className="mt-1 flex items-center justify-between gap-3 text-xs text-neutral-500">
+                <span>{formatNumber(item.pointsCost)} puntos</span>
+                <span>{formatNumber(item.credits)} creditos</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {plan.remainingPoints > 0 ? (
+        <SummaryRow
+          label="Puntos restantes"
+          value={formatNumber(plan.remainingPoints)}
+          valueClassName="text-neutral-400"
+        />
+      ) : null}
+    </div>
+  );
+}
+
 function SummaryRow({ label, value, valueClassName = "text-white" }) {
   return (
     <div className="flex items-center justify-between gap-4">
@@ -74,11 +135,18 @@ function SummaryRow({ label, value, valueClassName = "text-white" }) {
   );
 }
 
-function CreditPurchaseQuantityControl({ value, max, onChange }) {
+function CreditPurchaseQuantityControl({
+  value,
+  max,
+  maxPurchasePlan,
+  onMaxPurchase,
+  onChange,
+}) {
   const safeMax = Math.max(0, Math.floor(Number(max || 0)));
   const safeValue = safeMax > 0
     ? Math.min(Math.max(1, Math.floor(Number(value || 1))), safeMax)
     : 0;
+  const canMaxPurchase = maxPurchasePlan?.totalPacks > 0;
 
   function updateQuantity(nextValue) {
     if (safeMax <= 0) {
@@ -146,6 +214,17 @@ function CreditPurchaseQuantityControl({ value, max, onChange }) {
           {safeValue} {safeValue === 1 ? "pack" : "packs"}
         </strong>
       </div>
+
+      <button
+        type="button"
+        onClick={onMaxPurchase}
+        disabled={!canMaxPurchase}
+        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-amber-300/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:border-amber-200/55 hover:bg-amber-300/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-200/60 disabled:cursor-not-allowed disabled:border-amber-200/15 disabled:bg-black/20 disabled:text-amber-100/40"
+        aria-label="Comprar el maximo de creditos posible"
+      >
+        <IconSparkles size={18} />
+        Comprar maximo
+      </button>
     </div>
   );
 }

@@ -19,6 +19,7 @@ import { envConfig } from "@/config";
 import { apiRequest } from "@/modules/api/client";
 import { legalMenuItems, menuItems } from "@/modules/sidebar/libs/menu-items";
 import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
+import { KICK_POINTS_UPDATED_EVENT } from "@/modules/ranking/libs/points-events";
 
 function formatExactNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
@@ -103,6 +104,28 @@ export default function Header() {
       clearInterval(interval);
     };
   }, [userId]);
+
+  useEffect(() => {
+    function handleKickPointsUpdated(event) {
+      const points = Number(event.detail?.points);
+
+      if (!Number.isFinite(points)) return;
+
+      setKickPoints(points);
+      setHasLoadedPoints(true);
+      hasLoadedPointsRef.current = true;
+      setLoadingPoints(false);
+    }
+
+    window.addEventListener(KICK_POINTS_UPDATED_EVENT, handleKickPointsUpdated);
+
+    return () => {
+      window.removeEventListener(
+        KICK_POINTS_UPDATED_EVENT,
+        handleKickPointsUpdated,
+      );
+    };
+  }, []);
 
   useEffect(() => {
     setMenuOpen(false);
