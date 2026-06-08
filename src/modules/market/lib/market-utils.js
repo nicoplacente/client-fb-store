@@ -30,6 +30,26 @@ export function getRedemptionQuantity(value, product) {
   return clampRedemptionQuantity(value, product?.stock);
 }
 
+export function getCreditPurchaseLimit(creditPackage, availablePoints) {
+  const pointsCost = Number(creditPackage?.pointsCost || 0);
+  const points = Number(availablePoints || 0);
+
+  if (!Number.isFinite(pointsCost) || pointsCost <= 0) return 0;
+  if (!Number.isFinite(points) || points <= 0) return 0;
+
+  return Math.max(0, Math.floor(points / pointsCost));
+}
+
+export function getCreditPurchaseQuantity(value, creditPackage, availablePoints) {
+  const limit = getCreditPurchaseLimit(creditPackage, availablePoints);
+  const quantity = Math.floor(Number(value || 1));
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(1, quantity) : 1;
+
+  if (limit <= 0) return 0;
+
+  return Math.min(safeQuantity, limit);
+}
+
 export function saveLocalRedemption(redemption) {
   if (typeof window === "undefined" || !redemption?.id) return;
 
@@ -55,14 +75,26 @@ export function saveLocalRedemption(redemption) {
   }
 }
 
-export function getActionConfirmation(action) {
+export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
   if (!action) return null;
 
   if (action.type === "purchase") {
+    const quantity = getCreditPurchaseQuantity(
+      action.quantity,
+      action.item,
+      availablePoints
+    );
+    const totalPointsCost = Number(action.item.pointsCost || 0) * quantity;
+    const totalCredits = Number(action.item.credits || 0) * quantity;
+    const hasEnoughPoints = quantity > 0;
+
     return {
       title: "Confirmar compra",
-      description: `Vas a usar ${formatNumber(action.item.pointsCost)} puntos y recibir ${formatNumber(action.item.credits)} creditos al instante.`,
+      description: hasEnoughPoints
+        ? `Vas a usar ${formatNumber(totalPointsCost)} puntos y recibir ${formatNumber(totalCredits)} creditos al instante.`
+        : `No tenes puntos suficientes para comprar este pack.`,
       confirmLabel: "Comprar",
+      confirmDisabled: !hasEnoughPoints,
     };
   }
 

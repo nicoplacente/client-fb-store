@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { IconInfinity, IconPackage } from "@tabler/icons-react";
+import { useId, useState } from "react";
+import { IconPackage } from "@tabler/icons-react";
 import AdminCard from "../admin-card";
 import {
   Field,
@@ -179,25 +179,35 @@ function ProductFormFields({ form, setForm }) {
 }
 
 function StockField({ form, setForm }) {
+  const stockId = useId();
+  const infiniteStockId = useId();
+
   return (
-    <Field label="Stock">
-      <div className="grid gap-2">
-        <TextInput
-          type="number"
+    <div className="grid gap-2 text-sm font-semibold text-neutral-300">
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:gap-6">
+        <label htmlFor={stockId}>Stock</label>
+        <label
+          htmlFor={infiniteStockId}
+          className="cursor-pointer whitespace-nowrap"
+        >
+          Stock ilimitado
+        </label>
+      </div>
+      <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-6">
+        <FormattedNumberInput
+          id={stockId}
           min="0"
           value={form.stock}
+          className="w-full"
           disabled={form.infiniteStock}
-          onChange={(event) =>
-            setForm((current) => ({ ...current, stock: event.target.value }))
+          onValueChange={(stock) =>
+            setForm((current) => ({ ...current, stock }))
           }
           required
         />
-        <label className="flex cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/70 px-3 py-2 text-sm font-bold text-neutral-300 transition hover:border-red-300/25 hover:bg-white/[0.03]">
-          <span className="inline-flex items-center gap-2">
-            <IconInfinity size={17} className="text-red-100" />
-            Stock infinito
-          </span>
+        <div className="flex items-center">
           <input
+            id={infiniteStockId}
             type="checkbox"
             checked={form.infiniteStock}
             onChange={(event) =>
@@ -207,10 +217,35 @@ function StockField({ form, setForm }) {
                 stock: event.target.checked ? current.stock || "0" : current.stock,
               }))
             }
-            className="size-4 accent-red-500"
+            className="sr-only"
           />
-        </label>
+          <button
+            type="button"
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                infiniteStock: !current.infiniteStock,
+                stock: !current.infiniteStock ? current.stock || "0" : current.stock,
+              }))
+            }
+            className={`relative h-11 w-24 cursor-pointer rounded-xl border shadow-inner shadow-black/10 transition hover:border-red-300/25 focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+              form.infiniteStock
+                ? "border-red-300/45 bg-red-500/15"
+                : "border-white/10 bg-neutral-900/90"
+            }`}
+            aria-pressed={form.infiniteStock}
+            aria-label="Alternar stock ilimitado"
+          >
+            <span
+              className={`absolute top-1/2 size-6 -translate-y-1/2 rounded-full shadow-sm transition ${
+                form.infiniteStock
+                  ? "left-15 bg-red-100"
+                  : "left-2 bg-white"
+              }`}
+            />
+          </button>
+        </div>
       </div>
-    </Field>
+    </div>
   );
 }

@@ -24,20 +24,23 @@ import {
   normalizeCreditPackage,
   purchaseCreditPackage,
 } from "@/modules/credits/libs/credit-api";
+import { getMyRanking } from "@/modules/ranking/libs/ranking-api";
 import ActionSummary from "@/modules/market/components/action-summary";
 import CreditPackagesSection from "@/modules/market/components/credit-packages-section";
 import MarketToolbar from "@/modules/market/components/market-toolbar";
 import ProductsGrid from "@/modules/market/components/products-grid";
 import {
   getActionConfirmation,
+  getCreditPurchaseQuantity,
   getRedemptionQuantity,
   saveLocalRedemption,
 } from "@/modules/market/lib/market-utils";
 
 export default function MarketPage() {
-  const { refreshUser } = useAppContext(AuthContext);
+  const { user, refreshUser } = useAppContext(AuthContext);
   const [products, setProducts] = useState([]);
   const [creditPackages, setCreditPackages] = useState([]);
+  const [availablePoints, setAvailablePoints] = useState(0);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("all");
   const [loading, setLoading] = useState(true);
@@ -45,6 +48,7 @@ export default function MarketPage() {
   const [pendingAction, setPendingAction] = useState(null);
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
+  const userId = user?.id;
 
   const normalizedProducts = useMemo(
     () =>
@@ -96,7 +100,29 @@ export default function MarketPage() {
     loadMarket();
   }, [loadMarket]);
 
-  const actionsDisabled = isPending || Boolean(pendingAction);
+  const loadAvailablePoints = useCallback(async () => {
+    if (!userId) {
+      setAvailablePoints(0);
+      return 0;
+    }
+
+    try {
+      const ranking = await getMyRanking();
+      const points = Number(ranking.points || 0);
+
+      setAvailablePoints(points);
+      return points;
+    } catch {
+      setAvailablePoints(0);
+      return 0;
+    }
+  }, [userId]);
+
+  useEffect(() => {
+    loadAvailablePoints();
+  }, [loadAvailablePoints]);
+
+  const actionsDisabled = isPending;
 
   const handleRequestRedeem = useCallback((product) => {
     if (isPending) return;
@@ -114,8 +140,9 @@ export default function MarketPage() {
     setPendingAction({
       type: "purchase",
       item: creditPackage,
+      quantity: getCreditPurchaseQuantity(1, creditPackage, availablePoints),
     });
-  }, [isPending]);
+  }, [availablePoints, isPending]);
 
   const handleCancelAction = useCallback(() => {
     setPendingAction(null);
@@ -145,7 +172,28 @@ export default function MarketPage() {
           return;
         }
 
-        await purchaseCreditPackage(action.item.id);
+        const quantity = getCreditPurchaseQuantity(
+          action.quantity,
+          action.item,
+          availablePoints,
+        );
+
+        if (quantity < 1) {
+          toast.error("Puntos insuficientes");
+          return;
+        }
+
+        const result = await purchaseCreditPackage(action.item.id, {
+          quantity,
+        });
+        const nextPoints = Number(result?.ranking?.points);
+
+        if (Number.isFinite(nextPoints)) {
+          setAvailablePoints(nextPoints);
+        } else {
+          await loadAvailablePoints();
+        }
+
         toast.success("Creditos acreditados");
         await Promise.resolve(refreshUser?.()).catch(() => {});
       } catch (error) {
@@ -158,11 +206,18 @@ export default function MarketPage() {
         }
       }
     });
-  }, [loadMarket, pendingAction, refreshUser, startTransition]);
+  }, [
+    availablePoints,
+    loadAvailablePoints,
+    loadMarket,
+    pendingAction,
+    refreshUser,
+    startTransition,
+  ]);
 
   const confirmation = useMemo(
-    () => getActionConfirmation(pendingAction),
-    [pendingAction],
+    () => getActionConfirmation(pendingAction, { availablePoints }),
+    [availablePoints, pendingAction],
   );
 
   return (
@@ -194,12 +249,14 @@ export default function MarketPage() {
         title={confirmation?.title}
         description={confirmation?.description}
         confirmLabel={confirmation?.confirmLabel}
+        confirmDisabled={confirmation?.confirmDisabled}
         onConfirm={handleConfirmAction}
         onCancel={handleCancelAction}
       >
         {pendingAction ? (
           <ActionSummary
             action={pendingAction}
+            availablePoints={availablePoints}
             onQuantityChange={handleQuantityChange}
           />
         ) : null}

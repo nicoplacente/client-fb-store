@@ -23,11 +23,14 @@ export async function updateCreditPackage(packageId, creditPackage) {
   });
 }
 
-export async function purchaseCreditPackage(packageId) {
+export async function purchaseCreditPackage(packageId, { quantity = 1 } = {}) {
   return apiRequest(
     `${buildResourceUrl(envConfig.API_CREDIT_PACKAGES, packageId)}/purchase`,
     {
       method: "POST",
+      body: {
+        quantity: Math.max(1, Math.floor(Number(quantity || 1))),
+      },
     }
   );
 }
