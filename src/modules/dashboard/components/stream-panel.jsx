@@ -21,6 +21,19 @@ function formatMultiplier(value) {
   })}`;
 }
 
+function formatSchedulerTime(value) {
+  if (!value) return null;
+
+  const date = new Date(value);
+
+  if (!Number.isFinite(date.getTime())) return null;
+
+  return date.toLocaleTimeString("es-AR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
 export default function StreamPanel({
   streamHour,
   streamRewards,
@@ -55,8 +68,11 @@ export default function StreamPanel({
     chestScheduler: {
       intervalMinutes: 45,
       durationSeconds: 60,
+      streamOnlineSince: null,
+      nextCheckAt: null,
     },
   };
+  const nextChestTime = formatSchedulerTime(chestState.chestScheduler.nextCheckAt);
 
   return (
     <section className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
@@ -171,9 +187,14 @@ export default function StreamPanel({
                 Cofres
               </h3>
               <p className="mt-1 text-sm text-neutral-500">
-                Automatico cada {chestState.chestScheduler.intervalMinutes} minutos y activo por{" "}
+                Automatico cada {chestState.chestScheduler.intervalMinutes} minutos desde que el stream esta online y activo por{" "}
                 {chestState.chestScheduler.durationSeconds} segundos.
               </p>
+              {nextChestTime ? (
+                <p className="mt-2 text-sm font-semibold text-amber-200">
+                  Proximo cofre automatico: {nextChestTime}.
+                </p>
+              ) : null}
               {chestState.chest ? (
                 <p className="mt-2 text-sm font-semibold text-green-300">
                   Hay un cofre activo para reclamar.

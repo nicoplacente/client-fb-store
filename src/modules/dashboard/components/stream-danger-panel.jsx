@@ -18,7 +18,26 @@ function formatLiveMode(liveStatus) {
   if (!liveStatus) return "Esperando lectura";
   if (liveStatus.manualOverride === true) return "Override manual online";
   if (liveStatus.manualOverride === false) return "Override manual offline";
-  return `Detector: ${liveStatus.status || "auto"}`;
+
+  const source = formatLiveSource(liveStatus.details?.source);
+  const hasOnlineSignal = Boolean(liveStatus.details?.lastOnlineSignalAt);
+
+  if (hasOnlineSignal) return `${source} · señal online reciente`;
+
+  return `${source}: ${liveStatus.status || "auto"}`;
+}
+
+function formatLiveSource(source) {
+  if (source === "chrome_extension" || source === "chrome_extension_page") {
+    return "Extension";
+  }
+
+  if (source === "kick_api") return "Kick API";
+  if (source === "playwright_dom") return "Detector DOM";
+  if (source === "server_detector") return "Detector";
+  if (source === "manual") return "Manual";
+
+  return "Detector";
 }
 
 export default function StreamDangerPanel({
