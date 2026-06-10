@@ -8,6 +8,18 @@ import { toast } from "sonner";
 
 export const AuthContext = createContext(null);
 
+const kickAuthErrorMessages = {
+  config: "Falta configurar OAuth de Kick",
+  access_denied: "Kick denego la autorizacion de la aplicacion",
+  session_expired: "La sesion de Kick expiro. Intenta iniciar sesion otra vez",
+  state: "La validacion de seguridad de Kick fallo. Intenta iniciar sesion otra vez",
+  scope: "Kick rechazo los permisos solicitados",
+  redirect_uri: "La URL de retorno de Kick no coincide con la configurada",
+  token_exchange: "Kick rechazo el codigo de autorizacion",
+  kick_user: "Kick no devolvio los datos del usuario",
+  unknown: "No se pudo iniciar sesion con Kick",
+};
+
 export function AuthProvider({ children, initialUser }) {
   const [user, setUser] = useState(initialUser);
   const [loading, setLoading] = useState(!initialUser);
@@ -58,6 +70,7 @@ export function AuthProvider({ children, initialUser }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const authStatus = params.get("auth");
+    const authReason = params.get("reason");
 
     if (!authStatus) return;
 
@@ -66,7 +79,10 @@ export function AuthProvider({ children, initialUser }) {
     }
 
     if (authStatus === "kick_error") {
-      toast.error("No se pudo iniciar sesion con Kick");
+      toast.error(
+        kickAuthErrorMessages[authReason] ||
+          kickAuthErrorMessages.unknown,
+      );
     }
 
     params.delete("auth");

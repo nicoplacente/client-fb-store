@@ -37,6 +37,7 @@ export const envConfig = {
   API_SUBSCRIPTION_REWARDS: `${SERVER_URL}/subscriptions/rewards`,
   API_STREAM_HOURS: `${SERVER_URL}/stream/hours`,
   API_STREAM_REWARDS: `${SERVER_URL}/stream/rewards`,
+  API_PREDICTIONS: `${SERVER_URL}/predictions`,
   API_LIVE_STATUS: `${SERVER_URL}/live/status`,
   API_UPLOAD_IMAGE: `${SERVER_URL}/uploads/image`,
   API_LOGOUT: `${SERVER_URL}/logout`,

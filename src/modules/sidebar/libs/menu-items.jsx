@@ -1,6 +1,7 @@
 import {
   IconHomeFilled,
   IconChartBar,
+  IconChartPie,
   IconCoinBitcoin,
   IconGift,
   IconHelpHexagon,
@@ -19,6 +20,7 @@ export const menuItems = [
   },
   { name: "Ranking", icon: <IconChartBar size={20} />, href: "/ranking" },
   { name: "Tienda", icon: <IconCoinBitcoin size={20} />, href: "/market" },
+  // { name: "Predicciones", icon: <IconChartPie size={20} />, href: "/predictions" },
   { name: "Sorteos", icon: <IconGift size={20} />, href: "/gifts" },
   { name: "Soporte", icon: <IconHelpHexagon size={20} />, href: "/support" },
   {

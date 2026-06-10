@@ -238,7 +238,10 @@ function DashboardActivePanel({ dashboard }) {
         onActivateHour={dashboard.activateStreamHour}
         onActivateChest={dashboard.activateStreamChest}
         onActivateChatReward={dashboard.activateStreamChatReward}
+        onCreatePrediction={dashboard.submitStreamPrediction}
+        onResolvePrediction={dashboard.resolveStreamPrediction}
         onDisableHour={dashboard.disableStreamHour}
+        predictions={dashboard.predictions}
       />
     );
   }
