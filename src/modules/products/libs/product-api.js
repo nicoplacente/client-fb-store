@@ -65,6 +65,11 @@ export function normalizeProductRedemption(redemption) {
     status: redemption.status || "pending",
     cost: Number(redemption.cost || 0),
     quantity: Number(redemption.quantity || 1),
+    wheelPrizeName:
+      redemption.wheelPrizeName ||
+      redemption.wheel?.winner?.name ||
+      redemption.winner?.name ||
+      "",
     createdAt: redemption.createdAt || "",
     product: normalizeProduct(product),
   };

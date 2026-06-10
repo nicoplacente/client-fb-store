@@ -67,6 +67,50 @@ export async function resetRankingPoints() {
   return data;
 }
 
+export async function getRewardWheelConfigs() {
+  const data = await apiRequest(envConfig.API_REWARD_WHEELS);
+  return Array.isArray(data.rewardWheels)
+    ? data.rewardWheels.map(normalizeRewardWheelConfig)
+    : [];
+}
+
+export async function updateRewardWheelConfig(rewardWheelId, prizes) {
+  const data = await apiRequest(
+    `${envConfig.API_REWARD_WHEELS}/${encodeURIComponent(rewardWheelId)}`,
+    {
+      method: "PUT",
+      body: {
+        prizes,
+      },
+    },
+  );
+
+  return normalizeRewardWheelConfig(data.rewardWheel);
+}
+
+export function normalizeRewardWheelConfig(state = {}) {
+  return {
+    id: state.id || null,
+    productId: state.productId || state.product?.id || null,
+    product: state.product
+      ? {
+          id: state.product.id,
+          name: state.product.name || "Ruleta sin nombre",
+          status: state.product.status || "active",
+          enabled: state.product.enabled !== false,
+        }
+      : null,
+    prizes: Array.isArray(state.prizes)
+      ? state.prizes.map((prize, index) => ({
+          id: prize.id || `reward-wheel-prize-${index}`,
+          name: prize.name || "",
+          probability: String(Number(prize.probability || 0)),
+        }))
+      : [],
+    updatedAt: state.updatedAt || null,
+  };
+}
+
 export function normalizeStreamHourState(state = {}) {
   const hours = Array.isArray(state.hours) ? state.hours : [];
 

@@ -394,5 +394,9 @@ function getRedemptionSuccessMessage(result, product) {
     return "Hora activada";
   }
 
+  if (result?.wheel || product.rewardEffectType === "reward_wheel") {
+    return "Ruleta activada";
+  }
+
   return "Canje solicitado";
 }

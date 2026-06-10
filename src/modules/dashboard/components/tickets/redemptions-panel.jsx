@@ -7,6 +7,7 @@ import {
   IconFilter,
   IconPackage,
   IconShoppingBag,
+  IconSparkles,
   IconTrash,
   IconUserCircle,
   IconX,
@@ -195,10 +196,20 @@ function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }
           </div>
 
           <div className="mt-4 grid gap-2 sm:grid-cols-3">
-            <OrderMetric label="Unidades" value={details.quantity} icon={<IconShoppingBag size={14} />} />
+            <OrderMetric
+              label={details.wheelPrize ? "Premio" : "Unidades"}
+              value={details.wheelPrize || details.quantity}
+              icon={details.wheelPrize ? <IconSparkles size={14} /> : <IconShoppingBag size={14} />}
+            />
             <OrderMetric label="Creditos" value={details.cost || "-"} icon={<IconCoins size={14} />} />
             <OrderMetric label="Usuario" value={ticket.username} icon={<IconUserCircle size={14} />} />
           </div>
+          {details.wheelPrize ? (
+            <p className="mt-3 rounded-xl border border-red-300/20 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-100">
+              {ticket.username} canjeó {details.productName} y ganó{" "}
+              {details.wheelPrize}.
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -270,12 +281,14 @@ function getRedemptionProductName(ticket) {
 
 function getRedemptionDetails(ticket) {
   const text = `${ticket.message || ""} ${ticket.messages?.[0]?.message || ""}`;
-  const costMatch = text.match(/por\s+([\d.,]+)\s+creditos/i);
+  const costMatch = text.match(/por\s+([\d.,]+)\s+cr[eé]ditos/i);
   const quantityMatch = text.match(/Cantidad:\s+(\d+)/i);
+  const wheelPrizeMatch = text.match(/gan[oó]\s+(.+?)\./i);
 
   return {
     productName: getRedemptionProductName(ticket),
     cost: costMatch?.[1] || "",
     quantity: quantityMatch?.[1] || "1",
+    wheelPrize: wheelPrizeMatch?.[1]?.trim() || "",
   };
 }

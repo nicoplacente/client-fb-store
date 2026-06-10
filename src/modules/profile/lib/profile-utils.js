@@ -124,13 +124,16 @@ export function ticketToRedemption(ticket) {
   const productName = String(ticket.subject || "")
     .replace(/^Canje:\s*/i, "")
     .trim();
-  const costMatch = String(ticket.message || "").match(/(\d[\d.]*)\s*creditos/i);
+  const message = String(ticket.message || "");
+  const costMatch = message.match(/(\d[\d.]*)\s*cr[eé]ditos/i);
+  const wheelPrizeMatch = message.match(/\bgan[oó]\s+(.+?)\.\s*(?:Canje|$)/i);
   const cost = costMatch ? Number(costMatch[1].replace(/\./g, "")) : 0;
 
   return {
     id: `ticket-${ticket.id}`,
     status: ticket.status || "open",
     cost,
+    wheelPrizeName: wheelPrizeMatch?.[1]?.trim() || "",
     createdAt: ticket.createdAt || "",
     product: {
       id: `ticket-product-${ticket.id}`,

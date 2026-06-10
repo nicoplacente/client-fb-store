@@ -32,6 +32,47 @@ body {
   overflow-x: hidden;
 }
 
+html:has(.reward-wheel-source),
+body:has(.reward-wheel-source),
+html.reward-wheel-route,
+body.reward-wheel-route {
+  background: transparent !important;
+  background-image: none !important;
+  overflow: hidden !important;
+}
+
+body:has(.reward-wheel-source) header,
+body:has(.reward-wheel-source) aside,
+body:has(.reward-wheel-source) nav,
+body.reward-wheel-route header,
+body.reward-wheel-route aside,
+body.reward-wheel-route nav {
+  display: none !important;
+}
+
+body:has(.reward-wheel-source) nextjs-portal,
+body.reward-wheel-route nextjs-portal {
+  display: none !important;
+}
+
+body:has(.reward-wheel-source) main,
+body.reward-wheel-route main {
+  min-height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+}
+
+.reward-wheel-source {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  overflow: hidden;
+  pointer-events: none;
+  background: transparent;
+  isolation: isolate;
+}
+
 * {
   min-width: 0;
 }

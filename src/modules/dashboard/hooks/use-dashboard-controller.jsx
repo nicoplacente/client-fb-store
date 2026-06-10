@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useTransition } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
@@ -31,9 +31,11 @@ import {
 import {
   createStreamChatReward,
   createStreamChest,
+  normalizeRewardWheelConfig,
   normalizeStreamHourState,
   normalizeStreamRewardState,
   resetRankingPoints,
+  updateRewardWheelConfig,
   updateStreamHour,
 } from "@/modules/stream/libs/stream-api";
 import {
@@ -65,6 +67,13 @@ export default function useDashboardController() {
   const [streamHour, setStreamHour] = useState(null);
   const [streamRewards, setStreamRewards] = useState(null);
   const [liveStatus, setLiveStatus] = useState(null);
+  const [rewardWheels, setRewardWheels] = useState([]);
+  const [rewardWheel, setRewardWheel] = useState(
+    normalizeRewardWheelConfig(),
+  );
+  const [rewardWheelDirty, setRewardWheelDirty] = useState(false);
+  const rewardWheelDirtyRef = useRef(false);
+  const rewardWheelDraftIdRef = useRef(0);
   const [productForm, setProductForm] = useState(emptyProduct);
   const [creditPackageForm, setCreditPackageForm] =
     useState(emptyCreditPackage);
@@ -144,6 +153,20 @@ export default function useDashboardController() {
       if (data.streamHour) setStreamHour(data.streamHour);
       if (data.streamRewards) setStreamRewards(data.streamRewards);
       if (data.liveStatus) setLiveStatus(data.liveStatus);
+      setRewardWheels(data.rewardWheels || []);
+      if (!rewardWheelDirtyRef.current) {
+        setRewardWheel((current) => {
+          const selectedWheel = (data.rewardWheels || []).find(
+            (wheel) => Number(wheel.id) === Number(current.id),
+          );
+
+          return (
+            selectedWheel ||
+            data.rewardWheels?.[0] ||
+            normalizeRewardWheelConfig()
+          );
+        });
+      }
       trackDashboardNotifications(data.ticketData);
     } catch {
       setError("No se pudo cargar el dashboard");
@@ -481,6 +504,110 @@ export default function useDashboardController() {
     });
   }
 
+  function addRewardWheelPrize() {
+    if (!rewardWheel.id) {
+      toast.error("Crea primero un producto de tipo ruleta");
+      return;
+    }
+
+    rewardWheelDraftIdRef.current += 1;
+    rewardWheelDirtyRef.current = true;
+    setRewardWheelDirty(true);
+    setRewardWheel((current) => ({
+      ...current,
+      prizes: [
+        ...current.prizes,
+        {
+          id: `new-reward-wheel-prize-${Date.now()}-${rewardWheelDraftIdRef.current}`,
+          name: "",
+          probability: "",
+        },
+      ],
+    }));
+  }
+
+  function updateRewardWheelPrize(prizeId, field, value) {
+    rewardWheelDirtyRef.current = true;
+    setRewardWheelDirty(true);
+    setRewardWheel((current) => ({
+      ...current,
+      prizes: current.prizes.map((prize) =>
+        prize.id === prizeId ? { ...prize, [field]: value } : prize,
+      ),
+    }));
+  }
+
+  function removeRewardWheelPrize(prizeId) {
+    rewardWheelDirtyRef.current = true;
+    setRewardWheelDirty(true);
+    setRewardWheel((current) => ({
+      ...current,
+      prizes: current.prizes.filter((prize) => prize.id !== prizeId),
+    }));
+  }
+
+  function selectRewardWheel(rewardWheelId) {
+    if (rewardWheelDirtyRef.current) {
+      toast.error("Guarda los cambios antes de seleccionar otra ruleta");
+      return;
+    }
+
+    const selectedWheel = rewardWheels.find(
+      (wheel) => Number(wheel.id) === Number(rewardWheelId),
+    );
+
+    if (selectedWheel) {
+      setRewardWheel(selectedWheel);
+    }
+  }
+
+  function saveRewardWheel() {
+    if (!rewardWheel.id) {
+      toast.error("Selecciona una ruleta");
+      return;
+    }
+
+    const prizes = rewardWheel.prizes.map((prize) => ({
+      name: prize.name.trim(),
+      probability: Number(prize.probability),
+    }));
+    const total = prizes.reduce(
+      (sum, prize) => sum + prize.probability,
+      0,
+    );
+
+    if (
+      !prizes.length ||
+      prizes.some(
+        (prize) =>
+          !prize.name ||
+          !Number.isFinite(prize.probability) ||
+          prize.probability <= 0,
+      ) ||
+      Math.abs(total - 100) >= 0.001
+    ) {
+      toast.error("Los premios deben ser validos y sumar exactamente 100%");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const data = await updateRewardWheelConfig(rewardWheel.id, prizes);
+        setRewardWheel(data);
+        setRewardWheels((current) =>
+          current.map((wheel) =>
+            Number(wheel.id) === Number(data.id) ? data : wheel,
+          ),
+        );
+        rewardWheelDirtyRef.current = false;
+        setRewardWheelDirty(false);
+        toast.success("Ruleta actualizada");
+      } catch {
+        toast.error("No se pudo guardar la ruleta");
+      }
+    });
+  }
+
   function removeTicket(ticket) {
     setConfirmation({
       type: "delete-ticket",
@@ -573,6 +700,9 @@ export default function useDashboardController() {
     streamHour,
     streamRewards,
     liveStatus,
+    rewardWheels,
+    rewardWheel,
+    rewardWheelDirty,
     supportReplies,
     setSupportReplies,
     loadDashboard,
@@ -634,6 +764,11 @@ export default function useDashboardController() {
     disableStreamHour,
     activateStreamChest,
     activateStreamChatReward,
+    addRewardWheelPrize,
+    updateRewardWheelPrize,
+    removeRewardWheelPrize,
+    selectRewardWheel,
+    saveRewardWheel,
     resetRankingPointsToZero,
     useAutomaticStreamHour,
   };

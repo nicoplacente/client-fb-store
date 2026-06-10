@@ -4,6 +4,7 @@ import {
   IconGift,
   IconRestore,
   IconSparkles,
+  IconWheel,
 } from "@tabler/icons-react";
 import { Field, TextInput } from "../form-controls";
 
@@ -44,7 +45,9 @@ export function FeaturedToggle({ checked, onChange }) {
 export function RewardEffectFields({ form, setForm }) {
   const hasRewardEffect = form.rewardEffectType === "stream_special_hour";
   const restoresStreamStreak = form.rewardEffectType === "restore_stream_streak";
-  const hasStreamEvent = hasRewardEffect || restoresStreamStreak;
+  const isRewardWheel = form.rewardEffectType === "reward_wheel";
+  const hasStreamEvent =
+    hasRewardEffect || restoresStreamStreak || isRewardWheel;
 
   return (
     <div className="grid gap-4 rounded-2xl border border-red-300/15 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(10,10,10,0.78)_44%,rgba(10,10,10,0.92))] p-4 shadow-inner shadow-black/10">
@@ -100,7 +103,7 @@ export function RewardEffectFields({ form, setForm }) {
       </button>
 
       {hasStreamEvent ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
           <RewardTypeCard
             active={hasRewardEffect}
             icon={<IconBroadcast size={19} />}
@@ -131,6 +134,20 @@ export function RewardEffectFields({ form, setForm }) {
               }))
             }
           />
+          <RewardTypeCard
+            active={isRewardWheel}
+            icon={<IconWheel size={19} />}
+            title="Ruleta de recompensas"
+            description="Usa una ruleta propia con premios configurables desde Stream."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "reward_wheel",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "",
+              }))
+            }
+          />
         </div>
       ) : null}
 
@@ -145,6 +162,14 @@ export function RewardEffectFields({ form, setForm }) {
           Este premio solo puede canjearse si el usuario tiene una racha perdida
           para recuperar. Si no tiene racha perdida, el canje se rechaza antes de
           descontar creditos o stock.
+        </div>
+      ) : null}
+
+      {isRewardWheel ? (
+        <div className="rounded-2xl border border-fuchsia-300/20 bg-fuchsia-400/10 p-4 text-sm font-medium leading-6 text-fuchsia-100">
+          Este producto tendrá una ruleta propia. Sus premios y probabilidades
+          se configuran en Dashboard, Stream, Ruleta. Cada canje admite una sola
+          unidad.
         </div>
       ) : null}
     </div>

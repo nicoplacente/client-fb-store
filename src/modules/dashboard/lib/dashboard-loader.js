@@ -4,6 +4,7 @@ import { getGiveaways } from "@/modules/giveaways/libs/giveaway-api";
 import { getSupportTickets } from "@/modules/support/libs/support-api";
 import {
   getLiveStatus,
+  getRewardWheelConfigs,
   getStreamHours,
   getStreamRewards,
   normalizeStreamHourState,
@@ -19,6 +20,7 @@ export async function loadDashboardData() {
     streamHourData,
     streamRewardData,
     liveStatusData,
+    rewardWheelData,
   ] = await Promise.all([
     getProducts({ includeDisabled: true }),
     getCreditPackages({ includeDisabled: true }),
@@ -27,6 +29,7 @@ export async function loadDashboardData() {
     getStreamHours().catch(() => null),
     getStreamRewards().catch(() => null),
     getLiveStatus().catch(() => null),
+    getRewardWheelConfigs().catch(() => []),
   ]);
 
   return {
@@ -39,5 +42,6 @@ export async function loadDashboardData() {
       ? normalizeStreamRewardState(streamRewardData)
       : null,
     liveStatus: liveStatusData,
+    rewardWheels: rewardWheelData,
   };
 }

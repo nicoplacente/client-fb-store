@@ -14,7 +14,8 @@ export function clampRedemptionQuantity(value, stock) {
 export function hasSingleRedemptionEffect(product) {
   return (
     product?.rewardEffectType === "stream_special_hour" ||
-    product?.rewardEffectType === "restore_stream_streak"
+    product?.rewardEffectType === "restore_stream_streak" ||
+    product?.rewardEffectType === "reward_wheel"
   );
 }
 

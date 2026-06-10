@@ -1,5 +1,10 @@
 import Image from "next/image";
-import { IconCalendar, IconShoppingBag } from "@tabler/icons-react";
+import {
+  IconCalendar,
+  IconShoppingBag,
+  IconSparkles,
+  IconStack2,
+} from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import { formatDate } from "../lib/profile-utils";
 
@@ -15,7 +20,7 @@ export default function RedemptionsList({ loading, redemptions }) {
   if (redemptions.length === 0) {
     return (
       <div className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
-        Todavia no hiciste canjes.
+        Todavía no hiciste canjes.
       </div>
     );
   }
@@ -53,11 +58,21 @@ export default function RedemptionsList({ loading, redemptions }) {
               <p className="mt-2 line-clamp-2 text-sm text-neutral-400">
                 {redemption.product.description || "Canje de producto"}
               </p>
+              {redemption.wheelPrizeName ? (
+                <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-fuchsia-300/20 bg-fuchsia-500/10 px-3 py-2 text-sm font-bold text-fuchsia-100">
+                  <IconSparkles size={16} />
+                  Premio ganado: {redemption.wheelPrizeName}
+                </p>
+              ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
+              <span className="inline-flex items-center gap-2">
+                <IconStack2 size={16} />
+                Cantidad: {Math.max(1, redemption.quantity)}
+              </span>
               <span className="inline-flex items-center gap-2 text-yellow-200">
                 <Image src={coins} alt="Creditos" className="size-5" />
-                {redemption.cost.toLocaleString()} creditos
+                {redemption.cost.toLocaleString()} créditos
               </span>
               <span className="inline-flex items-center gap-2">
                 <IconCalendar size={16} />

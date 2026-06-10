@@ -10,6 +10,7 @@ import {
 import StatCard from "@/modules/dashboard/components/stat-card";
 import StreamDangerPanel from "@/modules/dashboard/components/stream-danger-panel";
 import StreamPanel from "@/modules/dashboard/components/stream-panel";
+import RewardWheelPanel from "@/modules/dashboard/components/reward-wheel-panel";
 import {
   RedemptionsPanel,
   SupportPanel,
@@ -230,16 +231,30 @@ function DashboardActivePanel({ dashboard }) {
 
   if (dashboard.activeTab === "stream") {
     return (
-      <StreamPanel
-        streamHour={dashboard.streamHour}
-        streamRewards={dashboard.streamRewards}
-        loading={dashboard.loading}
-        isPending={dashboard.isPending}
-        onActivateHour={dashboard.activateStreamHour}
-        onActivateChest={dashboard.activateStreamChest}
-        onActivateChatReward={dashboard.activateStreamChatReward}
-        onDisableHour={dashboard.disableStreamHour}
-      />
+      <div className="space-y-6">
+        <StreamPanel
+          streamHour={dashboard.streamHour}
+          streamRewards={dashboard.streamRewards}
+          loading={dashboard.loading}
+          isPending={dashboard.isPending}
+          onActivateHour={dashboard.activateStreamHour}
+          onActivateChest={dashboard.activateStreamChest}
+          onActivateChatReward={dashboard.activateStreamChatReward}
+          onDisableHour={dashboard.disableStreamHour}
+        />
+        <RewardWheelPanel
+          rewardWheels={dashboard.rewardWheels}
+          selectedWheelId={dashboard.rewardWheel.id}
+          prizes={dashboard.rewardWheel.prizes}
+          hasUnsavedChanges={dashboard.rewardWheelDirty}
+          isPending={dashboard.isPending}
+          onAddPrize={dashboard.addRewardWheelPrize}
+          onChangePrize={dashboard.updateRewardWheelPrize}
+          onRemovePrize={dashboard.removeRewardWheelPrize}
+          onSelectWheel={dashboard.selectRewardWheel}
+          onSave={dashboard.saveRewardWheel}
+        />
+      </div>
     );
   }
 
