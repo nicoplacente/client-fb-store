@@ -10,6 +10,10 @@ import {
   normalizeStreamHourState,
   normalizeStreamRewardState,
 } from "@/modules/stream/libs/stream-api";
+import {
+  getPredictions,
+  normalizePrediction,
+} from "@/modules/predictions/libs/prediction-api";
 
 export async function loadDashboardData() {
   const [
@@ -21,6 +25,7 @@ export async function loadDashboardData() {
     streamRewardData,
     liveStatusData,
     rewardWheelData,
+    predictionData,
   ] = await Promise.all([
     getProducts({ includeDisabled: true }),
     getCreditPackages({ includeDisabled: true }),
@@ -30,6 +35,7 @@ export async function loadDashboardData() {
     getStreamRewards().catch(() => null),
     getLiveStatus().catch(() => null),
     getRewardWheelConfigs().catch(() => []),
+    getPredictions({ includeInactive: true }).catch(() => []),
   ]);
 
   return {
@@ -37,11 +43,14 @@ export async function loadDashboardData() {
     creditPackageData,
     giveawayData,
     ticketData,
-    streamHour: streamHourData ? normalizeStreamHourState(streamHourData) : null,
+    streamHour: streamHourData
+      ? normalizeStreamHourState(streamHourData)
+      : null,
     streamRewards: streamRewardData
       ? normalizeStreamRewardState(streamRewardData)
       : null,
     liveStatus: liveStatusData,
     rewardWheels: rewardWheelData,
+    predictions: predictionData.map(normalizePrediction),
   };
 }

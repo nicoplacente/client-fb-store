@@ -39,6 +39,11 @@ import {
   updateStreamHour,
 } from "@/modules/stream/libs/stream-api";
 import {
+  createPrediction,
+  normalizePrediction,
+  resolvePrediction,
+} from "@/modules/predictions/libs/prediction-api";
+import {
   emptyCreditPackage,
   emptyGiveaway,
   emptyProduct,
@@ -56,6 +61,15 @@ import {
 } from "../lib/dashboard-payloads";
 import useDashboardNotifications from "./use-dashboard-notifications";
 
+function parseNumericInput(value, fallback = 0) {
+  const normalized = String(value ?? "")
+    .trim()
+    .replace(",", ".");
+  const parsed = Number(normalized || fallback);
+
+  return Number.isFinite(parsed) ? parsed : Number(fallback);
+}
+
 export default function useDashboardController() {
   const { user, refreshUser } = useAppContext(AuthContext);
   const canManageDashboard = hasDashboardAccess(user);
@@ -68,12 +82,11 @@ export default function useDashboardController() {
   const [streamRewards, setStreamRewards] = useState(null);
   const [liveStatus, setLiveStatus] = useState(null);
   const [rewardWheels, setRewardWheels] = useState([]);
-  const [rewardWheel, setRewardWheel] = useState(
-    normalizeRewardWheelConfig(),
-  );
+  const [rewardWheel, setRewardWheel] = useState(normalizeRewardWheelConfig());
   const [rewardWheelDirty, setRewardWheelDirty] = useState(false);
   const rewardWheelDirtyRef = useRef(false);
   const rewardWheelDraftIdRef = useRef(0);
+  const [predictions, setPredictions] = useState([]);
   const [productForm, setProductForm] = useState(emptyProduct);
   const [creditPackageForm, setCreditPackageForm] =
     useState(emptyCreditPackage);
@@ -167,6 +180,7 @@ export default function useDashboardController() {
           );
         });
       }
+      setPredictions(data.predictions || []);
       trackDashboardNotifications(data.ticketData);
     } catch {
       setError("No se pudo cargar el dashboard");
@@ -334,7 +348,8 @@ export default function useDashboardController() {
       try {
         await deleteCreditPackage(creditPackage.id);
         toast.success("Pack de creditos eliminado");
-        if (selectedCreditPackageId === creditPackage.id) resetCreditPackageForm();
+        if (selectedCreditPackageId === creditPackage.id)
+          resetCreditPackageForm();
         await loadDashboard();
       } catch {
         toast.error("No se pudo eliminar el pack");
@@ -571,10 +586,7 @@ export default function useDashboardController() {
       name: prize.name.trim(),
       probability: Number(prize.probability),
     }));
-    const total = prizes.reduce(
-      (sum, prize) => sum + prize.probability,
-      0,
-    );
+    const total = prizes.reduce((sum, prize) => sum + prize.probability, 0);
 
     if (
       !prizes.length ||
@@ -604,6 +616,94 @@ export default function useDashboardController() {
         toast.success("Ruleta actualizada");
       } catch {
         toast.error("No se pudo guardar la ruleta");
+      }
+    });
+  }
+
+  function submitStreamPrediction(payload) {
+    const options = (payload.options || [])
+      .map((option) => String(option || "").trim())
+      .filter(Boolean);
+    const payoutMultiplier = parseNumericInput(payload.payoutMultiplier, 2);
+    const durationMinutes = Math.floor(
+      parseNumericInput(payload.durationMinutes, 0),
+    );
+    const minBetPoints = Math.floor(parseNumericInput(payload.minBetPoints, 1));
+    const maxBetPoints = payload.maxBetPoints
+      ? Math.floor(parseNumericInput(payload.maxBetPoints, 0))
+      : null;
+
+    if (!String(payload.title || "").trim()) {
+      toast.error("Completa el titulo de la prediccion");
+      return;
+    }
+
+    if (options.length < 2 || options.length > 10) {
+      toast.error("La prediccion debe tener entre 2 y 10 opciones");
+      return;
+    }
+
+    if (!Number.isFinite(payoutMultiplier) || payoutMultiplier < 1) {
+      toast.error("El multiplicador debe ser 1 o mayor");
+      return;
+    }
+
+    if (!Number.isFinite(durationMinutes) || durationMinutes < 1) {
+      toast.error("El timer debe ser de al menos 1 minuto");
+      return;
+    }
+
+    if (!Number.isFinite(minBetPoints) || minBetPoints < 1) {
+      toast.error("La apuesta minima debe ser de al menos 1 punto");
+      return;
+    }
+
+    if (
+      maxBetPoints !== null &&
+      (!Number.isFinite(maxBetPoints) || maxBetPoints < minBetPoints)
+    ) {
+      toast.error("La apuesta maxima debe ser mayor o igual a la minima");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const prediction = await createPrediction({
+          ...payload,
+          options,
+          payoutMultiplier,
+          durationMinutes,
+          minBetPoints,
+          maxBetPoints,
+          status: "active",
+        });
+
+        setPredictions((current) => [
+          normalizePrediction(prediction),
+          ...current,
+        ]);
+        toast.success("Prediccion creada");
+      } catch {
+        toast.error("No se pudo crear la prediccion");
+      }
+    });
+  }
+
+  function resolveStreamPrediction(predictionId, optionId) {
+    startTransition(async () => {
+      try {
+        const prediction = await resolvePrediction(predictionId, optionId);
+
+        setPredictions((current) =>
+          current.map((item) =>
+            Number(item.id) === Number(predictionId)
+              ? normalizePrediction(prediction)
+              : item,
+          ),
+        );
+        toast.success("Prediccion resuelta");
+      } catch {
+        toast.error("No se pudo resolver la prediccion");
       }
     });
   }
@@ -703,6 +803,7 @@ export default function useDashboardController() {
     rewardWheels,
     rewardWheel,
     rewardWheelDirty,
+    predictions,
     supportReplies,
     setSupportReplies,
     loadDashboard,
@@ -769,6 +870,8 @@ export default function useDashboardController() {
     removeRewardWheelPrize,
     selectRewardWheel,
     saveRewardWheel,
+    submitStreamPrediction,
+    resolveStreamPrediction,
     resetRankingPointsToZero,
     useAutomaticStreamHour,
   };

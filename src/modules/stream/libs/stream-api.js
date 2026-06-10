@@ -40,6 +40,7 @@ export async function getLiveStatus() {
     status: data.status || "unknown",
     manualOverride: data.manualOverride,
     currentStreamId: data.currentStreamId || null,
+    details: data.details || null,
   };
 }
 
@@ -142,6 +143,8 @@ export function normalizeStreamRewardState(state = {}) {
       enabled: scheduler.enabled !== false,
       intervalMinutes: Number(scheduler.intervalMinutes || 45),
       durationSeconds: Number(scheduler.durationSeconds || 60),
+      streamId: scheduler.streamId || null,
+      streamOnlineSince: scheduler.streamOnlineSince || null,
       lastAutoChestAt: scheduler.lastAutoChestAt || null,
       nextCheckAt: scheduler.nextCheckAt || null,
     },

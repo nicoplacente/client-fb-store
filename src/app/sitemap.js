@@ -4,6 +4,7 @@ const SITE_URL =
 const publicRoutes = [
   { path: "/", priority: 1, changeFrequency: "daily" },
   { path: "/market", priority: 0.9, changeFrequency: "weekly" },
+  { path: "/predictions", priority: 0.85, changeFrequency: "daily" },
   { path: "/ranking", priority: 0.8, changeFrequency: "weekly" },
   { path: "/gifts", priority: 0.8, changeFrequency: "weekly" },
   { path: "/support", priority: 0.7, changeFrequency: "weekly" },

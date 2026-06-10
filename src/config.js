@@ -1,7 +1,9 @@
 // Configuration for environment variables
 
 function normalizeUrl(value) {
-  return String(value || "").trim().replace(/\/+$/, "");
+  return String(value || "")
+    .trim()
+    .replace(/\/+$/, "");
 }
 
 function ensureApiUrl(value) {
@@ -13,7 +15,7 @@ function ensureApiUrl(value) {
   return `${normalized}/api`;
 }
 
-const rawServerUrl = process.env.NEXT_PUBLIC_SERVER_URL
+const rawServerUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const SERVER_URL = ensureApiUrl(rawServerUrl);
 const SOCKET_URL = normalizeUrl(SERVER_URL).replace(/\/api$/, "");
 
@@ -38,6 +40,7 @@ export const envConfig = {
   API_STREAM_HOURS: `${SERVER_URL}/stream/hours`,
   API_STREAM_REWARDS: `${SERVER_URL}/stream/rewards`,
   API_REWARD_WHEELS: `${SERVER_URL}/stream/reward-wheels`,
+  API_PREDICTIONS: `${SERVER_URL}/predictions`,
   API_LIVE_STATUS: `${SERVER_URL}/live/status`,
   API_UPLOAD_IMAGE: `${SERVER_URL}/uploads/image`,
   API_LOGOUT: `${SERVER_URL}/logout`,
