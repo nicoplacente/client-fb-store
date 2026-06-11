@@ -9,7 +9,8 @@ import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 
 function formatLiveStatus(liveStatus) {
   if (!liveStatus) return "Sin datos";
-  if (liveStatus.isLive) return "En vivo";
+  if (liveStatus.isConfirmedLive) return "En vivo";
+  if (liveStatus.isLive) return "Sin confirmar";
   if (liveStatus.status === "unknown") return "Desconocido";
   return "Offline";
 }
@@ -22,17 +23,23 @@ function formatLiveMode(liveStatus) {
   const source = formatLiveSource(liveStatus.details?.source);
   const hasOnlineSignal = Boolean(liveStatus.details?.lastOnlineSignalAt);
 
-  if (hasOnlineSignal) return `${source} · señal online reciente`;
+  if (liveStatus.isConfirmedLive && hasOnlineSignal) {
+    return `${source} · online confirmado`;
+  }
+
+  if (hasOnlineSignal) return `${source} · esperando confirmacion`;
 
   return `${source}: ${liveStatus.status || "auto"}`;
 }
 
 function formatLiveSource(source) {
   if (source === "chrome_extension" || source === "chrome_extension_page") {
-    return "Extension";
+    return "Extension (diagnostico)";
   }
 
   if (source === "kick_api") return "Kick API";
+  if (source === "kick_public_api") return "Kick API oficial";
+  if (source === "kick_webhook") return "Kick webhook";
   if (source === "playwright_dom") return "Detector DOM";
   if (source === "server_detector") return "Detector";
   if (source === "manual") return "Manual";
@@ -47,7 +54,7 @@ export default function StreamDangerPanel({
   onResetRankingPoints,
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const live = Boolean(liveStatus?.isLive);
+  const live = Boolean(liveStatus?.isConfirmedLive);
   const isManual = streamHour?.hasManualOverride || streamHour?.mode === "manual";
 
   function confirmResetRankingPoints() {

@@ -37,6 +37,7 @@ export async function getLiveStatus() {
 
   return {
     isLive: Boolean(data.isLive),
+    isConfirmedLive: Boolean(data.isConfirmedLive),
     status: data.status || "unknown",
     manualOverride: data.manualOverride,
     currentStreamId: data.currentStreamId || null,
