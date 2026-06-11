@@ -20,7 +20,7 @@ export default function LegalDocument({
           {description}
         </p>
         <p className="mt-4 text-xs font-semibold uppercase text-neutral-500">
-          Ultima actualizacion: {updatedAt}
+          Última actualización: {updatedAt}
         </p>
       </header>
 

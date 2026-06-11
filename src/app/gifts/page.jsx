@@ -4,6 +4,8 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useId,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -319,14 +321,58 @@ function GiveawayCard({
 }
 
 function GiveawayResultModal({ giveaway, onClose }) {
+  const titleId = useId();
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
   const isFinalized =
     giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
 
+  useEffect(() => {
+    const previouslyFocusedElement = document.activeElement;
+
+    function handleKeyDown(event) {
+      if (event.key === "Escape") {
+        onClose();
+      }
+
+      if (event.key === "Tab") {
+        const focusableElements = dialogRef.current?.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        );
+        const firstElement = focusableElements?.[0];
+        const lastElement = focusableElements?.[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement?.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement?.focus();
+        }
+      }
+    }
+
+    closeButtonRef.current?.focus();
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus?.();
+    };
+  }, [onClose]);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-md"
+      onClick={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
+        aria-labelledby={titleId}
         className="w-full max-w-md overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70 ring-1 ring-white/[0.03]"
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-[linear-gradient(135deg,rgba(220,38,38,0.14),rgba(255,255,255,0.03))] p-5">
@@ -334,11 +380,12 @@ function GiveawayResultModal({ giveaway, onClose }) {
             <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
               Resultado
             </p>
-            <h2 className="mt-1 text-2xl font-bold text-white">
+            <h2 id={titleId} className="mt-1 text-2xl font-bold text-white">
               {giveaway.title}
             </h2>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="cursor-pointer rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
@@ -361,12 +408,12 @@ function GiveawayResultModal({ giveaway, onClose }) {
                 </div>
               ) : (
                 <p className="text-sm leading-6 text-neutral-400">
-                  El sorteo finalizo sin participantes, no hay ganador.
+                  El sorteo finalizó sin participantes, no hay ganador.
                 </p>
               )
             ) : (
               <p className="text-sm leading-6 text-neutral-400">
-                El ganador se sortea automaticamente cuando llega la fecha de
+                El ganador se sortea automáticamente cuando llega la fecha de
                 fin.
               </p>
             )}

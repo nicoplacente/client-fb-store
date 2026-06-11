@@ -11,7 +11,7 @@ function ProductsGrid({
 }) {
   if (loading) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
+      <div role="status" aria-live="polite" className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
         Cargando tienda...
       </div>
     );
@@ -19,7 +19,7 @@ function ProductsGrid({
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-10 text-center text-red-200 shadow-xl shadow-black/15">
+      <div role="alert" className="rounded-2xl border border-red-500/30 bg-red-500/10 p-10 text-center text-red-200 shadow-xl shadow-black/15">
         {error}
       </div>
     );
@@ -27,7 +27,7 @@ function ProductsGrid({
 
   if (products.length === 0) {
     return (
-      <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
+      <div role="status" className="rounded-2xl border border-white/10 bg-neutral-950/75 p-10 text-center text-neutral-400 shadow-xl shadow-black/15">
         No encontramos productos con esos filtros.
       </div>
     );

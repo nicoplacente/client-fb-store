@@ -32,6 +32,30 @@ body {
   overflow-x: hidden;
 }
 
+.skip-link {
+  position: fixed;
+  top: 0.75rem;
+  left: 0.75rem;
+  z-index: 10000;
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(252, 165, 165, 0.7);
+  border-radius: 0.75rem;
+  color: #fff;
+  background: #171717;
+  box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.45);
+  transform: translateY(-160%);
+  transition: transform 180ms ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+:where(a, button, input, select, textarea):focus-visible {
+  outline: 2px solid rgba(252, 165, 165, 0.9);
+  outline-offset: 3px;
+}
+
 html:has(.reward-wheel-source),
 body:has(.reward-wheel-source),
 html.reward-wheel-route,
@@ -185,6 +209,19 @@ body.reward-wheel-route main {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
   .gamer-border-link,
   .gamer-border-link::before {
     animation: none;

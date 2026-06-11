@@ -59,10 +59,13 @@ export default function RedemptionsList({ loading, redemptions }) {
                 {redemption.product.description || "Canje de producto"}
               </p>
               {redemption.wheelPrizeName ? (
-                <p className="mt-3 inline-flex items-center gap-2 rounded-lg border border-fuchsia-300/20 bg-fuchsia-500/10 px-3 py-2 text-sm font-bold text-fuchsia-100">
-                  <IconSparkles size={16} />
-                  Premio ganado: {redemption.wheelPrizeName}
-                </p>
+                <div className="mt-3 flex flex-wrap items-center gap-2">
+                  <p className="inline-flex items-center gap-2 rounded-lg border border-fuchsia-300/20 bg-fuchsia-500/10 px-3 py-2 text-sm font-bold text-fuchsia-100">
+                    <IconSparkles size={16} />
+                    Premio ganado: {redemption.wheelPrizeName}
+                  </p>
+                  <WheelEffectStatus redemption={redemption} />
+                </div>
               ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">
@@ -83,5 +86,39 @@ export default function RedemptionsList({ loading, redemptions }) {
         </article>
       ))}
     </div>
+  );
+}
+
+function WheelEffectStatus({ redemption }) {
+  if (
+    !redemption.wheelEffectType ||
+    redemption.wheelEffectType === "none"
+  ) {
+    return null;
+  }
+
+  const statusStyles = {
+    completed:
+      "border-green-300/20 bg-green-400/10 text-green-100",
+    pending:
+      "border-amber-300/20 bg-amber-400/10 text-amber-100",
+    failed: "border-red-300/20 bg-red-500/10 text-red-100",
+  };
+  const statusLabels = {
+    completed: "Efecto aplicado",
+    pending: "Efecto pendiente",
+    failed: "Efecto fallido",
+  };
+  const status = redemption.wheelEffectStatus || "pending";
+
+  return (
+    <span
+      title={redemption.wheelEffectError || undefined}
+      className={`rounded-lg border px-3 py-2 text-sm font-bold ${
+        statusStyles[status] || statusStyles.pending
+      }`}
+    >
+      {statusLabels[status] || statusLabels.pending}
+    </span>
   );
 }

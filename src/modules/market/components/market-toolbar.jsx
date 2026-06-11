@@ -55,27 +55,31 @@ function MarketToolbar({
             Recompensas listas para la comunidad
           </h1>
           <p className="mt-3 max-w-2xl text-neutral-400">
-            Explora productos, codigos y beneficios disponibles. Filtra rapido y canjea con tus creditos.
+            Explorá productos, códigos y beneficios disponibles. Filtrá rápido
+            y canjeá con tus créditos.
           </p>
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
           <label className="flex w-full items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-neutral-400 shadow-inner shadow-black/20 transition focus-within:border-red-300/50 focus-within:ring-2 focus-within:ring-red-300/10 sm:min-w-72">
-            <IconSearch size={18} />
+            <IconSearch size={18} aria-hidden="true" />
             <input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
               placeholder="Buscar producto"
               aria-label="Buscar producto"
+              name="market-search"
+              type="search"
               className="w-full bg-transparent text-sm text-white outline-none placeholder:text-neutral-600"
             />
           </label>
           <div ref={categoryRef} className="relative w-full sm:w-44">
             <button
               type="button"
-              aria-label="Filtrar productos por categoria"
+              aria-label="Filtrar productos por categoría"
               aria-expanded={categoryOpen}
               aria-haspopup="listbox"
+              aria-controls="market-category-listbox"
               onClick={() => setCategoryOpen((open) => !open)}
               className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-left text-sm font-semibold text-white shadow-inner shadow-black/20 outline-none transition hover:border-red-300/30 focus:border-red-300/50 focus:ring-2 focus:ring-red-300/10"
             >
@@ -89,7 +93,8 @@ function MarketToolbar({
             {categoryOpen ? (
               <div
                 role="listbox"
-                aria-label="Categorias"
+                id="market-category-listbox"
+                aria-label="Categorías"
                 className="absolute right-0 top-full z-30 mt-2 max-h-64 w-full min-w-44 overflow-y-auto rounded-xl border border-white/10 bg-neutral-950 p-1.5 shadow-2xl shadow-black/60 ring-1 ring-white/[0.04]"
               >
                 {categories.map((item) => {

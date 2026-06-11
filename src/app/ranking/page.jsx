@@ -139,6 +139,9 @@ export default function RankingPage() {
 
       <div className="overflow-x-auto rounded-xl ">
         <table className="mx-auto w-full min-w-[760px] table border-separate overflow-hidden [border-spacing:0_4px] sm:min-w-[880px]">
+          <caption className="sr-only">
+            Ranking de usuarios por puntos, actividad y recompensas
+          </caption>
           <thead className="bg-neutral-900">
             <tr>
               <TH>
@@ -217,6 +220,7 @@ export default function RankingPage() {
           </span>
           <div className="flex items-center justify-between gap-2 sm:justify-start">
             <button
+              type="button"
               className="rounded-md bg-neutral-900 px-3 py-1 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() => setCurrentPage((page) => Math.max(page - 1, 1))}
               disabled={currentPage === 1}
@@ -225,6 +229,7 @@ export default function RankingPage() {
             </button>
             <span className="px-2 text-sm text-white">{currentPage}</span>
             <button
+              type="button"
               className="rounded-md bg-neutral-900 px-3 py-1 text-sm transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:opacity-50"
               onClick={() =>
                 setCurrentPage((page) => Math.min(page + 1, totalPages))

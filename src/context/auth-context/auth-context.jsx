@@ -71,8 +71,9 @@ export function AuthProvider({ children, initialUser }) {
     const params = new URLSearchParams(window.location.search);
     const authStatus = params.get("auth");
     const authReason = params.get("reason");
+    const moderationStatus = params.get("moderation");
 
-    if (!authStatus) return;
+    if (!authStatus && !moderationStatus) return;
 
     if (authStatus === "kick_success") {
       toast.success("Sesion iniciada con Kick");
@@ -85,7 +86,20 @@ export function AuthProvider({ children, initialUser }) {
       );
     }
 
+    if (moderationStatus === "success") {
+      toast.success("Moderación de Kick habilitada");
+    }
+
+    if (moderationStatus === "error") {
+      toast.error(
+        authReason === "scope"
+          ? "Kick no concedió el permiso de moderación"
+          : "No se pudo habilitar la moderación de Kick",
+      );
+    }
+
     params.delete("auth");
+    params.delete("moderation");
     params.delete("reason");
 
     const nextSearch = params.toString();

@@ -33,7 +33,7 @@ export const menuItems = [
 ];
 
 export const legalMenuItems = [
-  { name: "Terminos", icon: <IconFileText size={20} />, href: "/terms" },
+  { name: "Términos", icon: <IconFileText size={20} />, href: "/terms" },
   {
     name: "Privacidad",
     icon: <IconShieldLock size={20} />,

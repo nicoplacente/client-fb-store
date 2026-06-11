@@ -89,6 +89,35 @@ export async function updateRewardWheelConfig(rewardWheelId, prizes) {
   return normalizeRewardWheelConfig(data.rewardWheel);
 }
 
+export async function getRewardWheelModerationStatus() {
+  const data = await apiRequest(envConfig.API_REWARD_WHEEL_MODERATION);
+  return normalizeRewardWheelModeration(data.moderation);
+}
+
+export async function disconnectRewardWheelModeration() {
+  await apiRequest(envConfig.API_REWARD_WHEEL_MODERATION, {
+    method: "DELETE",
+  });
+
+  return normalizeRewardWheelModeration();
+}
+
+export function getRewardWheelModerationConnectUrl() {
+  return `${envConfig.API_REWARD_WHEEL_MODERATION}/connect`;
+}
+
+export function normalizeRewardWheelModeration(state = {}) {
+  return {
+    connected: Boolean(state.connected),
+    configured: state.configured !== false,
+    username: state.username || "",
+    kickUserId: state.kickUserId || "",
+    scopes: Array.isArray(state.scopes) ? state.scopes : [],
+    expiresAt: state.expiresAt || null,
+    updatedAt: state.updatedAt || null,
+  };
+}
+
 export function normalizeRewardWheelConfig(state = {}) {
   return {
     id: state.id || null,
@@ -106,6 +135,8 @@ export function normalizeRewardWheelConfig(state = {}) {
           id: prize.id || `reward-wheel-prize-${index}`,
           name: prize.name || "",
           probability: String(Number(prize.probability || 0)),
+          effectType: prize.effectType || "none",
+          effectValue: prize.effectValue ? String(prize.effectValue) : "",
         }))
       : [],
     updatedAt: state.updatedAt || null,

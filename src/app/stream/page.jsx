@@ -33,7 +33,8 @@ export default function StreamPage() {
           Watchtime activo
         </h1>
         <p className="mt-3 max-w-2xl text-neutral-400">
-          Mantené esta página abierta mientras ves el directo para sincronizar tu actividad.
+          Mantené esta página abierta mientras ves el directo para sincronizar
+          tu actividad.
         </p>
       </div>
     </SectionContainer>

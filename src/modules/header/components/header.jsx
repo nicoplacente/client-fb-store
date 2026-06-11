@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import HandleShowLogin from "./handle-show-login";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import useAppContext from "@/context/use-app-context";
@@ -277,6 +277,37 @@ function MobileHeaderMenu({
   onClose,
   onLogout,
 }) {
+  const titleId = useId();
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    if (!open) return undefined;
+
+    function handleKeyDown(event) {
+      if (event.key !== "Tab") return;
+
+      const focusableElements = dialogRef.current?.querySelectorAll(
+        'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+      );
+      const firstElement = focusableElements?.[0];
+      const lastElement = focusableElements?.[focusableElements.length - 1];
+
+      if (event.shiftKey && document.activeElement === firstElement) {
+        event.preventDefault();
+        lastElement?.focus();
+      } else if (!event.shiftKey && document.activeElement === lastElement) {
+        event.preventDefault();
+        firstElement?.focus();
+      }
+    }
+
+    closeButtonRef.current?.focus();
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open]);
+
   if (!open) return null;
 
   return (
@@ -289,14 +320,16 @@ function MobileHeaderMenu({
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-label="Menú principal"
+        aria-labelledby={titleId}
         className="absolute left-3 right-3 top-3 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black/70 [animation:mobile-menu-panel-in_220ms_cubic-bezier(0.22,1,0.36,1)] sm:left-6 sm:right-6 sm:top-5 sm:p-5 md:left-auto md:w-[420px]"
       >
         <div className="flex items-center justify-end">
-          <h2 className="sr-only">Menú</h2>
+          <h2 id={titleId} className="sr-only">Menú principal</h2>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onClose}
             className="inline-flex size-10 items-center justify-center rounded-lg border border-white/10 bg-neutral-900 text-neutral-300 transition hover:text-white"

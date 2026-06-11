@@ -29,13 +29,15 @@ export default function HandleShowLogin({ variant = "default" }) {
 
   return (
     <button
+      type="button"
       onClick={handleKickLogin}
       disabled={isRedirecting}
-      aria-label="Iniciar sesion con Kick"
+      aria-label="Iniciar sesión con Kick"
+      aria-busy={isRedirecting}
       className={buttonClassName}
     >
       <IconBrandKick size={isCompact ? 20 : 20} />
-      <span>{isRedirecting ? "Redirigiendo..." : "Iniciar sesion"}</span>
+      <span>{isRedirecting ? "Redirigiendo..." : "Iniciar sesión"}</span>
     </button>
   );
 }

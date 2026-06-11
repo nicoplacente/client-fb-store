@@ -5,6 +5,7 @@ import { getSupportTickets } from "@/modules/support/libs/support-api";
 import {
   getLiveStatus,
   getRewardWheelConfigs,
+  getRewardWheelModerationStatus,
   getStreamHours,
   getStreamRewards,
   normalizeStreamHourState,
@@ -26,6 +27,7 @@ export async function loadDashboardData() {
     liveStatusData,
     rewardWheelData,
     predictionData,
+    moderationData,
   ] = await Promise.all([
     getProducts({ includeDisabled: true }),
     getCreditPackages({ includeDisabled: true }),
@@ -36,6 +38,7 @@ export async function loadDashboardData() {
     getLiveStatus().catch(() => null),
     getRewardWheelConfigs().catch(() => []),
     getPredictions({ includeInactive: true }).catch(() => []),
+    getRewardWheelModerationStatus().catch(() => null),
   ]);
 
   return {
@@ -52,5 +55,6 @@ export async function loadDashboardData() {
     liveStatus: liveStatusData,
     rewardWheels: rewardWheelData,
     predictions: predictionData.map(normalizePrediction),
+    kickModeration: moderationData,
   };
 }

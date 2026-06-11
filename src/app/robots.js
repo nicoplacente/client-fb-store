@@ -1,14 +1,21 @@
-const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL || "https://francobertello74.store";
+import { siteUrl } from "@/modules/seo/metadata";
 
 export default function robots() {
   return {
     rules: [
       {
         userAgent: "*",
-        disallow: ["/dashboard", "/profile", "/stream", "/api"],
+        allow: "/",
+        disallow: [
+          "/api/",
+          "/dashboard",
+          "/profile",
+          "/stream/alerts",
+          "/stream/wheel",
+        ],
       },
     ],
-    sitemap: `${SITE_URL.replace(/\/+$/, "")}/sitemap.xml`,
+    sitemap: `${siteUrl}/sitemap.xml`,
+    host: siteUrl,
   };
 }
