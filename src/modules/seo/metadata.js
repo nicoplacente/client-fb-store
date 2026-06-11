@@ -1,8 +1,6 @@
 const DEFAULT_SITE_URL = "https://francobertello-store.codeluxe.tech";
 
-export const siteUrl = (
-  process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL
-).replace(/\/+$/, "");
+export const siteUrl = DEFAULT_SITE_URL.replace(/\/+$/, "");
 
 export const siteName = "FrancoBertello74 Store";
 
