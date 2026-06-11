@@ -22,7 +22,7 @@ export function hasKickModerationAccess(user) {
   ).toLowerCase();
 
   return (
-    role === "admin" ||
+    role === "mod" ||
     role === "streamer" ||
     username === mainStreamer
   );
