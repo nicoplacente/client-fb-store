@@ -157,8 +157,8 @@ export default function SupportPage() {
           </div>
 
           {!user ? (
-            <div className="mb-5 rounded-md border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium text-red-100">
-              Para enviar una consulta necesitas iniciar sesion. Asi soporte
+            <div role="status" className="mb-5 rounded-md border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium text-red-100">
+              Para enviar una consulta necesitás iniciar sesión. Así soporte
               puede responderte en tu ticket.
             </div>
           ) : null}
@@ -235,6 +235,8 @@ export default function SupportPage() {
                 >
                   <button
                     type="button"
+                    aria-expanded={expandedTicketId === ticket.id}
+                    aria-controls={`ticket-${ticket.id}-thread`}
                     onClick={() =>
                       setExpandedTicketId((current) =>
                         current === ticket.id ? null : ticket.id,
@@ -308,7 +310,10 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
       ];
 
   return (
-    <div className="mt-4 space-y-3 border-t border-white/10 pt-4">
+    <div
+      id={`ticket-${ticket.id}-thread`}
+      className="mt-4 space-y-3 border-t border-white/10 pt-4"
+    >
       <div className="space-y-2">
         {messages.map((message) => {
           const fromAdmin = message.senderRole === "admin";
@@ -338,7 +343,11 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
         })}
       </div>
       <div className="grid gap-2">
+        <label htmlFor={`ticket-${ticket.id}-reply`} className="sr-only">
+          Responder en este ticket
+        </label>
         <textarea
+          id={`ticket-${ticket.id}-reply`}
           value={reply}
           rows={3}
           disabled={disabled}

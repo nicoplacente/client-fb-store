@@ -1,33 +1,28 @@
 import LegalDocument from "@/modules/legal/components/legal-document";
 import { legalUpdatedAt, termsSections } from "@/modules/legal/lib/legal-content";
+import { createPageMetadata } from "@/modules/seo/metadata";
 
-export const metadata = {
-  title: "Terminos y condiciones",
+export const metadata = createPageMetadata({
+  title: "Términos y condiciones",
   description:
-    "Condiciones de uso del store, creditos, puntos, sorteos, canjes y herramientas de la comunidad.",
+    "Condiciones de uso del store, créditos, puntos, sorteos, canjes y herramientas de la comunidad.",
+  path: "/terms",
   keywords: [
-    "terminos y condiciones",
+    "términos y condiciones",
     "FrancoBertello74",
     "Kick",
-    "creditos",
+    "créditos",
     "canjes",
     "sorteos",
   ],
-  openGraph: {
-    title: "Terminos y condiciones | FrancoBertello74 Store",
-    description:
-      "Reglas de uso del store, el sistema de creditos, sorteos, canjes y soporte.",
-    type: "website",
-    locale: "es_AR",
-  },
-};
+});
 
 export default function TermsPage() {
   return (
     <LegalDocument
-      eyebrow="Terminos"
-      title="Terminos y condiciones"
-      description="Estas condiciones regulan el uso del store, los creditos, puntos, sorteos, canjes, soporte, recompensas y herramientas vinculadas a la comunidad de FrancoBertello74."
+      eyebrow="Términos"
+      title="Términos y condiciones"
+      description="Estas condiciones regulan el uso del store, los créditos, puntos, sorteos, canjes, soporte, recompensas y herramientas vinculadas a la comunidad de FrancoBertello74."
       updatedAt={legalUpdatedAt}
       sections={termsSections}
     />

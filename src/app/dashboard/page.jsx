@@ -11,6 +11,7 @@ import StatCard from "@/modules/dashboard/components/stat-card";
 import StreamDangerPanel from "@/modules/dashboard/components/stream-danger-panel";
 import StreamPanel from "@/modules/dashboard/components/stream-panel";
 import RewardWheelPanel from "@/modules/dashboard/components/reward-wheel-panel";
+import KickModerationPanel from "@/modules/dashboard/components/kick-moderation-panel";
 import {
   RedemptionsPanel,
   SupportPanel,
@@ -125,7 +126,11 @@ function DashboardStats({ stats }) {
 
 function DashboardTabs({ activeTab, onChange }) {
   return (
-    <div className="grid grid-cols-3 gap-2 rounded-2xl p-2 lg:flex lg:gap-2">
+    <div
+      role="tablist"
+      aria-label="Secciones del dashboard"
+      className="grid grid-cols-3 gap-2 rounded-2xl p-2 lg:flex lg:gap-2"
+    >
       {dashboardTabs.map((tab) => {
         const Icon = tab.icon;
         const active = activeTab === tab.id;
@@ -133,6 +138,9 @@ function DashboardTabs({ activeTab, onChange }) {
         return (
           <button
             key={tab.id}
+            type="button"
+            role="tab"
+            aria-selected={active}
             onClick={() => onChange(tab.id)}
             className={`flex min-h-16 grow cursor-pointer flex-col shadow-xl shadow-black/20 items-center justify-center gap-1 rounded-xl border px-2 py-2 text-xs font-bold transition focus:outline-none focus:ring-2 focus:ring-red-300/40 lg:min-h-0 lg:flex-row lg:gap-2 lg:px-4 lg:py-3 lg:text-sm ${
               active
@@ -257,6 +265,14 @@ function DashboardActivePanel({ dashboard }) {
           onSelectWheel={dashboard.selectRewardWheel}
           onSave={dashboard.saveRewardWheel}
         />
+        {dashboard.canManageKickModeration ? (
+          <KickModerationPanel
+            moderation={dashboard.kickModeration}
+            isPending={dashboard.isPending}
+            onConnect={dashboard.connectKickModeration}
+            onDisconnect={dashboard.disconnectKickModeration}
+          />
+        ) : null}
       </div>
     );
   }

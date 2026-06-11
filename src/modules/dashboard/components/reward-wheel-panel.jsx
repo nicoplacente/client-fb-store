@@ -11,6 +11,28 @@ import {
 } from "./form-controls";
 
 const PROBABILITY_TOLERANCE = 0.001;
+const EFFECT_OPTIONS = [
+  {
+    value: "none",
+    label: "Sin efecto",
+  },
+  {
+    value: "credits_multiply",
+    label: "X2 del precio de la ruleta",
+  },
+  {
+    value: "credits_add",
+    label: "Suma de puntos",
+  },
+  {
+    value: "credits_subtract",
+    label: "Reducir créditos",
+  },
+  {
+    value: "kick_timeout",
+    label: "Timeout en Kick",
+  },
+];
 
 export default function RewardWheelPanel({
   rewardWheels,
@@ -99,7 +121,7 @@ export default function RewardWheelPanel({
             prizes.map((prize, index) => (
               <div
                 key={prize.id}
-                className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-3 sm:grid-cols-[minmax(0,1fr)_11rem_auto] sm:items-end"
+                className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-3 lg:grid-cols-[minmax(0,1fr)_10rem_minmax(12rem,0.8fr)_auto] lg:items-end"
               >
                 <label className="grid gap-2 text-sm font-semibold text-neutral-300">
                   Premio {index + 1}
@@ -134,6 +156,26 @@ export default function RewardWheelPanel({
                     </span>
                   </div>
                 </label>
+                <label className="grid gap-2 text-sm font-semibold text-neutral-300">
+                  Efecto
+                  <SelectInput
+                    value={prize.effectType || "none"}
+                    disabled={isPending}
+                    onChange={(event) =>
+                      onChangePrize(
+                        prize.id,
+                        "effectType",
+                        event.target.value,
+                      )
+                    }
+                  >
+                    {EFFECT_OPTIONS.map((effect) => (
+                      <option key={effect.value} value={effect.value}>
+                        {effect.label}
+                      </option>
+                    ))}
+                  </SelectInput>
+                </label>
                 <button
                   type="button"
                   disabled={isPending}
@@ -143,6 +185,36 @@ export default function RewardWheelPanel({
                 >
                   <IconTrash size={17} />
                 </button>
+                {requiresEffectValue(prize.effectType) ? (
+                  <label className="grid gap-2 text-sm font-semibold text-neutral-300 lg:col-start-3">
+                    {getEffectValueLabel(prize.effectType)}
+                    <div className="relative">
+                      <FormattedNumberInput
+                        value={prize.effectValue}
+                        min="1"
+                        max={
+                          prize.effectType === "kick_timeout"
+                            ? "10080"
+                            : "1000000000"
+                        }
+                        disabled={isPending}
+                        onValueChange={(value) =>
+                          onChangePrize(prize.id, "effectValue", value)
+                        }
+                        className="w-full pr-20"
+                        aria-label={`${getEffectValueLabel(prize.effectType)} del premio ${index + 1}`}
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 grid place-items-center text-sm font-bold text-neutral-500">
+                        {prize.effectType === "kick_timeout"
+                          ? "minutos"
+                          : "créditos"}
+                      </span>
+                    </div>
+                  </label>
+                ) : null}
+                <p className="text-xs leading-relaxed text-neutral-500 lg:col-span-2">
+                  {getEffectDescription(prize)}
+                </p>
               </div>
             ))
           ) : (
@@ -190,4 +262,44 @@ function formatProbability(value) {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
+}
+
+function getEffectDescription(prize) {
+  if (prize.effectType === "credits_multiply") {
+    return "Acredita dos veces el precio pagado por la ruleta. Si cuesta 500, suma 1.000 créditos.";
+  }
+
+  if (prize.effectType === "credits_add") {
+    return "Suma al usuario la cantidad exacta de créditos configurada.";
+  }
+
+  if (prize.effectType === "credits_subtract") {
+    return "Resta la cantidad configurada sin permitir que el saldo quede por debajo de cero.";
+  }
+
+  if (prize.effectType === "kick_timeout") {
+    return "El canje se completa aunque Kick rechace el timeout; el fallo queda registrado.";
+  }
+
+  return "Este premio se muestra en la ruleta sin modificar la cuenta del usuario.";
+}
+
+function requiresEffectValue(effectType) {
+  return [
+    "credits_add",
+    "credits_subtract",
+    "kick_timeout",
+  ].includes(effectType);
+}
+
+function getEffectValueLabel(effectType) {
+  if (effectType === "kick_timeout") {
+    return "Duración del timeout";
+  }
+
+  if (effectType === "credits_subtract") {
+    return "Créditos a restar";
+  }
+
+  return "Créditos a sumar";
 }

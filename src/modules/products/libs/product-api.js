@@ -70,6 +70,10 @@ export function normalizeProductRedemption(redemption) {
       redemption.wheel?.winner?.name ||
       redemption.winner?.name ||
       "",
+    wheelEffectType: redemption.wheelEffectType || "",
+    wheelEffectValue: Number(redemption.wheelEffectValue || 0),
+    wheelEffectStatus: redemption.wheelEffectStatus || "not_applicable",
+    wheelEffectError: redemption.wheelEffectError || "",
     createdAt: redemption.createdAt || "",
     product: normalizeProduct(product),
   };

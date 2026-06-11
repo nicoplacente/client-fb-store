@@ -136,7 +136,7 @@ function ProductPrice({ product, outOfStock, unavailable }) {
   return (
     <div className="grid justify-items-center gap-2">
       <p className="flex items-center justify-center gap-2 text-2xl font-black text-amber-300">
-        <Image src={coins} alt="Creditos" className="size-5" />
+        <Image src={coins} alt="" className="size-5" />
         {formatNumber(product.price)}
       </p>
       <div className="text-center text-xs font-black uppercase text-neutral-600">

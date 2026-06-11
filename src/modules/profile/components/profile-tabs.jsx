@@ -3,7 +3,7 @@ import { IconCrown, IconInfoCircle, IconShoppingBag } from "@tabler/icons-react"
 const profileTabs = [
   {
     id: "info",
-    label: "Informacion",
+    label: "Información",
     icon: IconInfoCircle,
   },
   {
@@ -20,7 +20,11 @@ const profileTabs = [
 
 export default function ProfileTabs({ activeTab, onChange }) {
   return (
-    <div className="mx-auto mb-7 grid w-full max-w-xl grid-cols-3 gap-2 border-b border-white/10">
+    <div
+      role="tablist"
+      aria-label="Secciones del perfil"
+      className="mx-auto mb-7 grid w-full max-w-xl grid-cols-3 gap-2 border-b border-white/10"
+    >
       {profileTabs.map((tab) => {
         const Icon = tab.icon;
 
@@ -28,8 +32,10 @@ export default function ProfileTabs({ activeTab, onChange }) {
           <button
             key={tab.id}
             type="button"
+            role="tab"
+            aria-selected={activeTab === tab.id}
             onClick={() => onChange(tab.id)}
-            aria-label={`Ver seccion ${tab.label}`}
+            aria-label={`Ver sección ${tab.label}`}
             className={`inline-flex min-w-0 cursor-pointer items-center justify-center gap-2 border-b-2 px-2 py-3 text-sm font-bold transition sm:px-4 ${
               activeTab === tab.id
                 ? "border-red-400 text-white"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId, useRef } from "react";
 import {
   IconCheck,
   IconCopy,
@@ -16,16 +16,42 @@ import useCopy from "@/modules/hooks/use-copy";
 export default function LoginModal({ onClose }) {
   const { token, error } = useVerifyToken();
   const { copied, copy } = useCopy();
+  const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
 
   useVerifyListener(onClose);
 
   useEffect(() => {
+    const previouslyFocusedElement = document.activeElement;
+
     function handleKeyDown(event) {
       if (event.key === "Escape") onClose();
+
+      if (event.key === "Tab") {
+        const focusableElements = dialogRef.current?.querySelectorAll(
+          'button:not([disabled]), [href], [tabindex]:not([tabindex="-1"])',
+        );
+        const firstElement = focusableElements?.[0];
+        const lastElement = focusableElements?.[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement?.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement?.focus();
+        }
+      }
     }
 
+    closeButtonRef.current?.focus();
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus?.();
+    };
   }, [onClose]);
 
   function handleCopy() {
@@ -35,15 +61,24 @@ export default function LoginModal({ onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-md">
-      <div className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-950 p-6 text-white shadow-2xl">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        className="w-full max-w-md rounded-lg border border-zinc-700 bg-zinc-950 p-6 text-white shadow-2xl"
+      >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-xl font-semibold">Verificación Kick</h2>
-            <p className="mt-2 text-sm text-zinc-400">
+            <h2 id={titleId} className="text-xl font-semibold">Verificación Kick</h2>
+            <p id={descriptionId} className="mt-2 text-sm text-zinc-400">
               Entra al chat y envía el comando para vincular tu cuenta.
             </p>
           </div>
           <button
+            ref={closeButtonRef}
+            type="button"
             onClick={onClose}
             aria-label="Cerrar modal de login"
             className="rounded-md border border-white/10 p-2 text-zinc-400 transition hover:text-white"
@@ -88,6 +123,7 @@ export default function LoginModal({ onClose }) {
 
               {token ? (
                 <button
+                  type="button"
                   onClick={handleCopy}
                   className="ml-2 cursor-pointer text-white transition hover:text-green-400"
                   title="Copiar comando"
@@ -112,6 +148,7 @@ export default function LoginModal({ onClose }) {
           </a>
 
           <button
+            type="button"
             onClick={onClose}
             aria-label="Cancelar login"
             className="w-full cursor-pointer rounded-md bg-zinc-800 py-2.5 text-white transition hover:bg-zinc-700"

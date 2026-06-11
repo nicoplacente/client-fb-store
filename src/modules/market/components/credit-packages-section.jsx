@@ -21,19 +21,19 @@ function CreditPackagesSection({ creditPackages, disabled, onPurchase }) {
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-black uppercase tracking-wide text-amber-200/80">
-              Packs de creditos
+              Packs de créditos
             </p>
             <h2 className="mt-2 max-w-xl text-2xl font-black leading-tight text-white sm:text-3xl">
-              Prepara saldo para canjear al instante
+              Prepará saldo para canjear al instante
             </h2>
             <p className="mt-3 max-w-xl text-sm font-medium leading-6 text-neutral-400">
-              Usa tus puntos del canal para cargar creditos y desbloquear
+              Usá tus puntos del canal para cargar créditos y desbloquear
               recompensas sin esperar.
             </p>
           </div>
           <span className="inline-flex w-fit items-center gap-2 rounded-full border border-amber-300/20 bg-black/25 px-3 py-1.5 text-xs font-black text-amber-100">
             <IconBolt size={15} />
-            Acreditacion inmediata
+            Acreditación inmediata
           </span>
         </div>
 

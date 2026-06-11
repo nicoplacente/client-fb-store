@@ -9,16 +9,18 @@ import {
   IconSparkles,
   IconTrophy,
 } from "@tabler/icons-react";
+import { createPageMetadata } from "@/modules/seo/metadata";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
 
-export const metadata = {
+export const metadata = createPageMetadata({
   title: {
     absolute: "FrancoBertello74 Store",
   },
   description:
     "Sitio oficial de la comunidad de FrancoBertello74 para canjear créditos, participar en sorteos y abrir soporte.",
+  path: "/",
   keywords: [
     "FrancoBertello74",
     "Kick",
@@ -28,14 +30,7 @@ export const metadata = {
     "sorteos",
     "soporte",
   ],
-  openGraph: {
-    title: "FrancoBertello74 Store",
-    description:
-      "Canjeá créditos, participá en sorteos y revisá tus compras de la comunidad.",
-    type: "website",
-    locale: "es_AR",
-  },
-};
+});
 
 export default function Home() {
   return (
@@ -55,8 +50,8 @@ export default function Home() {
                 STORE
               </h1>
               <p className="mt-5 max-w-xl text-base font-medium leading-7 text-neutral-400 sm:text-lg">
-                Canjea creditos, participa en sorteos y desbloquea recompensas
-                de la comunidad con una experiencia rapida, oscura y premium.
+                Canjeá créditos, participá en sorteos y desbloqueá recompensas
+                de la comunidad con una experiencia rápida, oscura y premium.
               </p>
             </div>
             <div className="flex flex-col gap-3 sm:flex-row">
@@ -84,7 +79,7 @@ export default function Home() {
               height="701"
               src="https://player.kick.com/francobertello74"
               title="FrancoBertello74"
-              loading="eager"
+              loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; storage-access; web-share"
               referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
@@ -97,7 +92,7 @@ export default function Home() {
         <div>
           <p className="text-xs font-black uppercase text-red-300">Extensión</p>
           <h2 className="mt-1 text-xl font-black text-white">
-            Suma la experiencia FrancoBertello Points a tu Navegador.
+            Sumá la experiencia FrancoBertello Points a tu navegador.
           </h2>
         </div>
         <a
@@ -115,19 +110,19 @@ export default function Home() {
         <HomeFeature
           icon={IconShoppingBag}
           title="Canjes directos"
-          text="Productos, codigos y beneficios organizados para encontrar rapido lo que queres desbloquear."
+          text="Productos, códigos y beneficios organizados para encontrar rápido lo que querés desbloquear."
           href="/market"
         />
         <HomeFeature
           icon={IconTrophy}
           title="Competencia viva"
-          text="Ranking, puntos y creditos conectados a la actividad real de la comunidad."
+          text="Ranking, puntos y créditos conectados a la actividad real de la comunidad."
           href="/ranking"
         />
         <HomeFeature
           icon={IconGift}
           title="Sorteos activos"
-          text="Participa con creditos, revisa estados y consulta resultados desde el mismo ecosistema."
+          text="Participá con créditos, revisá estados y consultá resultados desde el mismo ecosistema."
           href="/gifts"
         />
       </SpotlightGroup>

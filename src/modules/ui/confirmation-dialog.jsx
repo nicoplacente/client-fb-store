@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId } from "react";
+import { useEffect, useId, useRef } from "react";
 import { IconAlertTriangle, IconCheck, IconX } from "@tabler/icons-react";
 
 export default function ConfirmationDialog({
@@ -17,6 +17,8 @@ export default function ConfirmationDialog({
 }) {
   const titleId = useId();
   const descriptionId = useId();
+  const dialogRef = useRef(null);
+  const closeButtonRef = useRef(null);
   const isDanger = variant === "danger";
   const iconClassName = isDanger
     ? "border-red-300/25 bg-red-500/10 text-red-100"
@@ -30,16 +32,37 @@ export default function ConfirmationDialog({
 
   useEffect(() => {
     if (!open) return undefined;
+    const previouslyFocusedElement = document.activeElement;
 
     function handleKeyDown(event) {
       if (event.key === "Escape") {
         onCancel();
       }
+
+      if (event.key === "Tab") {
+        const focusableElements = dialogRef.current?.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        const firstElement = focusableElements?.[0];
+        const lastElement = focusableElements?.[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement?.focus();
+        } else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement?.focus();
+        }
+      }
     }
 
+    closeButtonRef.current?.focus();
     window.addEventListener("keydown", handleKeyDown);
 
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      previouslyFocusedElement?.focus?.();
+    };
   }, [open, onCancel]);
 
   if (!open) return null;
@@ -54,6 +77,7 @@ export default function ConfirmationDialog({
       }}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -80,10 +104,11 @@ export default function ConfirmationDialog({
             </div>
           </div>
           <button
+            ref={closeButtonRef}
             type="button"
             onClick={onCancel}
             className={`rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 ${focusClassName}`}
-            aria-label="Cerrar confirmacion"
+            aria-label="Cerrar confirmación"
           >
             <IconX size={18} />
           </button>

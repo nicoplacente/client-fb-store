@@ -40,6 +40,7 @@ export const envConfig = {
   API_STREAM_HOURS: `${SERVER_URL}/stream/hours`,
   API_STREAM_REWARDS: `${SERVER_URL}/stream/rewards`,
   API_REWARD_WHEELS: `${SERVER_URL}/stream/reward-wheels`,
+  API_REWARD_WHEEL_MODERATION: `${SERVER_URL}/stream/reward-wheel-moderation`,
   API_PREDICTIONS: `${SERVER_URL}/predictions`,
   API_LIVE_STATUS: `${SERVER_URL}/live/status`,
   API_UPLOAD_IMAGE: `${SERVER_URL}/uploads/image`,

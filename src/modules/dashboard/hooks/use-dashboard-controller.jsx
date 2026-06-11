@@ -2,7 +2,10 @@ import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
-import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
+import {
+  hasDashboardAccess,
+  hasKickModerationAccess,
+} from "@/modules/auth/libs/permissions";
 import {
   createProduct,
   deleteProduct,
@@ -31,7 +34,10 @@ import {
 import {
   createStreamChatReward,
   createStreamChest,
+  disconnectRewardWheelModeration,
+  getRewardWheelModerationConnectUrl,
   normalizeRewardWheelConfig,
+  normalizeRewardWheelModeration,
   normalizeStreamHourState,
   normalizeStreamRewardState,
   resetRankingPoints,
@@ -73,6 +79,7 @@ function parseNumericInput(value, fallback = 0) {
 export default function useDashboardController() {
   const { user, refreshUser } = useAppContext(AuthContext);
   const canManageDashboard = hasDashboardAccess(user);
+  const canManageKickModeration = hasKickModerationAccess(user);
   const [activeTab, setActiveTab] = useState("products");
   const [products, setProducts] = useState([]);
   const [creditPackages, setCreditPackages] = useState([]);
@@ -84,6 +91,9 @@ export default function useDashboardController() {
   const [rewardWheels, setRewardWheels] = useState([]);
   const [rewardWheel, setRewardWheel] = useState(normalizeRewardWheelConfig());
   const [rewardWheelDirty, setRewardWheelDirty] = useState(false);
+  const [kickModeration, setKickModeration] = useState(
+    normalizeRewardWheelModeration(),
+  );
   const rewardWheelDirtyRef = useRef(false);
   const rewardWheelDraftIdRef = useRef(0);
   const [predictions, setPredictions] = useState([]);
@@ -181,6 +191,9 @@ export default function useDashboardController() {
         });
       }
       setPredictions(data.predictions || []);
+      if (data.kickModeration) {
+        setKickModeration(data.kickModeration);
+      }
       trackDashboardNotifications(data.ticketData);
     } catch {
       setError("No se pudo cargar el dashboard");
@@ -536,6 +549,8 @@ export default function useDashboardController() {
           id: `new-reward-wheel-prize-${Date.now()}-${rewardWheelDraftIdRef.current}`,
           name: "",
           probability: "",
+          effectType: "none",
+          effectValue: "",
         },
       ],
     }));
@@ -585,6 +600,14 @@ export default function useDashboardController() {
     const prizes = rewardWheel.prizes.map((prize) => ({
       name: prize.name.trim(),
       probability: Number(prize.probability),
+      effectType: prize.effectType || "none",
+      effectValue: [
+        "credits_add",
+        "credits_subtract",
+        "kick_timeout",
+      ].includes(prize.effectType)
+        ? Number(prize.effectValue)
+        : null,
     }));
     const total = prizes.reduce((sum, prize) => sum + prize.probability, 0);
 
@@ -594,7 +617,15 @@ export default function useDashboardController() {
         (prize) =>
           !prize.name ||
           !Number.isFinite(prize.probability) ||
-          prize.probability <= 0,
+          prize.probability <= 0 ||
+          (["credits_add", "credits_subtract", "kick_timeout"].includes(
+            prize.effectType,
+          ) &&
+            (!Number.isSafeInteger(prize.effectValue) ||
+              prize.effectValue < 1 ||
+              (prize.effectType === "kick_timeout"
+                ? prize.effectValue > 10080
+                : prize.effectValue > 1000000000))),
       ) ||
       Math.abs(total - 100) >= 0.001
     ) {
@@ -616,6 +647,22 @@ export default function useDashboardController() {
         toast.success("Ruleta actualizada");
       } catch {
         toast.error("No se pudo guardar la ruleta");
+      }
+    });
+  }
+
+  function connectKickModeration() {
+    window.location.assign(getRewardWheelModerationConnectUrl());
+  }
+
+  function disconnectKickModeration() {
+    startTransition(async () => {
+      try {
+        const data = await disconnectRewardWheelModeration();
+        setKickModeration(data);
+        toast.success("Moderación de Kick desconectada");
+      } catch {
+        toast.error("No se pudo desconectar la moderación de Kick");
       }
     });
   }
@@ -785,6 +832,7 @@ export default function useDashboardController() {
   return {
     user,
     canManageDashboard,
+    canManageKickModeration,
     activeTab,
     setActiveTab,
     stats,
@@ -803,6 +851,7 @@ export default function useDashboardController() {
     rewardWheels,
     rewardWheel,
     rewardWheelDirty,
+    kickModeration,
     predictions,
     supportReplies,
     setSupportReplies,
@@ -870,6 +919,8 @@ export default function useDashboardController() {
     removeRewardWheelPrize,
     selectRewardWheel,
     saveRewardWheel,
+    connectKickModeration,
+    disconnectKickModeration,
     submitStreamPrediction,
     resolveStreamPrediction,
     resetRankingPointsToZero,
