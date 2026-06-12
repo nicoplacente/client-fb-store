@@ -20,6 +20,7 @@ import {
   getSupportTickets,
   normalizeTicket,
 } from "@/modules/support/libs/support-api";
+import { SUPPORT_CATEGORY_OPTIONS } from "@/modules/support/libs/support-categories";
 import { formatDateTime } from "@/modules/dashboard/lib/formatters";
 import { StatusBadge } from "@/modules/dashboard/components/tickets/ticket-status";
 
@@ -206,11 +207,11 @@ export default function SupportPage() {
                 className="h-12 cursor-pointer rounded-xl border border-white/10 bg-neutral-900/80 px-4 text-white outline-none transition hover:border-white/20 focus:border-red-400/60"
                 disabled={!user || isPending}
               >
-                <option value="general">General</option>
-                <option value="credits">Créditos</option>
-                <option value="giveaways">Sorteos</option>
-                <option value="account">Cuenta</option>
-                <option value="technical">Técnico</option>
+                {SUPPORT_CATEGORY_OPTIONS.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
               </select>
             </label>
             <label className="grid gap-2 text-sm font-bold text-neutral-300">
@@ -280,7 +281,7 @@ export default function SupportPage() {
                     <span className="min-w-0">
                       <span className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] font-black uppercase text-neutral-400">
-                          {ticket.category}
+                          {ticket.categoryLabel}
                         </span>
                         <StatusBadge status={ticket.status} />
                       </span>

@@ -25,6 +25,7 @@ export default function SupportPanel({
   const activeTickets = tickets.filter(
     (ticket) => ticket.status !== "closed",
   ).length;
+  const closedTickets = tickets.length - activeTickets;
 
   return (
     <div className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
@@ -43,13 +44,14 @@ export default function SupportPanel({
         <div className="flex gap-2">
           <InboxMetric label="Total" value={tickets.length} />
           <InboxMetric label="Activos" value={activeTickets} tone="red" />
+          <InboxMetric label="Historial" value={closedTickets} />
         </div>
       </div>
 
       {loading ? (
         <TicketEmptyState>Cargando tickets...</TicketEmptyState>
       ) : tickets.length === 0 ? (
-        <TicketEmptyState>No hay consultas abiertas.</TicketEmptyState>
+        <TicketEmptyState>No hay consultas para mostrar.</TicketEmptyState>
       ) : (
         <TicketGroup
           tickets={tickets}
@@ -174,7 +176,7 @@ function TicketCardHeader({ ticket, onOpenProfile }) {
     <div className="min-w-0">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-black uppercase text-neutral-400">
-          {ticket.category}
+          {ticket.categoryLabel}
         </span>
         <StatusBadge status={ticket.status} />
         <UserProfileButton

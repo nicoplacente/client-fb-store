@@ -138,12 +138,16 @@ export default function useDashboardController() {
     () => normalizedTickets.filter((ticket) => ticket.category === "market"),
     [normalizedTickets],
   );
-  const openSupportTickets = useMemo(
+  const supportTickets = useMemo(
     () =>
       normalizedTickets.filter(
-        (ticket) => ticket.category !== "market" && ticket.status !== "closed",
+        (ticket) => ticket.category !== "market",
       ),
     [normalizedTickets],
+  );
+  const openSupportTickets = useMemo(
+    () => supportTickets.filter((ticket) => ticket.status !== "closed"),
+    [supportTickets],
   );
   const stats = useMemo(
     () => ({
@@ -910,7 +914,7 @@ export default function useDashboardController() {
     products: normalizedProducts,
     creditPackages: normalizedCreditPackages,
     giveaways: normalizedGiveaways,
-    supportTickets: openSupportTickets,
+    supportTickets,
     redemptionTickets,
     streamHour,
     streamRewards,
