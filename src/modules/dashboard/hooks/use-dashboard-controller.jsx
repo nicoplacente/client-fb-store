@@ -27,6 +27,7 @@ import {
 import { uploadImage } from "@/modules/uploads/libs/upload-api";
 import {
   createSupportMessage,
+  deleteRedemptionTickets,
   deleteSupportTicket,
   normalizeTicket,
   updateSupportTicket,
@@ -462,6 +463,24 @@ export default function useDashboardController() {
     });
   }
 
+  function deleteRedemptionsByMode(mode) {
+    startTransition(async () => {
+      try {
+        const data = await deleteRedemptionTickets(mode);
+        const deletedCount = Number(data.deletedCount || 0);
+
+        toast.success(
+          deletedCount === 1
+            ? "Se elimino 1 canje"
+            : `Se eliminaron ${deletedCount} canjes`,
+        );
+        await loadDashboard();
+      } catch {
+        toast.error("No se pudieron eliminar los canjes");
+      }
+    });
+  }
+
   function activateStreamHour(hour, options = {}) {
     startTransition(async () => {
       try {
@@ -770,6 +789,44 @@ export default function useDashboardController() {
     });
   }
 
+  function removeClosedRedemptions() {
+    const closedCount = redemptionTickets.filter(
+      (ticket) => ticket.status === "closed",
+    ).length;
+
+    setConfirmation({
+      type: "delete-closed-redemptions",
+      title: "Eliminar canjes cerrados",
+      description: `Vas a eliminar ${closedCount} canje${
+        closedCount === 1 ? "" : "s"
+      } cerrado${closedCount === 1 ? "" : "s"}.`,
+      confirmLabel: "Eliminar cerrados",
+      cancelLabel: "Conservar canjes",
+      details: [
+        "Solo se eliminaran canjes de productos con estado Cerrado.",
+        "Los canjes abiertos o en proceso se conservaran.",
+        "Esta accion no depende del filtro de fecha visible.",
+      ],
+    });
+  }
+
+  function removeAllRedemptions() {
+    setConfirmation({
+      type: "delete-all-redemptions",
+      title: "Eliminar todos los canjes",
+      description: `Vas a eliminar ${redemptionTickets.length} canje${
+        redemptionTickets.length === 1 ? "" : "s"
+      } de productos.`,
+      confirmLabel: "Eliminar todos",
+      cancelLabel: "Conservar canjes",
+      details: [
+        "Se eliminaran canjes abiertos, en proceso y cerrados.",
+        "Esta accion limpia todos los canjes de productos, aunque no esten visibles por filtros.",
+        "No se eliminaran tickets de soporte.",
+      ],
+    });
+  }
+
   function cancelConfirmation() {
     setConfirmation(null);
   }
@@ -797,6 +854,16 @@ export default function useDashboardController() {
 
     if (current.type === "delete-ticket") {
       deleteTicketById(current.target);
+      return;
+    }
+
+    if (current.type === "delete-closed-redemptions") {
+      deleteRedemptionsByMode("closed");
+      return;
+    }
+
+    if (current.type === "delete-all-redemptions") {
+      deleteRedemptionsByMode("all");
     }
   }
 
@@ -908,6 +975,8 @@ export default function useDashboardController() {
     updateTicketStatus,
     replyToTicket,
     removeTicket,
+    removeClosedRedemptions,
+    removeAllRedemptions,
     cancelConfirmation,
     confirmDashboardAction,
     activateStreamHour,

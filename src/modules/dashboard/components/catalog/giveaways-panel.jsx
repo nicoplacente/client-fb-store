@@ -140,9 +140,8 @@ function GiveawayFormFields({ form, setForm }) {
             onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
           >
             <option value="active">Activo</option>
-            <option value="draft">Borrador</option>
+            <option value="draft">No visible en sorteos</option>
             <option value="closed">Cerrado</option>
-            <option value="archived">Archivado</option>
           </SelectInput>
         </Field>
         <Field label="Inicio">

@@ -29,6 +29,8 @@ export default function RedemptionsPanel({
   isPending,
   onStatusChange,
   onDelete,
+  onDeleteAll,
+  onDeleteClosed,
 }) {
   const [dateFilter, setDateFilter] = useState("");
   const [calendarDate, setCalendarDate] = useState("");
@@ -39,6 +41,8 @@ export default function RedemptionsPanel({
   });
   const openTickets = filteredTickets.filter((ticket) => ticket.status !== "closed").length;
   const closedTickets = filteredTickets.length - openTickets;
+  const totalTickets = tickets.length;
+  const totalClosedTickets = tickets.filter((ticket) => ticket.status === "closed").length;
   const hasFilter = Boolean(calendarDate || dateFilter);
 
   function clearFilters() {
@@ -58,6 +62,11 @@ export default function RedemptionsPanel({
         onCalendarDateChange={setCalendarDate}
         onDateFilterChange={setDateFilter}
         onClearFilters={clearFilters}
+        totalTickets={totalTickets}
+        totalClosedTickets={totalClosedTickets}
+        isPending={isPending}
+        onDeleteAll={onDeleteAll}
+        onDeleteClosed={onDeleteClosed}
       />
 
       {loading ? (
@@ -94,6 +103,11 @@ function RedemptionsHeader({
   onCalendarDateChange,
   onDateFilterChange,
   onClearFilters,
+  totalTickets,
+  totalClosedTickets,
+  isPending,
+  onDeleteAll,
+  onDeleteClosed,
 }) {
   return (
     <div className="grid gap-5 border-b border-white/10 pb-5 xl:grid-cols-[1fr_auto] xl:items-end">
@@ -148,6 +162,26 @@ function RedemptionsHeader({
           <RedemptionStat label="Total" value={total} icon={<IconShoppingBag size={14} />} />
           <RedemptionStat label="Abiertos" value={open} icon={<IconClock size={14} />} />
           <RedemptionStat label="Cerrados" value={closed} icon={<IconCircleCheck size={14} />} />
+        </div>
+        <div className="grid gap-2 sm:flex sm:justify-end">
+          <button
+            type="button"
+            onClick={onDeleteClosed}
+            disabled={isPending || totalClosedTickets === 0}
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2.5 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-300/15 focus:outline-none focus:ring-2 focus:ring-amber-300/35 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <IconTrash size={16} />
+            Eliminar cerrados
+          </button>
+          <button
+            type="button"
+            onClick={onDeleteAll}
+            disabled={isPending || totalTickets === 0}
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <IconTrash size={16} />
+            Eliminar todos
+          </button>
         </div>
       </div>
     </div>

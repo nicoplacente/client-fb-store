@@ -123,8 +123,7 @@ function CreditPackageFormFields({ form, setForm }) {
             onChange={(event) => setForm((current) => ({ ...current, status: event.target.value }))}
           >
             <option value="active">Activo</option>
-            <option value="draft">Borrador</option>
-            <option value="archived">Archivado</option>
+            <option value="draft">No visible en la tienda</option>
           </SelectInput>
         </Field>
       </div>

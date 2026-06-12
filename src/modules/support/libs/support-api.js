@@ -42,6 +42,15 @@ export async function deleteSupportTicket(ticketId) {
   });
 }
 
+export async function deleteRedemptionTickets(mode) {
+  return apiRequest(`${envConfig.API_SUPPORT_TICKETS}/market`, {
+    method: "DELETE",
+    body: {
+      mode,
+    },
+  });
+}
+
 export function normalizeTicket(ticket) {
   const user = ticket.user
     ? {

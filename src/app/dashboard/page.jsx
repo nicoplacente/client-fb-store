@@ -232,6 +232,8 @@ function DashboardActivePanel({ dashboard }) {
       <RedemptionsPanel
         tickets={dashboard.redemptionTickets}
         products={dashboard.products}
+        onDeleteAll={dashboard.removeAllRedemptions}
+        onDeleteClosed={dashboard.removeClosedRedemptions}
         {...ticketProps}
       />
     );
