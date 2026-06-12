@@ -61,7 +61,7 @@ export default function ImageInput({
         onClick={openFileSelector}
         onDrop={handleDrop}
         onDragOver={(event) => event.preventDefault()}
-        className="grid min-h-44 cursor-pointer place-items-center rounded-2xl border border-dashed border-white/15 bg-neutral-900/60 px-4 py-8 text-center transition hover:border-red-300/45 hover:bg-red-500/5 focus:outline-none focus:ring-2 focus:ring-red-300/35"
+        className="grid min-h-44 cursor-pointer place-items-center rounded-2xl border border-dashed border-white/15 bg-neutral-900/60 px-4 py-8 text-center transition hover:border-red-300/45 hover:bg-red-500/5 focus:outline-none"
       >
         <span className="grid justify-items-center gap-3">
           <IconPhotoUp size={44} className="text-neutral-600" />
@@ -109,7 +109,7 @@ export default function ImageInput({
               <button
                 type="button"
                 onClick={clearFile}
-                className="absolute right-2 top-2 grid size-8 cursor-pointer place-items-center rounded-full bg-black/70 text-white opacity-100 transition hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-300/45 sm:opacity-0 sm:group-hover:opacity-100"
+                className="absolute right-2 top-2 grid size-8 cursor-pointer place-items-center rounded-full bg-black/70 text-white opacity-100 transition hover:bg-red-600 focus:outline-none sm:opacity-0 sm:group-hover:opacity-100"
                 aria-label="Quitar archivo"
               >
                 <IconX size={16} />

@@ -9,6 +9,7 @@ import {
   useTransition,
 } from "react";
 import { toast } from "sonner";
+import { IconSparkles } from "@tabler/icons-react";
 import SectionContainer from "@/modules/ui/section-container";
 import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import useAppContext from "@/context/use-app-context";
@@ -30,6 +31,9 @@ import ActionSummary from "@/modules/market/components/action-summary";
 import CreditPackagesSection from "@/modules/market/components/credit-packages-section";
 import MarketToolbar from "@/modules/market/components/market-toolbar";
 import ProductsGrid from "@/modules/market/components/products-grid";
+import ProductDetail, {
+  WheelPrizes,
+} from "@/modules/market/components/product-detail";
 import {
   getActionConfirmation,
   getCreditPurchaseQuantity,
@@ -48,6 +52,8 @@ export default function MarketPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
+  const [wheelResult, setWheelResult] = useState(null);
+  const [wheelRedeeming, setWheelRedeeming] = useState(false);
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
   const userId = user?.id;
@@ -133,6 +139,7 @@ export default function MarketPage() {
   const handleRequestRedeem = useCallback((product) => {
     if (isPending) return;
 
+    setWheelResult(null);
     setPendingAction({
       type: "redeem",
       item: product,
@@ -160,8 +167,11 @@ export default function MarketPage() {
   }, [isPending, maxPurchasePlan]);
 
   const handleCancelAction = useCallback(() => {
+    if (wheelRedeeming) return;
+
     setPendingAction(null);
-  }, []);
+    setWheelResult(null);
+  }, [wheelRedeeming]);
 
   const handleQuantityChange = useCallback((quantity) => {
     setPendingAction((current) =>
@@ -172,6 +182,43 @@ export default function MarketPage() {
   const handleConfirmAction = useCallback(() => {
     const action = pendingAction;
     if (!action) return;
+
+    if (wheelResult) {
+      setPendingAction(null);
+      setWheelResult(null);
+      return;
+    }
+
+    if (action.type === "redeem" && action.item.rewardEffectType === "reward_wheel") {
+      setWheelRedeeming(true);
+
+      startTransition(async () => {
+        try {
+          const result = await confirmProductRedemption({
+            action,
+            loadMarket,
+            refreshUser,
+            setProducts,
+          });
+          const winner = getWheelWinner(result);
+
+          if (winner) {
+            setWheelResult(winner);
+          } else {
+            toast.error("La ruleta se canjeó, pero no se pudo mostrar el premio");
+            setPendingAction(null);
+          }
+        } catch (error) {
+          toast.error(
+            getErrorMessage(error, "No se pudo completar la operación"),
+          );
+          await loadMarket({ showLoading: false });
+        } finally {
+          setWheelRedeeming(false);
+        }
+      });
+      return;
+    }
 
     setPendingAction(null);
 
@@ -244,6 +291,7 @@ export default function MarketPage() {
     pendingAction,
     refreshUser,
     startTransition,
+    wheelResult,
   ]);
 
   const confirmation = useMemo(
@@ -277,21 +325,48 @@ export default function MarketPage() {
 
       <ConfirmationDialog
         open={Boolean(pendingAction)}
-        title={confirmation?.title}
-        description={confirmation?.description}
-        confirmLabel={confirmation?.confirmLabel}
-        confirmDisabled={confirmation?.confirmDisabled}
+        title={wheelResult ? "Resultado de la ruleta" : confirmation?.title}
+        description={
+          wheelResult
+            ? "Tu premio quedó registrado en el historial de canjes."
+            : confirmation?.description
+        }
+        confirmLabel={
+          wheelResult
+            ? "Cerrar"
+            : wheelRedeeming
+              ? "Girando..."
+              : confirmation?.confirmLabel
+        }
+        cancelLabel={wheelResult ? "Volver a la tienda" : "Cancelar"}
+        confirmDisabled={confirmation?.confirmDisabled || wheelRedeeming}
+        cancelDisabled={wheelRedeeming}
         onConfirm={handleConfirmAction}
         onCancel={handleCancelAction}
+        aside={
+          pendingAction?.type === "redeem" ? (
+            <ProductDetail product={pendingAction.item} />
+          ) : null
+        }
+        secondaryAside={
+          pendingAction?.type === "redeem" &&
+          pendingAction.item.rewardEffectType === "reward_wheel" ? (
+            <WheelPrizes prizes={pendingAction.item.rewardWheelPrizes} />
+          ) : null
+        }
       >
         {pendingAction ? (
-          <ActionSummary
-            action={pendingAction}
-            availablePoints={availablePoints}
-            maxPurchasePlan={maxPurchasePlan}
-            onMaxPurchase={handleRequestMaxPurchase}
-            onQuantityChange={handleQuantityChange}
-          />
+          wheelResult ? (
+            <WheelResult winner={wheelResult} />
+          ) : (
+            <ActionSummary
+              action={pendingAction}
+              availablePoints={availablePoints}
+              maxPurchasePlan={maxPurchasePlan}
+              onMaxPurchase={handleRequestMaxPurchase}
+              onQuantityChange={handleQuantityChange}
+            />
+          )
         ) : null}
       </ConfirmationDialog>
     </SectionContainer>
@@ -377,6 +452,49 @@ async function confirmProductRedemption({
 
   toast.success(getRedemptionSuccessMessage(result, action.item));
   await Promise.resolve(refreshUser?.()).catch(() => {});
+
+  return result;
+}
+
+function getWheelWinner(result) {
+  const winner = result?.wheel?.winner || result?.winner;
+  const name =
+    result?.redemption?.wheelPrizeName ||
+    winner?.name ||
+    result?.wheelPrizeName ||
+    "";
+
+  if (!name) return null;
+
+  return {
+    id: winner?.id || name,
+    name: String(name).trim(),
+  };
+}
+
+function WheelResult({ winner }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="grid justify-items-center gap-4 py-5 text-center"
+    >
+      <span className="grid size-16 place-items-center rounded-2xl border border-fuchsia-300/25 bg-fuchsia-400/10 text-fuchsia-200">
+        <IconSparkles size={30} aria-hidden="true" />
+      </span>
+      <div>
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-fuchsia-200">
+          Premio obtenido
+        </p>
+        <p className="mt-2 text-2xl font-black leading-tight text-white">
+          {winner.name}
+        </p>
+      </div>
+      <p className="max-w-sm text-sm leading-6 text-neutral-400">
+        Podés consultar este resultado nuevamente desde tu historial de canjes.
+      </p>
+    </div>
+  );
 }
 
 function getRedemptionSuccessMessage(result, product) {

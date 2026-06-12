@@ -27,17 +27,13 @@ export default function LinkSidebar({
       ? "bg-red-400/15 text-red-100"
       : "bg-white/[0.035] text-neutral-400 group-hover:text-neutral-100";
 
-  const focusClassName = isBlueAccent
-    ? "focus:ring-cyan-300/45"
-    : "focus:ring-red-300/40";
-
   return (
     <Link
       href={item.href}
       target={item.external ? "_blank" : undefined}
       rel={item.external ? "noopener" : undefined}
       title={!isOpen ? item.name : undefined}
-      className={`group relative flex items-center overflow-hidden rounded-lg border text-sm font-semibold transition-[background,border-color,color,transform] duration-200 ease-out focus:outline-none focus:ring-2 ${focusClassName} [&_svg]:size-5 [&_svg]:shrink-0 ${
+      className={`group relative flex items-center overflow-hidden rounded-lg border text-sm font-semibold transition-[background,border-color,color,transform] duration-200 ease-out focus:outline-none [&_svg]:size-5 [&_svg]:shrink-0 ${
         isOpen ? "h-11 justify-start px-3" : "h-11 w-full justify-start px-3"
       } ${compact ? "text-xs" : "text-sm"} ${stateClassName}`}
     >

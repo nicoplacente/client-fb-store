@@ -14,7 +14,7 @@ export function FeaturedToggle({ checked, onChange }) {
       type="button"
       onClick={() => onChange(!checked)}
       aria-pressed={checked}
-      className={`flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border p-4 text-left transition focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+      className={`flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border p-4 text-left transition focus:outline-none ${
         checked
           ? "border-red-300/40 bg-red-500/12 shadow-lg shadow-red-950/15"
           : "border-white/10 bg-neutral-950/70 hover:border-red-300/25 hover:bg-white/[0.03]"
@@ -84,7 +84,7 @@ export function RewardEffectFields({ form, setForm }) {
           )
         }
         aria-pressed={hasStreamEvent}
-        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/70 p-4 text-left transition hover:border-red-300/25 hover:bg-white/[0.03] focus:outline-none focus:ring-2 focus:ring-red-300/40"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/70 p-4 text-left transition hover:border-red-300/25 hover:bg-white/[0.03] focus:outline-none"
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
@@ -188,7 +188,7 @@ export function StreamAlertFields({ form, setForm }) {
           }))
         }
         aria-pressed={form.alertEnabled}
-        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4 text-left transition hover:border-amber-300/30 focus:outline-none focus:ring-2 focus:ring-amber-200/35"
+        className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/65 p-4 text-left transition hover:border-amber-300/30 focus:outline-none"
       >
         <span className="flex min-w-0 items-center gap-3">
           <span className="grid size-11 shrink-0 place-items-center rounded-xl border border-amber-300/30 bg-amber-400/15 text-amber-100">
@@ -300,7 +300,7 @@ function RewardTypeCard({ active, icon, title, description, onClick }) {
       type="button"
       aria-pressed={active}
       onClick={onClick}
-      className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-red-300/25 focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+      className={`flex cursor-pointer items-start gap-3 rounded-2xl border p-4 text-left transition hover:-translate-y-0.5 hover:border-red-300/25 focus:outline-none ${
         active
           ? "border-red-300/40 bg-red-500/12 shadow-lg shadow-red-950/15"
           : "border-white/10 bg-neutral-950/70 hover:bg-white/[0.03]"

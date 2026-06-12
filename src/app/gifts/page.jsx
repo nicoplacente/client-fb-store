@@ -291,7 +291,7 @@ function GiveawayCard({
             onClick={() => onJoin(giveaway)}
             aria-label={`Participar en el sorteo ${giveaway.title}`}
             data-spotlight-cta
-            className="spotlight-cta inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+            className="spotlight-cta inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
           >
             <IconGift size={18} />
             {giveaway.hasJoined
@@ -309,7 +309,7 @@ function GiveawayCard({
             type="button"
             onClick={() => onOpenResult(giveaway)}
             aria-label={`Ver resultado del sorteo ${giveaway.title}`}
-            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(13,13,13,0.72))] px-5 py-3 text-xs font-black text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/45 hover:bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(13,13,13,0.78))] hover:text-white focus:outline-none focus:ring-2 focus:ring-amber-200/45"
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(13,13,13,0.72))] px-5 py-3 text-xs font-black text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/45 hover:bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(13,13,13,0.78))] hover:text-white focus:outline-none"
           >
             <IconTrophy size={17} />
             {isFinalized ? "Ver resultado" : "Resultado pendiente"}
@@ -388,7 +388,7 @@ function GiveawayResultModal({ giveaway, onClose }) {
             ref={closeButtonRef}
             type="button"
             onClick={onClose}
-            className="cursor-pointer rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
+            className="cursor-pointer rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none"
             aria-label="Cerrar resultado"
           >
             <IconX size={18} />

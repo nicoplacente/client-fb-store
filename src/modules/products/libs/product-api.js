@@ -81,6 +81,14 @@ export function normalizeProductRedemption(redemption) {
 
 export function normalizeProduct(product) {
   const status = normalizeStatus(product.status, product.enabled);
+  const rewardWheel =
+    product.rewardWheel || product.rewardWheelConfig || product.wheel || {};
+  const rewardWheelPrizes =
+    product.rewardWheelPrizes ||
+    product.wheelPrizes ||
+    rewardWheel.prizes ||
+    product.prizes ||
+    [];
 
   return {
     id: product.id || product._id || product.slug || product.title,
@@ -94,6 +102,18 @@ export function normalizeProduct(product) {
     status,
     featured: Boolean(product.featured),
     rewardEffectType: product.rewardEffectType || "",
+    rewardWheelPrizes: Array.isArray(rewardWheelPrizes)
+      ? rewardWheelPrizes
+          .map((prize, index) => ({
+            id: prize.id || prize._id || `reward-wheel-prize-${index}`,
+            name: String(prize.name || prize.title || "").trim(),
+            probability:
+              prize.probabilityBasisPoints !== undefined
+                ? Number(prize.probabilityBasisPoints || 0) / 100
+                : Number(prize.probability || 0),
+          }))
+          .filter((prize) => prize.name && prize.probability > 0)
+      : [],
     rewardEffectValue: product.rewardEffectValue || "",
     rewardEffectDurationMinutes: Number(product.rewardEffectDurationMinutes || 0),
     alertEnabled: Boolean(product.alertEnabled),

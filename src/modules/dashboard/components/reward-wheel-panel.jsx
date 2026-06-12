@@ -180,7 +180,7 @@ export default function RewardWheelPanel({
                   type="button"
                   disabled={isPending}
                   onClick={() => onRemovePrize(prize.id)}
-                  className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                   aria-label={`Eliminar premio ${prize.name || index + 1}`}
                 >
                   <IconTrash size={17} />
@@ -231,7 +231,7 @@ export default function RewardWheelPanel({
             type="button"
             disabled={isPending}
             onClick={onAddPrize}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-200 transition hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-200 transition hover:border-red-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconPlus size={17} />
             Agregar premio
@@ -240,7 +240,7 @@ export default function RewardWheelPanel({
             type="button"
             disabled={isPending || !hasValidTotal}
             onClick={onSave}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.18)] transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.18)] transition hover:-translate-y-0.5 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconDeviceFloppy size={18} />
             Guardar ruleta

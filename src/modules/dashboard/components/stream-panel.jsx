@@ -124,7 +124,7 @@ export default function StreamPanel({
             type="button"
             disabled={isPending}
             onClick={onDisableHour}
-            className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${
+            className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
               noEffectActive
                 ? "border-white/25 bg-white/[0.06] text-white"
                 : "border-white/10 bg-neutral-900/70 text-neutral-300"
@@ -159,7 +159,7 @@ export default function StreamPanel({
                 type="button"
                 disabled={isPending}
                 onClick={() => onActivateHour(hour.id, { autoDisable })}
-                className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-60 ${
+                className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
                   active
                     ? hourStyles[hour.id] || "border-red-300/30 bg-red-500/10 text-red-100"
                     : "border-white/10 bg-neutral-900/70 text-neutral-300"
@@ -218,7 +218,7 @@ export default function StreamPanel({
               type="button"
               onClick={onActivateChest}
               disabled={isPending || Boolean(chestState.chest)}
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-400/20 focus:outline-none focus:ring-2 focus:ring-amber-300/40 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
             >
               <IconBox size={17} />
               Activar cofre
@@ -244,7 +244,7 @@ export default function StreamPanel({
               type="button"
               onClick={onActivateChatReward}
               disabled={isPending || Boolean(chestState.chatReward)}
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/20 focus:outline-none focus:ring-2 focus:ring-green-300/40 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
+              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
             >
               <IconMessageCircle size={17} />
               Activar recompensa
@@ -264,7 +264,7 @@ export default function StreamPanel({
 
 function AutoDisableToggle({ checked, expiresAt, onChange }) {
   return (
-    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-red-300/20 focus-within:ring-2 focus-within:ring-red-300/40">
+    <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-red-300/20">
       <span className="flex min-w-0 items-center gap-3">
         <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
           <IconClockCog size={19} />
@@ -490,7 +490,7 @@ function StreamPredictionsPanel({
                 type="button"
                 onClick={addOption}
                 disabled={form.options.length >= 10}
-                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/80 px-3 py-2 text-xs font-black text-neutral-200 transition hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-white/10 bg-neutral-900/80 px-3 py-2 text-xs font-black text-neutral-200 transition hover:border-red-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <IconPlus size={15} />
                 Agregar
@@ -511,7 +511,7 @@ function StreamPredictionsPanel({
                     type="button"
                     onClick={() => removeOption(index)}
                     disabled={form.options.length <= 2}
-                    className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-xl border border-white/10 bg-neutral-900/80 text-neutral-500 transition hover:border-red-300/30 hover:text-red-100 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-40"
+                    className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-xl border border-white/10 bg-neutral-900/80 text-neutral-500 transition hover:border-red-300/30 hover:text-red-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                     aria-label={`Quitar opcion ${index + 1}`}
                   >
                     <IconTrash size={16} />
@@ -524,7 +524,7 @@ function StreamPredictionsPanel({
           <button
             type="submit"
             disabled={isPending}
-            className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconDeviceFloppy size={18} />
             Crear prediccion
@@ -570,7 +570,7 @@ function StreamPredictionsPanel({
                         type="button"
                         onClick={() => onResolvePrediction?.(prediction.id, option.id)}
                         disabled={isPending}
-                        className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-300/35 disabled:cursor-not-allowed disabled:opacity-50"
+                        className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Gana {option.label}
                       </button>

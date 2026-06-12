@@ -110,7 +110,7 @@ function RedemptionsHeader({
   onDeleteClosed,
 }) {
   return (
-    <div className="grid gap-5 border-b border-white/10 pb-5 xl:grid-cols-[1fr_auto] xl:items-end">
+    <div className="grid gap-5 border-b border-white/10 pb-5">
       <div>
         <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
           <IconShoppingBag size={19} />
@@ -120,71 +120,81 @@ function RedemptionsHeader({
           Revisa pedidos de tienda, datos del usuario y el estado de entrega.
         </p>
       </div>
-      <div className="grid gap-3">
-        <div className="grid gap-2 rounded-2xl border border-white/10 bg-neutral-900/55 p-3 shadow-inner shadow-black/10 md:grid-cols-[minmax(11rem,13rem)_minmax(15rem,22rem)_auto] md:items-end">
-          <label className="grid gap-1.5 text-xs font-bold uppercase text-neutral-500">
-            Calendario
-            <span className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 text-neutral-400 transition focus-within:border-red-300/60 focus-within:ring-2 focus-within:ring-red-300/15">
-              <IconCalendar size={16} />
-              <input
-                type="date"
-                value={calendarDate}
-                onChange={(event) => onCalendarDateChange(event.target.value)}
-                className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none [color-scheme:dark]"
-                aria-label="Seleccionar fecha de canjes"
-              />
-            </span>
-          </label>
-          <label className="grid gap-1.5 text-xs font-bold uppercase text-neutral-500">
-            Buscar fecha
-            <span className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 text-neutral-400 transition focus-within:border-red-300/60 focus-within:ring-2 focus-within:ring-red-300/15">
-              <IconFilter size={16} />
-              <input
-                value={dateFilter}
-                onChange={(event) => onDateFilterChange(event.target.value)}
-                placeholder="31 de mayo, 31-may o 31-05"
-                className="w-full bg-transparent text-sm font-bold text-white outline-none placeholder:text-neutral-600"
-                aria-label="Filtrar canjes por dia"
-              />
-            </span>
-          </label>
+
+      <div className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-900/45 p-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-end">
+        <div className="grid gap-2 md:grid-cols-[minmax(11rem,13rem)_minmax(15rem,1fr)_auto] md:items-end">
+          <FilterField label="Calendario" icon={<IconCalendar size={16} />}>
+            <input
+              type="date"
+              value={calendarDate}
+              onChange={(event) => onCalendarDateChange(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-sm font-bold text-white outline-none [color-scheme:dark]"
+              aria-label="Seleccionar fecha de canjes"
+            />
+          </FilterField>
+
+          <FilterField label="Buscar fecha" icon={<IconFilter size={16} />}>
+            <input
+              value={dateFilter}
+              onChange={(event) => onDateFilterChange(event.target.value)}
+              placeholder="31 de mayo, 31-may o 31-05"
+              className="w-full bg-transparent text-sm font-bold text-white outline-none placeholder:text-neutral-600"
+              aria-label="Filtrar canjes por día"
+            />
+          </FilterField>
+
           <button
             type="button"
             onClick={onClearFilters}
             disabled={!hasFilter}
-            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 text-sm font-bold text-neutral-300 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:text-neutral-700"
+            className="inline-flex h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-4 text-sm font-bold text-neutral-300 transition hover:border-red-300/35 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:text-neutral-700"
           >
             <IconX size={16} />
             Limpiar
           </button>
         </div>
-        <div className="grid grid-cols-3 gap-2 sm:flex sm:justify-end">
-          <RedemptionStat label="Total" value={total} icon={<IconShoppingBag size={14} />} />
-          <RedemptionStat label="Abiertos" value={open} icon={<IconClock size={14} />} />
-          <RedemptionStat label="Cerrados" value={closed} icon={<IconCircleCheck size={14} />} />
-        </div>
-        <div className="grid gap-2 sm:flex sm:justify-end">
-          <button
-            type="button"
-            onClick={onDeleteClosed}
-            disabled={isPending || totalClosedTickets === 0}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2.5 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-300/15 focus:outline-none focus:ring-2 focus:ring-amber-300/35 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <IconTrash size={16} />
-            Eliminar cerrados
-          </button>
-          <button
-            type="button"
-            onClick={onDeleteAll}
-            disabled={isPending || totalTickets === 0}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            <IconTrash size={16} />
-            Eliminar todos
-          </button>
+
+        <div className="grid gap-2">
+          <div className="grid grid-cols-3 gap-2">
+            <RedemptionStat label="Total" value={total} icon={<IconShoppingBag size={14} />} />
+            <RedemptionStat label="Abiertos" value={open} icon={<IconClock size={14} />} />
+            <RedemptionStat label="Cerrados" value={closed} icon={<IconCircleCheck size={14} />} />
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={onDeleteClosed}
+              disabled={isPending || totalClosedTickets === 0}
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2.5 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-300/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar cerrados
+            </button>
+            <button
+              type="button"
+              onClick={onDeleteAll}
+              disabled={isPending || totalTickets === 0}
+              className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar todos
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function FilterField({ label, icon, children }) {
+  return (
+    <label className="grid gap-1.5 text-xs font-bold uppercase text-neutral-500">
+      {label}
+      <span className="flex h-11 items-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 text-neutral-400 transition focus-within:border-red-300/60">
+        {icon}
+        {children}
+      </span>
+    </label>
   );
 }
 
@@ -278,7 +288,7 @@ function TicketActions({ ticket, isPending, onStatusChange, onDelete }) {
       <button
         onClick={() => onDelete(ticket)}
         disabled={isPending}
-        className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         aria-label={`Eliminar ticket ${ticket.subject}`}
       >
         <IconTrash size={17} />

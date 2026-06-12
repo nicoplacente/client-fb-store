@@ -116,7 +116,7 @@ export default function StreamDangerPanel({
               type="button"
               onClick={() => setConfirmOpen(true)}
               disabled={isPending}
-              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/25 focus:outline-none focus:ring-2 focus:ring-red-300/45 disabled:cursor-not-allowed disabled:opacity-60"
+              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/25 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
             >
               <IconRefreshAlert size={18} />
               Reiniciar puntos y creditos

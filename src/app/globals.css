@@ -51,9 +51,14 @@ body {
   transform: translateY(0);
 }
 
-:where(a, button, input, select, textarea):focus-visible {
+:where(a, button):focus-visible {
   outline: 2px solid rgba(252, 165, 165, 0.9);
   outline-offset: 3px;
+}
+
+:where(input, select, textarea):focus,
+:where(input, select, textarea):focus-visible {
+  outline: none;
 }
 
 html:has(.reward-wheel-source),

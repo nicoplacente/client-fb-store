@@ -57,14 +57,14 @@ export default function Home() {
             <div className="flex flex-col gap-3 sm:flex-row">
               <Link
                 href="/market"
-                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none"
               >
                 Ir a la tienda
                 <IconArrowRight size={18} />
               </Link>
               <Link
                 href="/gifts"
-                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-400/35 bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/12 focus:outline-none focus:ring-2 focus:ring-red-300/40"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-400/35 bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/12 focus:outline-none"
               >
                 Ver sorteos
                 <IconGift size={18} />
@@ -97,7 +97,7 @@ export default function Home() {
         </div>
         <a
           href="https://chromewebstore.google.com/detail/bertellitos/aeghpachelnjfcckdhdgeegpacgbnpng?hl=es-419"
-          className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/40 sm:w-fit"
+          className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none sm:w-fit"
           aria-label="Instalar extensión"
           rel="noopener noreferrer"
           target="_blank"

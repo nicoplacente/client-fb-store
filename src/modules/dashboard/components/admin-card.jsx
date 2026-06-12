@@ -54,7 +54,7 @@ export default function AdminCard({
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             onClick={onEdit}
-            className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-300/50 hover:bg-white/[0.04] focus:outline-none focus:ring-2 focus:ring-red-300/40"
+            className="inline-flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:border-red-300/50 hover:bg-white/[0.04] focus:outline-none"
           >
             <IconEdit size={17} />
             Editar
@@ -62,7 +62,7 @@ export default function AdminCard({
           {onDelete ? (
             <button
               onClick={onDelete}
-              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none focus:ring-2 focus:ring-red-300/40"
+              className="inline-flex cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none"
               aria-label={`Eliminar ${title}`}
             >
               <IconTrash size={17} />

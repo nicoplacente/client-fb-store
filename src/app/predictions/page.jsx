@@ -337,7 +337,7 @@ function PredictionsHero({ onRefresh }) {
         type="button"
         aria-label="Actualizar predicciones"
         onClick={onRefresh}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 text-xs font-black uppercase tracking-wide text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
+        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 text-xs font-black uppercase tracking-wide text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none"
       >
         <IconRefresh size={16} />
         Actualizar
@@ -434,7 +434,7 @@ function PredictionCard({
               value={betAmount}
               onChange={(event) => onBetChange(event.target.value)}
               disabled={prediction.hasVoted || bettingClosed}
-              className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 focus:ring-2 focus:ring-red-300/15 disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
               placeholder="100"
             />
           </label>
@@ -468,7 +468,7 @@ function PredictionCard({
             type="button"
             onClick={onVote}
             disabled={isPending || prediction.hasVoted || bettingClosed}
-            className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
+            className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
           >
             {prediction.hasVoted ? <IconCircleCheck size={18} /> : <IconTrophy size={18} />}
             {prediction.hasVoted
@@ -646,7 +646,7 @@ function PredictionOption({ option, accent, selected, locked, onSelect }) {
       type="button"
       onClick={onSelect}
       disabled={locked}
-      className={`group cursor-pointer rounded-2xl border bg-neutral-950/55 p-4 text-left transition hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-red-300/35 disabled:cursor-not-allowed ${
+      className={`group cursor-pointer rounded-2xl border bg-neutral-950/55 p-4 text-left transition hover:-translate-y-0.5 focus:outline-none disabled:cursor-not-allowed ${
         selected || option.isUserChoice
           ? `${accent.border} ${accent.bg}`
           : `border-white/10 ${accent.hoverBorder}`
@@ -866,7 +866,7 @@ function HistoryFilterButton({ active, label, count, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`min-h-11 cursor-pointer rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-wide transition focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+      className={`min-h-11 cursor-pointer rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-wide transition focus:outline-none ${
         active
           ? "border-white/15 bg-neutral-900 text-white"
           : "border-white/10 bg-neutral-950/70 text-neutral-500 hover:border-red-300/25 hover:text-white"

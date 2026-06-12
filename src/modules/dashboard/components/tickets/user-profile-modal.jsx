@@ -18,7 +18,7 @@ export function UserProfileButton({ user, username, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex cursor-pointer items-center gap-1 rounded-md text-xs font-semibold text-neutral-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none focus:ring-2 focus:ring-red-400/60"
+      className="inline-flex cursor-pointer items-center gap-1 rounded-md text-xs font-semibold text-neutral-300 underline-offset-4 transition hover:text-white hover:underline focus:outline-none"
       aria-label={`Ver perfil de ${username}`}
     >
       <IconUserCircle size={14} />
@@ -56,7 +56,7 @@ export default function UserProfileModal({ user, fallbackUsername, open, onClose
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
+            className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none"
             aria-label="Cerrar perfil"
           >
             <IconX size={18} />

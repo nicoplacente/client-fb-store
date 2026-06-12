@@ -213,7 +213,7 @@ function CreditPurchaseQuantityControl({
         </span>
       </div>
 
-      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-green-300/50 focus-within:ring-2 focus-within:ring-green-300/15">
+      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-green-300/50">
         <button
           type="button"
           onClick={() => updateQuantity(safeValue - 1)}
@@ -249,7 +249,7 @@ function CreditPurchaseQuantityControl({
         type="button"
         onClick={onMaxPurchase}
         disabled={!canMaxPurchase}
-        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-500/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:border-green-300/55 hover:bg-green-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-green-300/60 disabled:cursor-not-allowed disabled:border-green-300/15 disabled:bg-black/20 disabled:text-green-100/40"
+        className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-500/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:border-green-300/55 hover:bg-green-500/15 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:border-green-300/15 disabled:bg-black/20 disabled:text-green-100/40"
         aria-label="Comprar el maximo de creditos posible"
       >
         <IconSparkles size={18} />
@@ -291,7 +291,7 @@ function QuantityControl({ value, max, infiniteStock, onChange }) {
         </span>
       </div>
 
-      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-amber-300/50 focus-within:ring-2 focus-within:ring-amber-300/15">
+      <div className="grid grid-cols-[3rem_1fr_3rem] overflow-hidden rounded-xl border border-white/10 bg-neutral-950 shadow-inner shadow-black/10 focus-within:border-amber-300/50">
         <button
           type="button"
           onClick={() => updateQuantity(safeValue - 1)}

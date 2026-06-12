@@ -53,7 +53,7 @@ function CreditPackageCard({ creditPackage, onPurchase, disabled }) {
         disabled={disabled || creditPackage.status !== "active"}
         onClick={() => onPurchase(creditPackage)}
         aria-label={`Comprar pack ${creditPackage.name}`}
-        className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-black/35 px-4 py-3 text-sm font-black text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/55 hover:bg-amber-300/12 hover:text-white hover:shadow-[0_14px_36px_rgba(251,191,36,0.12)] focus:outline-none focus:ring-2 focus:ring-amber-200/60 disabled:cursor-not-allowed disabled:border-amber-200/15 disabled:bg-black/25 disabled:text-amber-100/45 disabled:shadow-none"
+        className="mt-4 inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-200/30 bg-black/35 px-4 py-3 text-sm font-black text-amber-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/55 hover:bg-amber-300/12 hover:text-white hover:shadow-[0_14px_36px_rgba(251,191,36,0.12)] focus:outline-none disabled:cursor-not-allowed disabled:border-amber-200/15 disabled:bg-black/25 disabled:text-amber-100/45 disabled:shadow-none"
       >
         <IconPlus size={18} />
         Comprar créditos

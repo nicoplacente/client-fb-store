@@ -11,6 +11,9 @@ export default function ConfirmationDialog({
   confirmLabel = "Confirmar",
   cancelLabel = "Cancelar",
   confirmDisabled = false,
+  cancelDisabled = false,
+  aside,
+  secondaryAside,
   children,
   onConfirm = () => {},
   onCancel = () => {},
@@ -23,12 +26,9 @@ export default function ConfirmationDialog({
   const iconClassName = isDanger
     ? "border-red-300/25 bg-red-500/10 text-red-100"
     : "border-amber-300/25 bg-amber-300/10 text-amber-200";
-  const focusClassName = isDanger
-    ? "focus:ring-red-300/40"
-    : "focus:ring-amber-300/40";
   const confirmClassName = isDanger
-    ? "border border-red-300/40 bg-red-500 text-white shadow-[0_14px_36px_rgba(239,68,68,0.16)] hover:border-red-300/25 hover:bg-red-950/35 hover:text-red-100 focus:ring-red-200/70"
-    : "border border-amber-200/55 bg-amber-300/12 text-white shadow-[0_14px_36px_rgba(251,191,36,0.12)] hover:border-amber-200/30 hover:bg-black/35 hover:text-amber-100 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] focus:ring-amber-200/70";
+    ? "border border-red-300/40 bg-red-500 text-white shadow-[0_14px_36px_rgba(239,68,68,0.16)] hover:border-red-300/25 hover:bg-red-950/35 hover:text-red-100"
+    : "border border-amber-200/55 bg-amber-300/12 text-white shadow-[0_14px_36px_rgba(251,191,36,0.12)] hover:border-amber-200/30 hover:bg-black/35 hover:text-amber-100 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]";
 
   useEffect(() => {
     if (!open) return undefined;
@@ -82,7 +82,9 @@ export default function ConfirmationDialog({
         aria-modal="true"
         aria-labelledby={titleId}
         aria-describedby={description ? descriptionId : undefined}
-        className="w-full max-w-lg overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70 [contain:layout_paint]"
+        className={`flex max-h-[calc(100vh-2rem)] w-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-neutral-950 shadow-2xl shadow-black/70 [contain:layout_paint] ${
+          secondaryAside ? "max-w-7xl" : aside ? "max-w-5xl" : "max-w-lg"
+        }`}
       >
         <div className="flex items-start justify-between gap-4 border-b border-white/10 bg-white/[0.03] p-5 sm:p-6">
           <div className="space-y-3">
@@ -107,38 +109,60 @@ export default function ConfirmationDialog({
             ref={closeButtonRef}
             type="button"
             onClick={onCancel}
-            className={`rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-white/20 hover:text-white focus:outline-none focus:ring-2 ${focusClassName}`}
+            disabled={cancelDisabled}
+            className="rounded-md border border-white/10 bg-neutral-950/70 p-2 text-neutral-400 transition hover:border-white/20 hover:text-white focus:outline-none"
             aria-label="Cerrar confirmación"
           >
             <IconX size={18} />
           </button>
         </div>
 
-        <div className="p-5 sm:p-6">
-          {children ? (
-            <div className="rounded-xl border border-white/10 bg-neutral-900/80 p-4">
-              {children}
-            </div>
-          ) : null}
+        <div
+          className={`overflow-y-auto ${
+            aside
+              ? secondaryAside
+                ? "grid overflow-x-hidden lg:grid-cols-[minmax(18rem,0.72fr)_minmax(22rem,1fr)_minmax(19rem,0.85fr)]"
+                : "grid lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
+              : ""
+          }`}
+        >
+          <div className="p-5 sm:p-6">
+            {children ? (
+              <div className="rounded-xl border border-white/10 bg-neutral-900/80 p-4">
+                {children}
+              </div>
+            ) : null}
 
-          <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="inline-flex cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20"
-            >
-              {cancelLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              disabled={confirmDisabled}
-              className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-black transition focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-60 ${confirmClassName}`}
-            >
-              <IconCheck size={18} />
-              {confirmLabel}
-            </button>
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+              <button
+                type="button"
+                onClick={onCancel}
+                disabled={cancelDisabled}
+                className="inline-flex cursor-pointer items-center justify-center rounded-md border border-white/10 bg-neutral-900 px-4 py-2.5 text-sm font-semibold text-neutral-200 transition hover:border-white/20 hover:bg-white/5 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                {cancelLabel}
+              </button>
+              <button
+                type="button"
+                onClick={onConfirm}
+                disabled={confirmDisabled}
+                className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-black transition focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${confirmClassName}`}
+              >
+                <IconCheck size={18} />
+                {confirmLabel}
+              </button>
+            </div>
           </div>
+          {aside ? (
+            <aside className="border-t border-white/10 bg-white/[0.025] p-5 sm:p-6 lg:border-l lg:border-t-0">
+              {aside}
+            </aside>
+          ) : null}
+          {secondaryAside ? (
+            <aside className="border-t border-white/10 bg-fuchsia-400/[0.02] p-5 sm:p-6 lg:border-l lg:border-t-0">
+              {secondaryAside}
+            </aside>
+          ) : null}
         </div>
       </div>
     </div>

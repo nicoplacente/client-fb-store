@@ -177,7 +177,7 @@ function RedeemButton({
       onClick={() => onRedeem(product)}
       aria-label={`Canjear producto ${product.title}`}
       data-spotlight-cta
-      className="spotlight-cta inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none focus:ring-2 min-w-full disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
+      className="spotlight-cta inline-flex min-h-11 w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none min-w-full disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
     >
       {unavailable ? <IconLock size={18} /> : <IconShoppingCart size={18} />}
       {outOfStock ? "Sin stock" : isDisabled ? "Deshabilitado" : "Canjear"}

@@ -13,7 +13,7 @@ export function TextInput({ className = "", ...props }) {
   return (
     <input
       {...props}
-      className={`rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 focus:ring-2 focus:ring-red-300/15 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
+      className={`rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     />
   );
 }
@@ -53,7 +53,7 @@ export function TextArea(props) {
   return (
     <textarea
       {...props}
-      className="resize-none rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 focus:ring-2 focus:ring-red-300/15 disabled:cursor-not-allowed disabled:opacity-60"
+      className="resize-none rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
     />
   );
 }
@@ -132,7 +132,7 @@ export function SelectInput(props) {
   return (
     <select
       {...props}
-      className="cursor-pointer rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition hover:border-red-300/25 focus:border-red-300/60 focus:ring-2 focus:ring-red-300/15 disabled:cursor-not-allowed disabled:opacity-60"
+      className="cursor-pointer rounded-xl border border-white/10 bg-neutral-900/90 px-3 py-2.5 text-white shadow-inner shadow-black/10 outline-none transition hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
     />
   );
 }
@@ -148,7 +148,7 @@ export function PanelHeader({ title, subtitle, canCancel, onCancel }) {
         <button
           type="button"
           onClick={onCancel}
-          className="cursor-pointer rounded-md border border-white/10 bg-neutral-900 p-2 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40"
+          className="cursor-pointer rounded-md border border-white/10 bg-neutral-900 p-2 text-neutral-400 transition hover:border-red-300/35 hover:text-white focus:outline-none"
           aria-label="Cancelar edicion"
         >
           <IconX size={18} />
@@ -163,7 +163,7 @@ export function SubmitButton({ isPending, selectedId }) {
     <button
       type="submit"
       disabled={isPending}
-      className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+      className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
     >
       {selectedId ? <IconDeviceFloppy size={18} /> : <IconPlus size={18} />}
       {selectedId ? "Guardar cambios" : "Crear"}

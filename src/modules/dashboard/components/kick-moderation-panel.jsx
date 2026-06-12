@@ -51,7 +51,7 @@ export default function KickModerationPanel({
             type="button"
             disabled={isPending}
             onClick={onDisconnect}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-900 px-4 py-3 text-sm font-bold text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconUnlink size={17} />
             Desconectar
@@ -61,7 +61,7 @@ export default function KickModerationPanel({
             type="button"
             disabled={isPending || !configured}
             onClick={onConnect}
-            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/25 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/15 focus:outline-none focus:ring-2 focus:ring-green-300/40 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/25 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconPlugConnected size={18} />
             Habilitar moderación

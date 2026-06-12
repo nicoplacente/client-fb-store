@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
   IconChevronDown,
+  IconClock,
   IconHeadset,
   IconSend,
+  IconSparkles,
   IconTicket,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
@@ -18,6 +20,8 @@ import {
   getSupportTickets,
   normalizeTicket,
 } from "@/modules/support/libs/support-api";
+import { formatDateTime } from "@/modules/dashboard/lib/formatters";
+import { StatusBadge } from "@/modules/dashboard/components/tickets/ticket-status";
 
 const emptyTicket = {
   subject: "",
@@ -41,6 +45,9 @@ export default function SupportPage() {
         .filter((ticket) => ticket.id && ticket.category !== "market"),
     [tickets],
   );
+  const activeTickets = normalizedTickets.filter(
+    (ticket) => ticket.status !== "closed",
+  ).length;
 
   useEffect(() => {
     let cancelled = false;
@@ -123,65 +130,80 @@ export default function SupportPage() {
 
   return (
     <SectionContainer className="space-y-8">
-      <div>
-        <p className="text-sm font-semibold uppercase text-red-300/80">
-          Soporte
-        </p>
-        <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
-          Centro de ayuda
-        </h1>
-        <p className="mt-3 max-w-2xl text-neutral-400">
-          Enviá consultas sobre canjes, créditos, sorteos o problemas de cuenta.
-        </p>
-      </div>
-
-      <div className="grid gap-6 xl:grid-cols-[1fr_420px]">
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-lg border border-white/10 bg-neutral-950/80 p-4 sm:p-6"
-        >
-          <div className="mb-6 flex items-center gap-3">
-            <span className="rounded-md border border-red-500/30 bg-red-500/10 p-2 text-red-200">
-              <IconHeadset size={22} />
+      <div className="overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/75 shadow-xl shadow-black/20">
+        <div className="grid gap-5 p-5 sm:p-7 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
+          <div className="flex items-start gap-4">
+            <span className="grid size-12 shrink-0 place-items-center rounded-2xl border border-red-300/20 bg-red-500/10 text-red-200">
+              <IconHeadset size={25} />
             </span>
             <div>
-              <h2 className="text-xl font-semibold text-white">
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-red-300/80">
+                Soporte
+              </p>
+              <h1 className="mt-2 text-3xl font-black text-white sm:text-4xl">
+                Centro de ayuda
+              </h1>
+              <p className="mt-3 max-w-2xl leading-6 text-neutral-400">
+                Enviá consultas sobre canjes, créditos, sorteos o problemas de
+                cuenta y seguí cada respuesta desde tu bandeja.
+              </p>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-2 sm:flex">
+            <SupportMetric label="Tickets" value={normalizedTickets.length} />
+            <SupportMetric label="Activos" value={activeTickets} tone="red" />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[minmax(20rem,0.8fr)_minmax(0,1.2fr)] xl:items-start">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-2xl border border-white/10 bg-neutral-950/80 p-4 shadow-xl shadow-black/20 sm:p-6 xl:sticky xl:top-6"
+        >
+          <div className="mb-6 flex items-start gap-3 border-b border-white/10 pb-5">
+            <span className="grid size-10 shrink-0 place-items-center rounded-xl border border-red-500/25 bg-red-500/10 text-red-200">
+              <IconSparkles size={20} />
+            </span>
+            <div>
+              <h2 className="text-xl font-black text-white">
                 Nueva consulta
               </h2>
-              <p className="text-sm text-neutral-500">
+              <p className="mt-1 text-sm leading-5 text-neutral-500">
                 {user
-                  ? "Te respondemos a la brevedad."
-                  : "Inicia sesion para que podamos responderte."}
+                  ? "Contanos qué pasó con el mayor detalle posible."
+                  : "Iniciá sesión para que podamos responderte."}
               </p>
             </div>
           </div>
 
           {!user ? (
-            <div role="status" className="mb-5 rounded-md border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium text-red-100">
-              Para enviar una consulta necesitás iniciar sesión. Así soporte
+            <div role="status" className="mb-5 rounded-xl border border-red-500/25 bg-red-500/10 p-4 text-sm font-medium leading-6 text-red-100">
+              Para enviar una consulta necesitás iniciar sesión. Así, soporte
               puede responderte en tu ticket.
             </div>
           ) : null}
 
-          <div className="grid gap-4">
-            <label className="grid gap-2 text-sm font-medium text-neutral-300">
+          <div className="grid gap-5">
+            <label className="grid gap-2 text-sm font-bold text-neutral-300">
               Asunto
               <input
                 value={form.subject}
                 onChange={(event) => updateField("subject", event.target.value)}
-                className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                placeholder="Resumen breve de la consulta"
+                className="h-12 rounded-xl border border-white/10 bg-neutral-900/80 px-4 text-white outline-none transition placeholder:text-neutral-600 hover:border-white/20 focus:border-red-400/60"
                 disabled={!user || isPending}
                 required
               />
             </label>
-            <label className="grid gap-2 text-sm font-medium text-neutral-300">
+            <label className="grid gap-2 text-sm font-bold text-neutral-300">
               Categoría
               <select
                 value={form.category}
                 onChange={(event) =>
                   updateField("category", event.target.value)
                 }
-                className="rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                className="h-12 cursor-pointer rounded-xl border border-white/10 bg-neutral-900/80 px-4 text-white outline-none transition hover:border-white/20 focus:border-red-400/60"
                 disabled={!user || isPending}
               >
                 <option value="general">General</option>
@@ -191,13 +213,14 @@ export default function SupportPage() {
                 <option value="technical">Técnico</option>
               </select>
             </label>
-            <label className="grid gap-2 text-sm font-medium text-neutral-300">
+            <label className="grid gap-2 text-sm font-bold text-neutral-300">
               Mensaje
               <textarea
                 value={form.message}
                 onChange={(event) => updateField("message", event.target.value)}
                 rows={8}
-                className="resize-none rounded-md border border-white/10 bg-neutral-900 px-3 py-2 text-white outline-none transition focus:border-red-400"
+                placeholder="Describí el problema, qué intentaste y qué resultado esperabas."
+                className="resize-none rounded-xl border border-white/10 bg-neutral-900/80 px-4 py-3 text-white outline-none transition placeholder:text-neutral-600 hover:border-white/20 focus:border-red-400/60"
                 disabled={!user || isPending}
                 required
               />
@@ -206,32 +229,42 @@ export default function SupportPage() {
 
           <button
             disabled={!user || isPending}
-            className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+            className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconSend size={18} />
-            Enviar consulta
+            {isPending ? "Enviando..." : "Enviar consulta"}
           </button>
         </form>
 
-        <aside className="rounded-lg border border-white/10 bg-neutral-950/70 p-4 sm:p-6">
-          <h2 className="flex items-center gap-2 text-xl font-semibold text-white">
-            <IconTicket size={22} />
-            Mis tickets
-          </h2>
-          <div className="mt-5 space-y-3">
+        <aside className="overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/75 shadow-xl shadow-black/20">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-white/[0.025] p-4 sm:p-5">
+            <div>
+              <h2 className="flex items-center gap-2 text-xl font-black text-white">
+                <IconTicket size={22} className="text-red-200" />
+                Mis tickets
+              </h2>
+              <p className="mt-1 text-sm text-neutral-500">
+                Historial de consultas y respuestas.
+              </p>
+            </div>
+            <span className="rounded-full border border-white/10 bg-neutral-900 px-3 py-1.5 text-xs font-black text-neutral-300">
+              {normalizedTickets.length}
+            </span>
+          </div>
+          <div className="grid gap-3 p-3 sm:p-4">
             {loadingTickets ? (
-              <p className="rounded-md border border-white/10 bg-neutral-900/60 p-4 text-sm text-neutral-400">
+              <p className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 text-center text-sm text-neutral-400">
                 Cargando tickets...
               </p>
             ) : normalizedTickets.length === 0 ? (
-              <p className="rounded-md border border-white/10 bg-neutral-900/60 p-4 text-sm text-neutral-400">
+              <p className="rounded-xl border border-white/10 bg-neutral-900/60 p-6 text-center text-sm text-neutral-400">
                 No hay tickets para mostrar.
               </p>
             ) : (
               normalizedTickets.map((ticket) => (
                 <article
                   key={ticket.id}
-                  className="rounded-md border border-white/10 bg-neutral-900/60 p-4"
+                  className="overflow-hidden rounded-2xl border border-white/10 bg-neutral-900/55 transition hover:border-white/20"
                 >
                   <button
                     type="button"
@@ -242,24 +275,29 @@ export default function SupportPage() {
                         current === ticket.id ? null : ticket.id,
                       )
                     }
-                    className="flex w-full items-start justify-between gap-3 text-left"
+                    className="flex w-full items-start justify-between gap-4 p-4 text-left sm:p-5"
                   >
-                    <span>
-                      <span className="font-semibold text-white">
+                    <span className="min-w-0">
+                      <span className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-[11px] font-black uppercase text-neutral-400">
+                          {ticket.category}
+                        </span>
+                        <StatusBadge status={ticket.status} />
+                      </span>
+                      <span className="mt-3 block font-black text-white">
                         {ticket.subject}
                       </span>
-                      <span className="mt-2 line-clamp-2 block text-sm text-neutral-500">
+                      <span className="mt-1.5 line-clamp-2 block text-sm leading-5 text-neutral-500">
                         {ticket.message}
                       </span>
+                      {ticket.createdAt ? (
+                        <span className="mt-3 flex items-center gap-1.5 text-xs text-neutral-600">
+                          <IconClock size={14} />
+                          {formatDateTime(ticket.createdAt)}
+                        </span>
+                      ) : null}
                     </span>
-                    <span className="flex items-center gap-2">
-                      <span className="rounded bg-white/5 px-2 py-1 text-xs text-neutral-400">
-                        {ticket.status == "in_progress"
-                          ? "En proceso"
-                          : ticket.status == "closed"
-                            ? "Cerrado"
-                            : "Abierto"}
-                      </span>
+                    <span className="grid size-9 shrink-0 place-items-center rounded-xl border border-white/10 bg-neutral-950 text-neutral-500">
                       <IconChevronDown
                         size={16}
                         className={`text-neutral-500 transition ${
@@ -312,37 +350,21 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
   return (
     <div
       id={`ticket-${ticket.id}-thread`}
-      className="mt-4 space-y-3 border-t border-white/10 pt-4"
+      className="border-t border-white/10 bg-black/20"
     >
-      <div className="space-y-2">
+      <div className="max-h-[28rem] space-y-3 overflow-y-auto p-4 sm:p-5">
         {messages.map((message) => {
           const fromAdmin = message.senderRole === "admin";
           return (
-            <div
+            <MessageBubble
               key={message.id}
-              className={`rounded-md border p-3 ${
-                fromAdmin
-                  ? "border-red-400/20 bg-red-500/10"
-                  : "ml-auto border-white/10 bg-neutral-950/70"
-              } max-w-full sm:max-w-[90%]`}
-            >
-              <p
-                className={
-                  fromAdmin
-                    ? "text-xs text-red-200"
-                    : "text-xs text-neutral-500"
-                }
-              >
-                {fromAdmin ? "Soporte" : "Vos"}
-              </p>
-              <p className="mt-1 whitespace-pre-wrap text-sm text-neutral-300">
-                {message.message}
-              </p>
-            </div>
+              fromAdmin={fromAdmin}
+              message={message}
+            />
           );
         })}
       </div>
-      <div className="grid gap-2">
+      <div className="grid gap-3 border-t border-white/10 bg-neutral-950/70 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
         <label htmlFor={`ticket-${ticket.id}-reply`} className="sr-only">
           Responder en este ticket
         </label>
@@ -353,18 +375,65 @@ function TicketThread({ ticket, reply, setReply, disabled, onReply }) {
           disabled={disabled}
           placeholder="Responder en este ticket"
           onChange={(event) => setReply(event.target.value)}
-          className="resize-none rounded-md border border-white/10 bg-neutral-950 px-3 py-2 text-sm text-white outline-none transition focus:border-red-400"
+          className="min-h-24 resize-none rounded-xl border border-white/10 bg-neutral-900/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-neutral-600 hover:border-white/20 focus:border-red-400/60 sm:min-h-12"
         />
         <button
           type="button"
           disabled={disabled || !reply.trim()}
           onClick={onReply}
-          className="inline-flex min-h-12 mt-6 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none focus:ring-2 focus:ring-red-300/50 disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_12px_28px_rgba(255,45,45,0.18)] transition hover:-translate-y-0.5 hover:shadow-[0_16px_34px_rgba(255,45,45,0.26)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
         >
           <IconSend size={17} />
           Responder
         </button>
       </div>
+    </div>
+  );
+}
+
+function MessageBubble({ fromAdmin, message }) {
+  return (
+    <div
+      className={`max-w-full sm:max-w-[86%] ${
+        fromAdmin ? "" : "ml-auto"
+      }`}
+    >
+      <div className="mb-1.5 flex items-center gap-2 px-1 text-xs">
+        <span className={fromAdmin ? "font-bold text-red-200" : "font-bold text-neutral-400"}>
+          {fromAdmin ? "Soporte" : "Vos"}
+        </span>
+        {message.createdAt ? (
+          <span className="text-neutral-600">
+            {formatDateTime(message.createdAt)}
+          </span>
+        ) : null}
+      </div>
+      <div
+        className={`rounded-2xl border px-4 py-3 ${
+          fromAdmin
+            ? "rounded-tl-md border-red-400/20 bg-red-500/10"
+            : "rounded-tr-md border-white/10 bg-neutral-900"
+        }`}
+      >
+        <p className="whitespace-pre-wrap text-sm leading-6 text-neutral-200">
+          {message.message}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function SupportMetric({ label, value, tone = "neutral" }) {
+  const valueClassName = tone === "red" ? "text-red-200" : "text-white";
+
+  return (
+    <div className="min-w-28 rounded-xl border border-white/10 bg-neutral-900/70 px-4 py-3">
+      <p className="text-[11px] font-black uppercase tracking-wide text-neutral-500">
+        {label}
+      </p>
+      <p className={`mt-1 text-2xl font-black tabular-nums ${valueClassName}`}>
+        {value}
+      </p>
     </div>
   );
 }

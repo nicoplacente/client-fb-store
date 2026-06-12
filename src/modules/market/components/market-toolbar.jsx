@@ -61,7 +61,7 @@ function MarketToolbar({
         </div>
 
         <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-          <label className="flex w-full items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-neutral-400 shadow-inner shadow-black/20 transition focus-within:border-red-300/50 focus-within:ring-2 focus-within:ring-red-300/10 sm:min-w-72">
+          <label className="flex w-full items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-neutral-400 shadow-inner shadow-black/20 transition focus-within:border-red-300/50 sm:min-w-72">
             <IconSearch size={18} aria-hidden="true" />
             <input
               value={query}
@@ -81,7 +81,7 @@ function MarketToolbar({
               aria-haspopup="listbox"
               aria-controls="market-category-listbox"
               onClick={() => setCategoryOpen((open) => !open)}
-              className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-left text-sm font-semibold text-white shadow-inner shadow-black/20 outline-none transition hover:border-red-300/30 focus:border-red-300/50 focus:ring-2 focus:ring-red-300/10"
+              className="flex w-full cursor-pointer items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/80 px-3 py-2.5 text-left text-sm font-semibold text-white shadow-inner shadow-black/20 outline-none transition hover:border-red-300/30 focus:border-red-300/50"
             >
               <span className="truncate">{selectedCategory}</span>
               <IconChevronDown

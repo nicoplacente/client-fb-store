@@ -22,7 +22,7 @@ export default function Sidebar() {
       onMouseLeave={() => !expanded && setHovered(false)}
     >
       <button
-        className={`absolute -right-3 top-6 z-30 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-300 shadow-lg shadow-black/30 transition-[opacity,transform,background,color] duration-300 ease-out hover:scale-110 hover:bg-red-500/15 hover:text-white focus:outline-none focus:ring-2 focus:ring-red-300/40 min-[1501px]:flex ${
+        className={`absolute -right-3 top-6 z-30 hidden size-6 cursor-pointer items-center justify-center rounded-full border border-white/10 bg-neutral-900 text-neutral-300 shadow-lg shadow-black/30 transition-[opacity,transform,background,color] duration-300 ease-out hover:scale-110 hover:bg-red-500/15 hover:text-white focus:outline-none min-[1501px]:flex ${
           expanded ? "rotate-12 text-red-100" : "-rotate-45"
         } ${isOpen ? "opacity-100" : "pointer-events-none opacity-0"}`}
         aria-label={expanded ? "Desfijar sidebar" : "Fijar sidebar"}

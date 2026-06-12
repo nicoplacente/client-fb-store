@@ -228,7 +228,7 @@ function StockField({ form, setForm }) {
                 stock: !current.infiniteStock ? current.stock || "0" : current.stock,
               }))
             }
-            className={`relative h-11 w-24 cursor-pointer rounded-xl border shadow-inner shadow-black/10 transition hover:border-red-300/25 focus:outline-none focus:ring-2 focus:ring-red-300/40 ${
+            className={`relative h-11 w-24 cursor-pointer rounded-xl border shadow-inner shadow-black/10 transition hover:border-red-300/25 focus:outline-none ${
               form.infiniteStock
                 ? "border-red-300/45 bg-red-500/15"
                 : "border-white/10 bg-neutral-900/90"
