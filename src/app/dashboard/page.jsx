@@ -158,6 +158,10 @@ function DashboardTabs({ activeTab, onChange }) {
 }
 
 function DashboardActivePanel({ dashboard }) {
+  if (!dashboard.activeTabReady) {
+    return null;
+  }
+
   if (dashboard.activeTab === "products") {
     return (
       <ProductsPanel
@@ -224,7 +228,14 @@ function DashboardActivePanel({ dashboard }) {
   };
 
   if (dashboard.activeTab === "support") {
-    return <SupportPanel tickets={dashboard.supportTickets} {...ticketProps} />;
+    return (
+      <SupportPanel
+        tickets={dashboard.supportTickets}
+        onDeleteAll={dashboard.removeAllSupportTickets}
+        onDeleteClosed={dashboard.removeClosedSupportTickets}
+        {...ticketProps}
+      />
+    );
   }
 
   if (dashboard.activeTab === "redemptions") {

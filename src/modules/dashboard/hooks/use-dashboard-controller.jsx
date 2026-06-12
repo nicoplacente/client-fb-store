@@ -28,6 +28,7 @@ import { uploadImage } from "@/modules/uploads/libs/upload-api";
 import {
   createSupportMessage,
   deleteRedemptionTickets,
+  deleteSupportTickets,
   deleteSupportTicket,
   normalizeTicket,
   updateSupportTicket,
@@ -51,6 +52,7 @@ import {
   resolvePrediction,
 } from "@/modules/predictions/libs/prediction-api";
 import {
+  dashboardTabs,
   emptyCreditPackage,
   emptyGiveaway,
   emptyProduct,
@@ -77,11 +79,20 @@ function parseNumericInput(value, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : Number(fallback);
 }
 
+const dashboardTabIds = new Set(dashboardTabs.map((tab) => tab.id));
+
+function getDashboardTabFromHash() {
+  const hashTab = window.location.hash.replace("#", "");
+
+  return dashboardTabIds.has(hashTab) ? hashTab : "products";
+}
+
 export default function useDashboardController() {
   const { user, refreshUser } = useAppContext(AuthContext);
   const canManageDashboard = hasDashboardAccess(user);
   const canManageKickModeration = hasKickModerationAccess(user);
-  const [activeTab, setActiveTab] = useState("products");
+  const [activeTab, setActiveTabState] = useState(null);
+  const [activeTabReady, setActiveTabReady] = useState(false);
   const [products, setProducts] = useState([]);
   const [creditPackages, setCreditPackages] = useState([]);
   const [giveaways, setGiveaways] = useState([]);
@@ -220,6 +231,28 @@ export default function useDashboardController() {
 
     return () => window.clearInterval(intervalId);
   }, [canManageDashboard]);
+
+  useEffect(() => {
+    function syncActiveTabFromHash() {
+      setActiveTabState(getDashboardTabFromHash());
+      setActiveTabReady(true);
+    }
+
+    syncActiveTabFromHash();
+    window.addEventListener("hashchange", syncActiveTabFromHash);
+
+    return () => {
+      window.removeEventListener("hashchange", syncActiveTabFromHash);
+    };
+  }, []);
+
+  function setActiveTab(tab) {
+    if (!dashboardTabIds.has(tab)) return;
+
+    setActiveTabState(tab);
+    setActiveTabReady(true);
+    window.history.replaceState(null, "", `#${tab}`);
+  }
 
   function resetProductForm() {
     setSelectedProductId(null);
@@ -481,6 +514,24 @@ export default function useDashboardController() {
         await loadDashboard();
       } catch {
         toast.error("No se pudieron eliminar los canjes");
+      }
+    });
+  }
+
+  function deleteSupportTicketsByMode(mode) {
+    startTransition(async () => {
+      try {
+        const data = await deleteSupportTickets(mode);
+        const deletedCount = Number(data.deletedCount || 0);
+
+        toast.success(
+          deletedCount === 1
+            ? "Se elimino 1 ticket"
+            : `Se eliminaron ${deletedCount} tickets`,
+        );
+        await loadDashboard();
+      } catch {
+        toast.error("No se pudieron eliminar los tickets");
       }
     });
   }
@@ -831,6 +882,44 @@ export default function useDashboardController() {
     });
   }
 
+  function removeClosedSupportTickets() {
+    const closedCount = supportTickets.filter(
+      (ticket) => ticket.status === "closed",
+    ).length;
+
+    setConfirmation({
+      type: "delete-closed-support-tickets",
+      title: "Eliminar tickets cerrados",
+      description: `Vas a eliminar ${closedCount} ticket${
+        closedCount === 1 ? "" : "s"
+      } cerrado${closedCount === 1 ? "" : "s"} de soporte.`,
+      confirmLabel: "Eliminar cerrados",
+      cancelLabel: "Conservar tickets",
+      details: [
+        "Solo se eliminaran tickets de soporte con estado Cerrado.",
+        "Los tickets abiertos o en proceso se conservaran.",
+        "Esta accion no elimina canjes de productos.",
+      ],
+    });
+  }
+
+  function removeAllSupportTickets() {
+    setConfirmation({
+      type: "delete-all-support-tickets",
+      title: "Eliminar todos los tickets",
+      description: `Vas a eliminar ${supportTickets.length} ticket${
+        supportTickets.length === 1 ? "" : "s"
+      } de soporte.`,
+      confirmLabel: "Eliminar todos",
+      cancelLabel: "Conservar tickets",
+      details: [
+        "Se eliminaran tickets abiertos, en proceso y cerrados.",
+        "Esta accion limpia la bandeja de soporte completa.",
+        "No se eliminaran canjes de productos.",
+      ],
+    });
+  }
+
   function cancelConfirmation() {
     setConfirmation(null);
   }
@@ -868,6 +957,16 @@ export default function useDashboardController() {
 
     if (current.type === "delete-all-redemptions") {
       deleteRedemptionsByMode("all");
+      return;
+    }
+
+    if (current.type === "delete-closed-support-tickets") {
+      deleteSupportTicketsByMode("closed");
+      return;
+    }
+
+    if (current.type === "delete-all-support-tickets") {
+      deleteSupportTicketsByMode("all");
     }
   }
 
@@ -905,6 +1004,7 @@ export default function useDashboardController() {
     canManageDashboard,
     canManageKickModeration,
     activeTab,
+    activeTabReady,
     setActiveTab,
     stats,
     loading,
@@ -981,6 +1081,8 @@ export default function useDashboardController() {
     removeTicket,
     removeClosedRedemptions,
     removeAllRedemptions,
+    removeClosedSupportTickets,
+    removeAllSupportTickets,
     cancelConfirmation,
     confirmDashboardAction,
     activateStreamHour,

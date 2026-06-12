@@ -21,6 +21,8 @@ export default function SupportPanel({
   onStatusChange,
   onReply,
   onDelete,
+  onDeleteAll,
+  onDeleteClosed,
 }) {
   const activeTickets = tickets.filter(
     (ticket) => ticket.status !== "closed",
@@ -41,10 +43,32 @@ export default function SupportPanel({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <InboxMetric label="Total" value={tickets.length} />
-          <InboxMetric label="Activos" value={activeTickets} tone="red" />
-          <InboxMetric label="Historial" value={closedTickets} />
+        <div className="grid gap-2 xl:grid-cols-[auto_auto] xl:items-start">
+          <div className="grid grid-cols-2 gap-2 xl:order-first">
+            <button
+              type="button"
+              onClick={onDeleteClosed}
+              disabled={isPending || closedTickets === 0}
+              className="inline-flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2.5 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-300/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar cerrados
+            </button>
+            <button
+              type="button"
+              onClick={onDeleteAll}
+              disabled={isPending || tickets.length === 0}
+              className="inline-flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar todos
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <InboxMetric label="Total" value={tickets.length} />
+            <InboxMetric label="Activos" value={activeTickets} tone="red" />
+            <InboxMetric label="Cerrados" value={closedTickets} />
+          </div>
         </div>
       </div>
 
