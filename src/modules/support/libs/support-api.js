@@ -67,6 +67,7 @@ export function normalizeTicket(ticket) {
         postalCode: ticket.user.postalCode || "",
         phone: ticket.user.phone || "",
         instagram: ticket.user.instagram || "",
+        twitter: ticket.user.twitter || "",
         discord: ticket.user.discord || "",
       }
     : null;

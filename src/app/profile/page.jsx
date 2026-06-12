@@ -2,13 +2,16 @@
 
 import { useEffect, useMemo, useState, useTransition } from "react";
 import {
+  IconAt,
   IconBrandDiscord,
+  IconBrandInstagram,
   IconBrandX,
   IconDeviceFloppy,
   IconFlame,
   IconId,
   IconMessageCircle,
   IconMapPin,
+  IconPhone,
   IconSparkles,
   IconUserCircle,
   IconVideo,
@@ -345,38 +348,93 @@ function ProfileHero({ user, displayName }) {
 
 function ProfileInfoForm({ profile, isPending, onSubmit, onFieldChange }) {
   const fields = [
-    ["country", "Pais", <IconMapPin key="country" size={18} />],
-    ["name", "Nombre Completo", <IconUserCircle key="name" size={18} />],
-    ["dni", "DNI (ID)", <IconId key="dni" size={18} />],
-    ["city", "Ciudad", <IconMapPin key="city" size={18} />],
-    ["province", "Provincia", <IconMapPin key="province" size={18} />],
-    ["direction", "Direccion", <IconMapPin key="direction" size={18} />],
-    ["postalCode", "Codigo Postal", <IconMapPin key="postalCode" size={18} />],
-    [
-      "instagram",
-      "Usuario de Twitter/X",
-      <IconBrandX key="instagram" size={18} />,
-    ],
-    [
-      "discord",
-      "Usuario de Discord",
-      <IconBrandDiscord key="discord" size={18} />,
-    ],
+    {
+      field: "country",
+      label: "Pais",
+      icon: <IconMapPin size={18} />,
+      autoComplete: "country-name",
+    },
+    {
+      field: "name",
+      label: "Nombre Completo",
+      icon: <IconUserCircle size={18} />,
+      autoComplete: "name",
+    },
+    {
+      field: "dni",
+      label: "DNI (ID)",
+      icon: <IconId size={18} />,
+    },
+    {
+      field: "email",
+      label: "Correo electronico",
+      icon: <IconAt size={18} />,
+      type: "email",
+      autoComplete: "email",
+    },
+    {
+      field: "phone",
+      label: "Numero de telefono",
+      icon: <IconPhone size={18} />,
+      type: "tel",
+      autoComplete: "tel",
+    },
+    {
+      field: "city",
+      label: "Ciudad",
+      icon: <IconMapPin size={18} />,
+      autoComplete: "address-level2",
+    },
+    {
+      field: "province",
+      label: "Provincia",
+      icon: <IconMapPin size={18} />,
+      autoComplete: "address-level1",
+    },
+    {
+      field: "direction",
+      label: "Direccion",
+      icon: <IconMapPin size={18} />,
+      autoComplete: "street-address",
+    },
+    {
+      field: "postalCode",
+      label: "Codigo Postal",
+      icon: <IconMapPin size={18} />,
+      autoComplete: "postal-code",
+    },
+    {
+      field: "instagram",
+      label: "Usuario de Instagram",
+      icon: <IconBrandInstagram size={18} />,
+      autoComplete: "username",
+    },
+    {
+      field: "twitter",
+      label: "Usuario de Twitter/X",
+      icon: <IconBrandX size={18} />,
+      autoComplete: "username",
+    },
+    {
+      field: "discord",
+      label: "Usuario de Discord",
+      icon: <IconBrandDiscord size={18} />,
+      autoComplete: "username",
+    },
   ];
 
   return (
     <form onSubmit={onSubmit}>
       <div className="grid gap-5 lg:grid-cols-2">
-        {fields.map(([field, label, icon]) => (
-          <div
-            key={field}
-            className={field === "discord" ? "lg:col-span-2" : undefined}
-          >
+        {fields.map(({ field, label, icon, type, autoComplete }) => (
+          <div key={field}>
             <ProfileField
               label={label}
               value={profile[field]}
               onChange={(value) => onFieldChange(field, value)}
               icon={icon}
+              type={type}
+              autoComplete={autoComplete}
             />
           </div>
         ))}

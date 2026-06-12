@@ -1,12 +1,15 @@
 export const emptyProfile = {
   country: "",
+  email: "",
   name: "",
   dni: "",
   city: "",
   province: "",
   direction: "",
   postalCode: "",
+  phone: "",
   instagram: "",
+  twitter: "",
   discord: "",
 };
 
@@ -30,13 +33,16 @@ export const emptyLevelStats = {
 export function toProfile(user) {
   return {
     country: user?.country || "",
+    email: user?.email || "",
     name: user?.name || "",
     dni: user?.dni || "",
     city: user?.city || "",
     province: user?.province || "",
     direction: user?.direction || "",
     postalCode: user?.postalCode || "",
+    phone: user?.phone || "",
     instagram: user?.instagram || "",
+    twitter: user?.twitter || "",
     discord: user?.discord || "",
   };
 }

@@ -8,12 +8,22 @@ import {
   useTransition,
 } from "react";
 import {
+  IconAlertTriangle,
+  IconArrowUpRight,
   IconChartLine,
   IconChartPie,
+  IconClock,
   IconCircleCheck,
-  IconHelpCircle,
+  IconCoins,
+  IconHistory,
+  IconInfoCircle,
+  IconMedal2,
   IconRefresh,
+  IconSparkles,
+  IconTargetArrow,
   IconTrophy,
+  IconUsers,
+  IconWallet,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
@@ -93,7 +103,10 @@ export default function PredictionsPage() {
   const [isPending, startTransition] = useTransition();
 
   const normalizedPredictions = useMemo(
-    () => predictions.map(normalizePrediction).filter((prediction) => prediction.id),
+    () =>
+      predictions
+        .map(normalizePrediction)
+        .filter((prediction) => prediction.id),
     [predictions],
   );
   const activePredictions = useMemo(
@@ -318,34 +331,128 @@ export default function PredictionsPage() {
   );
 }
 
-function PredictionsHero({ onRefresh }) {
+function PredictionsHero({
+  activeCount,
+  totalPool,
+  availablePoints,
+  onRefresh,
+}) {
+  const stats = [
+    {
+      label: "En vivo",
+      value: formatNumber(activeCount),
+      detail: activeCount === 1 ? "prediccion activa" : "predicciones activas",
+      icon: IconTargetArrow,
+    },
+    {
+      label: "Pool abierto",
+      value: `${formatNumber(totalPool)} pts`,
+      detail: "puntos en juego",
+      icon: IconCoins,
+    },
+    {
+      label: "Tu saldo",
+      value: `${formatNumber(availablePoints)} pts`,
+      detail: "disponibles para apostar",
+      icon: IconWallet,
+    },
+  ];
+  const steps = [
+    ["Elegí", "Lee el contexto y marca una opcion."],
+    ["Apostá", "Define puntos dentro de los limites."],
+    ["Cobra", "Si aciertas, recibis el multiplicador."],
+  ];
+
   return (
-    <div className="relative flex justify-between items-center  overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(135deg,rgba(220,38,38,0.16),rgba(10,10,10,0.74)_38%,rgba(10,10,10,0.9))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
-      <div className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-red-200/45 to-transparent" />
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="relative overflow-hidden rounded-3xl border border-white/10 bg-[radial-gradient(circle_at_16%_0%,rgba(239,68,68,0.34),transparent_34%),linear-gradient(135deg,rgba(24,24,27,0.92),rgba(10,10,10,0.96)_46%,rgba(127,29,29,0.3))] p-4 shadow-2xl shadow-black/35 ring-1 ring-white/[0.04] sm:p-6">
+      <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-gradient-to-r from-transparent via-red-200/60 to-transparent" />
+      <div className="pointer-events-none absolute -right-24 -top-24 size-56 rounded-full bg-red-500/10 blur-3xl" />
+
+      <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start">
         <div>
-          <h1 className="flex items-center gap-2 text-3xl font-black text-white sm:text-4xl">
-            <IconChartPie size={24} />
+          <span className="inline-flex min-h-9 items-center gap-2 rounded-full border border-red-300/25 bg-red-500/10 px-3 text-xs font-black uppercase tracking-wide text-red-100">
+            <span className="size-2 rounded-full bg-red-400 shadow-[0_0_18px_rgba(248,113,113,0.85)]" />
+            Arena del stream
+          </span>
+          <h1 className="mt-4 flex items-center gap-3 text-3xl font-black leading-tight text-white sm:text-5xl">
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl border border-white/10 bg-white/[0.06] text-red-100 shadow-xl shadow-black/25">
+              <IconChartPie size={24} />
+            </span>
             Predicciones
           </h1>
-          <p className="mt-3 max-w-2xl text-neutral-400">
-            Predeci lo que va a pasar en el stream y jugate tus puntos.
+          <p className="mt-3 max-w-2xl text-sm leading-6 text-neutral-300 sm:text-base">
+            Anticipá lo que pasa en vivo, medí el riesgo antes de confirmar y
+            competí por puntos sin perder de vista el cierre de cada jugada.
           </p>
         </div>
+
+        <button
+          type="button"
+          aria-label="Actualizar predicciones"
+          onClick={onRefresh}
+          className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-xl border border-white/10 bg-neutral-950/70 px-4 py-2 text-xs font-black uppercase tracking-wide text-neutral-300 transition hover:-translate-y-0.5 hover:border-red-300/35 hover:bg-red-500/10 hover:text-white focus:outline-none"
+        >
+          <IconRefresh size={16} />
+          Actualizar
+        </button>
       </div>
-      <button
-        type="button"
-        aria-label="Actualizar predicciones"
-        onClick={onRefresh}
-        className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-neutral-950/60 px-4 py-2 text-xs font-black uppercase tracking-wide text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none"
-      >
-        <IconRefresh size={16} />
-        Actualizar
-      </button>
+
+      <div className="relative mt-6 grid gap-3 md:grid-cols-3">
+        {stats.map((stat) => (
+          <HeroStat key={stat.label} {...stat} />
+        ))}
+      </div>
+
+      <div className="relative mt-4 grid gap-2 rounded-2xl border border-white/10 bg-black/20 p-2 md:grid-cols-3">
+        {steps.map(([label, text], index) => (
+          <HeroGuideStep
+            key={label}
+            index={index + 1}
+            label={label}
+            text={text}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function HeroStat({ label, value, detail, icon: Icon }) {
+  return (
+    <div className="group rounded-2xl border border-white/10 bg-neutral-950/55 p-4 transition hover:-translate-y-0.5 hover:border-red-300/25 hover:bg-neutral-900/70">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-wide text-neutral-500">
+            {label}
+          </p>
+          <strong className="mt-2 block font-mono text-2xl font-black text-white">
+            {value}
+          </strong>
+        </div>
+        <span className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-red-200 transition group-hover:border-red-300/30 group-hover:bg-red-500/10">
+          <Icon size={20} />
+        </span>
+      </div>
+      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+        {detail}
+      </p>
     </div>
   );
 }
 
+function HeroGuideStep({ index, label, text }) {
+  return (
+    <div className="flex items-center gap-3 rounded-xl px-3 py-2.5">
+      <span className="grid size-8 shrink-0 place-items-center rounded-full border border-red-300/25 bg-red-500/10 font-mono text-xs font-black text-red-100">
+        {index}
+      </span>
+      <div>
+        <p className="text-sm font-black text-white">{label}</p>
+        <p className="text-xs text-neutral-500">{text}</p>
+      </div>
+    </div>
+  );
+}
 
 function PredictionCard({
   prediction,
@@ -364,35 +471,78 @@ function PredictionCard({
   const bettingClosed = prediction.endsAt
     ? getRemainingMs(prediction.endsAt) <= 0
     : false;
+  const availableBetPoints = Math.max(
+    0,
+    Math.floor(Number(availablePoints || 0)),
+  );
+  const rawPredictionMaxBetPoints = Number(prediction.maxBetPoints);
+  const predictionMaxBetPoints =
+    Number.isFinite(rawPredictionMaxBetPoints) && rawPredictionMaxBetPoints > 0
+      ? Math.floor(rawPredictionMaxBetPoints)
+      : availableBetPoints;
+  const maxBetAmount = Math.max(
+    0,
+    Math.min(availableBetPoints, predictionMaxBetPoints),
+  );
   const possiblePayout = selectedOption
     ? betPoints * Number(prediction.payoutMultiplier || 2)
     : 0;
+  const maxBetDisabled =
+    prediction.hasVoted || bettingClosed || isPending || maxBetAmount < 1;
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+    <article className="group relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.92))] p-4 shadow-2xl shadow-black/30 ring-1 ring-white/[0.03] transition hover:border-red-300/20 sm:p-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-red-500 via-amber-300 to-transparent" />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_18rem]">
+      <div className="pointer-events-none absolute -left-24 top-16 size-52 rounded-full bg-red-500/8 blur-3xl transition group-hover:bg-red-500/12" />
+
+      <div className="relative space-y-5">
         <div className="min-w-0">
-          <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
-            <span className="size-2 rounded-full bg-green-400" />
-            Prediccion activa
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
+              <span className="size-2 animate-pulse rounded-full bg-green-400" />
+              Prediccion activa
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-neutral-300">
+              <IconClock size={15} />
+              <CountdownTimer endsAt={prediction.endsAt} />
+            </div>
           </div>
           <h2 className="mt-3 text-2xl font-black leading-tight text-white sm:text-3xl">
             {prediction.title}
           </h2>
           {prediction.description ? (
-            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-500">
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-neutral-400">
               {prediction.description}
             </p>
           ) : null}
+        </div>
 
-          <div className="mt-5 rounded-2xl border border-white/10 bg-black/20 p-4">
-            <div className="mb-3 flex items-center justify-between gap-3 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <PredictionSummaryPill
+            icon={IconCoins}
+            label="Pool"
+            value={`${formatNumber(prediction.totalPool)} pts`}
+          />
+          <PredictionSummaryPill
+            icon={IconUsers}
+            label="Jugadores"
+            value={formatNumber(prediction.players)}
+          />
+          <PredictionSummaryPill
+            icon={IconArrowUpRight}
+            label="Pago"
+            value={formatMultiplier(prediction.payoutMultiplier)}
+          />
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_19rem] lg:items-stretch">
+          <div className="h-full rounded-2xl border border-white/10 bg-black/25 p-4">
+            <div className="mb-3 flex items-center justify-between gap-3 text-xs font-black uppercase tracking-wide text-neutral-500">
               <span className="inline-flex items-center gap-2">
                 <IconChartLine size={15} />
                 Pool por opcion
               </span>
-              <span className="text-green-300">
+              <span className="rounded-full border border-green-300/20 bg-green-400/10 px-2.5 py-1 text-green-200">
                 {formatMultiplier(prediction.payoutMultiplier)}
               </span>
             </div>
@@ -409,77 +559,110 @@ function PredictionCard({
               ))}
             </div>
           </div>
+
+          <aside className="flex h-full flex-col rounded-2xl border border-white/10 bg-neutral-950/75 p-4 shadow-inner shadow-black/20">
+            <div className="grid gap-2">
+              <div className="flex items-center justify-between gap-3">
+                <label
+                  htmlFor={`prediction-bet-${prediction.id}`}
+                  className="text-sm font-semibold text-neutral-300"
+                >
+                  Puntos a apostar
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onBetChange(String(maxBetAmount))}
+                  disabled={maxBetDisabled}
+                  className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-lg border border-red-300/25 bg-red-500/10 px-3 text-[11px] font-black uppercase tracking-wide text-red-100 transition hover:border-red-200/45 hover:bg-red-500/20 focus:outline-none  disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:text-neutral-600"
+                >
+                  Max
+                </button>
+              </div>
+              <input
+                id={`prediction-bet-${prediction.id}`}
+                type="number"
+                min={prediction.minBetPoints}
+                max={prediction.maxBetPoints || availableBetPoints}
+                value={betAmount}
+                onChange={(event) => onBetChange(event.target.value)}
+                disabled={prediction.hasVoted || bettingClosed}
+                className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
+                placeholder="100"
+              />
+            </div>
+
+            <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3 text-sm">
+              <p className="mb-2 flex items-center justify-between gap-3 text-neutral-500">
+                Limites
+                <span className="font-black text-neutral-200">
+                  {formatNumber(prediction.minBetPoints)} -{" "}
+                  {prediction.maxBetPoints
+                    ? formatNumber(prediction.maxBetPoints)
+                    : "sin max."}{" "}
+                  pts
+                </span>
+              </p>
+              <p className="flex items-center justify-between gap-3 text-neutral-500">
+                Si ganas
+                <span className="font-black text-green-300">
+                  +{formatNumber(possiblePayout)} pts
+                </span>
+              </p>
+              <p className="mt-2 flex items-center justify-between gap-3 text-neutral-500">
+                Si perdes
+                <span className="font-black text-red-300">
+                  -{formatNumber(betPoints)} pts
+                </span>
+              </p>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-white/10 bg-neutral-900/45 p-3 text-xs leading-5 text-neutral-400">
+              <p className="flex items-start gap-2">
+                <IconInfoCircle
+                  className="mt-0.5 shrink-0 text-red-200"
+                  size={16}
+                />
+                {selectedOption
+                  ? `Vas con ${selectedOption.label}. Revisa el cierre antes de confirmar.`
+                  : "Selecciona una opcion para calcular el pago estimado."}
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={onVote}
+              disabled={isPending || prediction.hasVoted || bettingClosed}
+              className="mt-auto inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
+            >
+              {prediction.hasVoted ? (
+                <IconCircleCheck size={18} />
+              ) : (
+                <IconTrophy size={18} />
+              )}
+              {prediction.hasVoted
+                ? "Tu voto esta registrado"
+                : bettingClosed
+                  ? "Apuestas cerradas"
+                  : "Confirmar prediccion"}
+            </button>
+          </aside>
         </div>
-
-        <aside className="rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-inner shadow-black/20">
-          <div className="grid grid-cols-2 gap-3">
-            <MiniStat label="Pool" value={`${formatNumber(prediction.totalPool)} pts`} />
-            <MiniStat label="Jugadores" value={formatNumber(prediction.players)} />
-            <MiniStat
-              label="Cierra"
-              value={<CountdownTimer endsAt={prediction.endsAt} />}
-            />
-            <MiniStat
-              label="Pago"
-              value={formatMultiplier(prediction.payoutMultiplier)}
-            />
-          </div>
-
-          <label className="mt-4 grid gap-2 text-sm font-semibold text-neutral-300">
-            Puntos a apostar
-            <input
-              type="number"
-              min={prediction.minBetPoints}
-              max={prediction.maxBetPoints || Math.floor(availablePoints)}
-              value={betAmount}
-              onChange={(event) => onBetChange(event.target.value)}
-              disabled={prediction.hasVoted || bettingClosed}
-              className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
-              placeholder="100"
-            />
-          </label>
-
-          <div className="mt-3 rounded-xl border border-white/10 bg-black/20 p-3 text-sm">
-            <p className="mb-2 flex items-center justify-between gap-3 text-neutral-500">
-              Limites
-              <span className="font-black text-neutral-200">
-                {formatNumber(prediction.minBetPoints)} -{" "}
-                {prediction.maxBetPoints
-                  ? formatNumber(prediction.maxBetPoints)
-                  : "sin max."}{" "}
-                pts
-              </span>
-            </p>
-            <p className="flex items-center justify-between gap-3 text-neutral-500">
-              Si ganas
-              <span className="font-black text-green-300">
-                +{formatNumber(possiblePayout)} pts
-              </span>
-            </p>
-            <p className="mt-2 flex items-center justify-between gap-3 text-neutral-500">
-              Si perdes
-              <span className="font-black text-red-300">
-                -{formatNumber(betPoints)} pts
-              </span>
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={onVote}
-            disabled={isPending || prediction.hasVoted || bettingClosed}
-            className="mt-4 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
-          >
-            {prediction.hasVoted ? <IconCircleCheck size={18} /> : <IconTrophy size={18} />}
-            {prediction.hasVoted
-              ? "Tu voto esta registrado"
-              : bettingClosed
-                ? "Apuestas cerradas"
-                : "Confirmar prediccion"}
-          </button>
-        </aside>
       </div>
     </article>
+  );
+}
+
+function PredictionSummaryPill({ icon: Icon, label, value }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-neutral-950/55 p-3">
+      <p className="flex items-center gap-2 text-[11px] font-black uppercase tracking-wide text-neutral-500">
+        <Icon size={15} />
+        {label}
+      </p>
+      <strong className="mt-2 block font-mono text-lg font-black text-white">
+        {value}
+      </strong>
+    </div>
   );
 }
 
@@ -492,26 +675,38 @@ function WaitingResultPredictionCard({ prediction }) {
   const possiblePayout = betPoints * Number(prediction.payoutMultiplier || 2);
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+    <article className="relative overflow-hidden rounded-3xl border border-amber-300/18 bg-[linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.92))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
       <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-amber-300 via-amber-400 to-transparent" />
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="pointer-events-none absolute -right-20 top-10 size-48 rounded-full bg-amber-400/10 blur-3xl" />
+
+      <div className="relative flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
           <span className="size-2 rounded-full bg-green-400" />
-          Prediccion
+          Prediccion cerrada
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-amber-300">
+        <div className="flex flex-wrap items-center gap-2 rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-amber-200">
           <span className="size-2 animate-pulse rounded-full bg-amber-300" />
           Esperando ganador
         </div>
       </div>
 
-      <h2 className="mt-4 text-2xl font-black leading-tight text-white sm:text-4xl">
+      <h2 className="relative mt-4 text-2xl font-black leading-tight text-white sm:text-4xl">
         {prediction.title}
       </h2>
+      <p className="relative mt-2 max-w-3xl text-sm leading-6 text-neutral-400">
+        Las apuestas ya cerraron. El resultado se acredita cuando el admin
+        define la opcion ganadora.
+      </p>
 
-      <div className="grid overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/60 sm:grid-cols-4">
-        <WaitingStat label="Pool" value={`${formatNumber(prediction.totalPool)} pts`} />
-        <WaitingStat label="Jugadores" value={formatNumber(prediction.players)} />
+      <div className="relative mt-5 grid overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/60 sm:grid-cols-4">
+        <WaitingStat
+          label="Pool"
+          value={`${formatNumber(prediction.totalPool)} pts`}
+        />
+        <WaitingStat
+          label="Jugadores"
+          value={formatNumber(prediction.players)}
+        />
         <WaitingStat
           label="Tu jugada"
           value={betPoints ? `${formatNumber(betPoints)} pts` : "Sin apuesta"}
@@ -522,7 +717,7 @@ function WaitingResultPredictionCard({ prediction }) {
         />
       </div>
 
-      <div className="mt-5 grid gap-3 md:grid-cols-2">
+      <div className="relative mt-5 grid gap-3 md:grid-cols-2">
         {prediction.options.map((option, index) => (
           <WaitingOptionCard
             key={option.id}
@@ -533,19 +728,25 @@ function WaitingResultPredictionCard({ prediction }) {
         ))}
       </div>
 
-      <div className="mt-5 rounded-xl border border-amber-300/35 bg-amber-400/10 px-4 py-3 text-center text-xs font-black uppercase tracking-wide text-amber-200">
-        Prediccion cerrada. Esperando resultado.
+      <div className="relative mt-5 flex flex-col gap-3 rounded-2xl border border-amber-300/35 bg-amber-400/10 px-4 py-3 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between">
+        <span className="inline-flex items-center gap-2 font-black uppercase tracking-wide">
+          <IconClock size={17} />
+          Ticket en revision
+        </span>
+        <span className="text-xs font-semibold uppercase tracking-wide text-amber-200/80">
+          {selectedOption
+            ? `Tu opcion: ${selectedOption.label}`
+            : "Sin apuesta registrada"}
+        </span>
       </div>
     </article>
   );
 }
 
-
-
 function WaitingStat({ label, value }) {
   return (
-    <div className="border-b border-white/10 p-4 sm:border-b-0 sm:border-r sm:last:border-r-0">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-600">
+    <div className="border-b border-white/10 p-4 transition hover:bg-white/[0.03] sm:border-b-0 sm:border-r sm:last:border-r-0">
+      <p className="text-[10px] font-black uppercase tracking-wide text-neutral-600">
         {label}
       </p>
       <strong className="mt-1 block font-mono text-lg font-black text-white">
@@ -558,7 +759,7 @@ function WaitingStat({ label, value }) {
 function WaitingOptionCard({ option, accent, selected }) {
   return (
     <div
-      className={`rounded-2xl border bg-neutral-950/55 p-4 ${
+      className={`rounded-2xl border bg-neutral-950/55 p-4 transition ${
         selected ? `${accent.border} ${accent.bg}` : accent.softBorder
       }`}
     >
@@ -571,13 +772,17 @@ function WaitingOptionCard({ option, accent, selected }) {
           </p>
         </div>
         {selected ? (
-          <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
+          >
+            <IconCircleCheck size={13} />
             Tu eleccion
           </span>
         ) : null}
       </div>
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-neutral-600">
-        {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)} jugadores
+        {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)}{" "}
+        jugadores
       </p>
     </div>
   );
@@ -646,7 +851,7 @@ function PredictionOption({ option, accent, selected, locked, onSelect }) {
       type="button"
       onClick={onSelect}
       disabled={locked}
-      className={`group cursor-pointer rounded-2xl border bg-neutral-950/55 p-4 text-left transition hover:-translate-y-0.5 focus:outline-none disabled:cursor-not-allowed ${
+      className={`group/option cursor-pointer rounded-2xl border bg-neutral-950/55 p-4 text-left transition hover:-translate-y-0.5 hover:bg-neutral-900/70 focus:outline-none disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
         selected || option.isUserChoice
           ? `${accent.border} ${accent.bg}`
           : `border-white/10 ${accent.hoverBorder}`
@@ -654,28 +859,32 @@ function PredictionOption({ option, accent, selected, locked, onSelect }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="font-black text-white">{option.label}</p>
-          <p className="mt-2 font-mono text-3xl text-white">
+          <p className="text-base font-black text-white">{option.label}</p>
+          <p className="mt-2 font-mono text-4xl font-black text-white">
             {formatNumber(option.percent)}
             <span className={`ml-1 text-base ${accent.text}`}>%</span>
           </p>
         </div>
         {(selected || option.isUserChoice) && (
-          <span className={`rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}>
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
+          >
+            <IconCircleCheck size={13} />
             Tu eleccion
           </span>
         )}
       </div>
-      <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
         <div
-          className={`h-full rounded-full ${accent.line} ${getPercentWidthClass(
+          className={`h-full rounded-full ${accent.line} shadow-[0_0_18px_currentColor] transition-all duration-300 ${getPercentWidthClass(
             option.percent,
           )}`}
         />
       </div>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-600">
-        {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)} jugadores
-      </p>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+        <span>{formatNumber(option.totalPoints)} pts</span>
+        <span>{formatNumber(option.players)} jugadores</span>
+      </div>
     </button>
   );
 }
@@ -711,28 +920,18 @@ function getPercentWidthClass(percent) {
   return percentWidthClasses[bucket] || "w-0";
 }
 
-function MiniStat({ label, value }) {
-  return (
-    <div className="rounded-xl border border-white/10 bg-black/20 p-3">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-neutral-600">
-        {label}
-      </p>
-      <strong className="mt-1 block text-sm text-white">{value}</strong>
-    </div>
-  );
-}
-
 function ResolvedPredictionCard({ prediction }) {
   const outcome = getPredictionOutcome(prediction);
 
   return (
-    <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-neutral-950/75 p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+    <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.92))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-green-300/45 to-transparent" />
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
           <span className="size-2 rounded-full bg-green-400" />
-          Prediccion
+          Ultimo resultado
         </div>
-        <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-neutral-500">
+        <div className="flex flex-wrap items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-neutral-400">
           <span className="size-2 rounded-full bg-neutral-500" />
           Resuelta
         </div>
@@ -760,7 +959,7 @@ function ResolvedPredictionCard({ prediction }) {
 
 function ResolvedOptionCard({ option, accent, winner }) {
   const classes = winner
-    ? "border-green-400 bg-green-500/10 text-green-300"
+    ? "border-green-400/70 bg-green-500/10 text-green-300 shadow-[0_16px_38px_rgba(34,197,94,0.12)]"
     : `${accent.softBorder} bg-neutral-950/55 ${accent.text}`;
 
   return (
@@ -774,13 +973,15 @@ function ResolvedOptionCard({ option, accent, winner }) {
           </p>
         </div>
         {winner ? (
-          <span className="rounded-full border border-green-300/40 bg-green-400/10 px-3 py-1 text-[10px] font-black uppercase text-green-200">
-            Ganaste
+          <span className="inline-flex items-center gap-1 rounded-full border border-green-300/40 bg-green-400/10 px-3 py-1 text-[10px] font-black uppercase text-green-200">
+            <IconMedal2 size={13} />
+            Ganadora
           </span>
         ) : null}
       </div>
       <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-neutral-600">
-        {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)} jugadores
+        {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)}{" "}
+        jugadores
       </p>
     </div>
   );
@@ -796,8 +997,17 @@ function ResolvedOutcomePanel({ prediction, outcome }) {
       : "border-white/10 bg-neutral-900/55 text-neutral-300";
 
   return (
-    <div className={`mt-5 rounded-2xl border p-5 text-center ${panelClasses}`}>
-      <p className="text-xs font-black uppercase tracking-wide">
+    <div
+      className={`mt-5 rounded-2xl border p-5 text-center shadow-inner shadow-black/15 ${panelClasses}`}
+    >
+      <p className="inline-flex items-center justify-center gap-2 text-xs font-black uppercase tracking-wide">
+        {won ? (
+          <IconTrophy size={16} />
+        ) : lost ? (
+          <IconAlertTriangle size={16} />
+        ) : (
+          <IconInfoCircle size={16} />
+        )}
         {won ? "Acertaste" : lost ? "Fallaste" : "Resultado"}
       </p>
       <p className="mt-3 font-mono text-xl font-black sm:text-3xl">
@@ -824,13 +1034,19 @@ function PredictionHistory({
   onFilterChange,
 }) {
   return (
-    <section className="space-y-4">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex min-w-0 items-center gap-3">
-          <p className="shrink-0 text-sm font-black uppercase tracking-wide text-green-400">
+    <section className="space-y-4 rounded-3xl border border-white/10 bg-neutral-950/45 p-4 shadow-2xl shadow-black/20 sm:p-5">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
+          <p className="inline-flex items-center gap-2 text-sm font-black uppercase tracking-wide text-green-300">
+            <IconHistory size={18} />
             Historial
           </p>
-          <div className="h-px flex-1 bg-white/10 sm:w-80" />
+          <h2 className="mt-2 text-2xl font-black text-white">
+            Resultados anteriores
+          </h2>
+          <p className="mt-1 text-sm text-neutral-500">
+            Revisá tus balances y las rondas cerradas del stream.
+          </p>
         </div>
         <div className="flex gap-2">
           <HistoryFilterButton
@@ -866,13 +1082,16 @@ function HistoryFilterButton({ active, label, count, onClick }) {
     <button
       type="button"
       onClick={onClick}
-      className={`min-h-11 cursor-pointer rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-wide transition focus:outline-none ${
+      className={`inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border px-4 py-2 text-xs font-black uppercase tracking-wide transition focus:outline-none ${
         active
-          ? "border-white/15 bg-neutral-900 text-white"
+          ? "border-red-300/30 bg-red-500/10 text-white"
           : "border-white/10 bg-neutral-950/70 text-neutral-500 hover:border-red-300/25 hover:text-white"
       }`}
     >
-      {label} <span className="ml-2 text-neutral-500">{count}</span>
+      {label}{" "}
+      <span className="rounded-full bg-white/[0.06] px-2 py-0.5 text-neutral-400">
+        {count}
+      </span>
     </button>
   );
 }
@@ -888,21 +1107,25 @@ function HistoryRow({ prediction }) {
       : "border-white/10 bg-neutral-900 text-neutral-400";
 
   return (
-    <article className="flex min-h-16 items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/70 px-4 py-3 shadow-xl shadow-black/10">
+    <article className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-950/70 px-4 py-3 shadow-xl shadow-black/10 transition hover:border-red-300/20 hover:bg-neutral-900/70 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center">
       <div className="min-w-0">
         <h3 className="truncate text-base font-black text-white">
           {prediction.title}
         </h3>
-        <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+        <p className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-semibold uppercase tracking-wide text-neutral-600">
           <span className="text-blue-300">
             {prediction.winningOption?.label || "Pendiente"}
-          </span>{" "}
-          · {formatNumber(outcome.betPoints || prediction.totalPool)} pts ·{" "}
-          {getRelativeTime(prediction.resolvedAt || prediction.endsAt)}
+          </span>
+          <span>
+            {formatNumber(outcome.betPoints || prediction.totalPool)} pts
+          </span>
+          <span>
+            {getRelativeTime(prediction.resolvedAt || prediction.endsAt)}
+          </span>
         </p>
       </div>
       <span
-        className={`shrink-0 rounded-lg border px-3 py-1 text-xs font-black uppercase ${badgeClasses}`}
+        className={`inline-flex min-h-9 shrink-0 items-center justify-center rounded-xl border px-3 py-1 text-xs font-black uppercase ${badgeClasses}`}
       >
         {outcome.status === "none" ? "Resuelta" : formatDelta(outcome.delta)}
       </span>
@@ -955,7 +1178,10 @@ function getRelativeTime(value) {
 
   if (!Number.isFinite(date.getTime())) return "hace un momento";
 
-  const minutes = Math.max(1, Math.floor((Date.now() - date.getTime()) / 60000));
+  const minutes = Math.max(
+    1,
+    Math.floor((Date.now() - date.getTime()) / 60000),
+  );
 
   if (minutes < 60) return `hace ${minutes}m`;
 
@@ -971,12 +1197,16 @@ function StatePanel({ text, tone = "default" }) {
     tone === "error"
       ? "border-red-500/30 bg-red-500/10 text-red-200"
       : "border-white/10 bg-neutral-950/70 text-neutral-400";
+  const Icon = tone === "error" ? IconAlertTriangle : IconSparkles;
 
   return (
     <div
-      className={`rounded-2xl border p-10 text-center shadow-xl shadow-black/15 ${classes}`}
+      className={`rounded-3xl border p-10 text-center shadow-xl shadow-black/15 ${classes}`}
     >
-      {text}
+      <span className="mx-auto grid size-12 place-items-center rounded-2xl border border-white/10 bg-white/[0.04]">
+        <Icon size={22} />
+      </span>
+      <p className="mt-4 text-sm font-black uppercase tracking-wide">{text}</p>
     </div>
   );
 }
