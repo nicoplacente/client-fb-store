@@ -41,7 +41,7 @@ export default function ModerationTargetSelector({
   return (
     <section
       aria-labelledby="moderation-target-title"
-      className="mt-4 grid gap-3 border-t border-white/10 pt-4"
+      className="grid content-start gap-3"
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>

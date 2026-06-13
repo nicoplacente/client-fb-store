@@ -91,6 +91,12 @@ export function normalizeTicket(ticket) {
     categoryLabel: getSupportCategoryLabel(ticket.category),
     username: user?.username || ticket.username || "Sin usuario",
     user,
+    productEffectTargetUsername:
+      ticket.productEffectTargetUsername ||
+      ticket.redemption?.productEffectTargetUsername ||
+      ticket.metadata?.productEffectTargetUsername ||
+      ticket.metadata?.moderationTargetUsername ||
+      "",
     createdAt: ticket.createdAt || ticket.date || "",
     messages: Array.isArray(ticket.messages)
       ? ticket.messages.map((message) => ({

@@ -229,16 +229,21 @@ export default function MarketPage() {
   }, []);
 
   const handleModerationTargetChange = useCallback((kickId) => {
+    const target = moderationTargets.find(
+      (item) => item.kickId === kickId,
+    );
+
     setPendingAction((current) =>
       current
         ? {
             ...current,
             moderationTargetMode: "selected",
             moderationTargetKickId: kickId,
+            moderationTarget: target || null,
           }
         : current,
     );
-  }, []);
+  }, [moderationTargets]);
 
   const handleConfirmAction = useCallback(() => {
     const action = pendingAction;
@@ -271,7 +276,10 @@ export default function MarketPage() {
           }
         } catch (error) {
           toast.error(
-            getErrorMessage(error, "No se pudo completar la operación"),
+            getErrorMessage(
+              error,
+              "Ocurrió un error al canjear el producto.",
+            ),
           );
           await loadMarket({ showLoading: false });
         } finally {
@@ -332,9 +340,12 @@ export default function MarketPage() {
         toast.success("Creditos acreditados");
         await Promise.resolve(refreshUser?.()).catch(() => {});
       } catch (error) {
-        toast.error(
-          getErrorMessage(error, "No se pudo completar la operacion"),
-        );
+        const publicErrorMessage =
+          action.type === "redeem"
+            ? "Ocurrió un error al canjear el producto."
+            : "No se pudo completar la operación.";
+
+        toast.error(getErrorMessage(error, publicErrorMessage));
 
         if (action.type === "redeem") {
           await loadMarket({ showLoading: false });
@@ -429,10 +440,24 @@ export default function MarketPage() {
           ) : null
         }
         secondaryAside={
-          pendingAction?.type === "redeem" &&
-          pendingAction.item.rewardEffectType === "reward_wheel" ? (
+          isTimeoutAction ? (
+            <ModerationTargetSelector
+              targets={moderationTargets}
+              loading={moderationTargetsLoading}
+              error={moderationTargetsError}
+              mode={pendingAction.moderationTargetMode}
+              targetKickId={pendingAction.moderationTargetKickId}
+              onModeChange={handleModerationTargetModeChange}
+              onTargetChange={handleModerationTargetChange}
+              onRetry={() => loadModerationTargets(pendingAction.item.id)}
+            />
+          ) : pendingAction?.type === "redeem" &&
+            pendingAction.item.rewardEffectType === "reward_wheel" ? (
             <WheelPrizes prizes={pendingAction.item.rewardWheelPrizes} />
           ) : null
+        }
+        secondaryAsideClassName={
+          isTimeoutAction ? "bg-red-500/[0.02]" : undefined
         }
       >
         {pendingAction ? (
@@ -447,20 +472,6 @@ export default function MarketPage() {
                 onMaxPurchase={handleRequestMaxPurchase}
                 onQuantityChange={handleQuantityChange}
               />
-              {isTimeoutAction ? (
-                <ModerationTargetSelector
-                  targets={moderationTargets}
-                  loading={moderationTargetsLoading}
-                  error={moderationTargetsError}
-                  mode={pendingAction.moderationTargetMode}
-                  targetKickId={pendingAction.moderationTargetKickId}
-                  onModeChange={handleModerationTargetModeChange}
-                  onTargetChange={handleModerationTargetChange}
-                  onRetry={() =>
-                    loadModerationTargets(pendingAction.item.id)
-                  }
-                />
-              ) : null}
             </>
           )
         ) : null}
@@ -534,8 +545,20 @@ async function confirmProductRedemption({
   });
 
   if (result?.redemption) {
+    const target = getRedemptionModerationTarget(result, action);
+
     saveLocalRedemption({
       ...result.redemption,
+      ...(target.kickId
+        ? {
+            productEffectTargetKickId: target.kickId,
+          }
+        : {}),
+      ...(target.username
+        ? {
+            productEffectTargetUsername: target.username,
+          }
+        : {}),
       product: result.product || action.item,
     });
   }
@@ -551,16 +574,43 @@ async function confirmProductRedemption({
   }
 
   if (result?.redemption?.productEffectStatus === "failed") {
-    toast.error(
-      result.redemption.productEffectError ||
-        "El canje quedó registrado, pero Kick rechazó la acción",
-    );
+    toast.error("El canje quedó registrado, pero no se pudo aplicar la acción.");
   } else {
     toast.success(getRedemptionSuccessMessage(result, action.item));
   }
   await Promise.resolve(refreshUser?.()).catch(() => {});
 
   return result;
+}
+
+function getRedemptionModerationTarget(result, action) {
+  const redemption = result?.redemption || {};
+  const responseTarget =
+    result?.moderationTarget ||
+    result?.productEffectTarget ||
+    redemption.moderationTarget ||
+    {};
+  const selectedTarget =
+    action.moderationTargetMode === "selected"
+      ? action.moderationTarget
+      : null;
+
+  return {
+    kickId: String(
+      redemption.productEffectTargetKickId ||
+        responseTarget.kickId ||
+        responseTarget.id ||
+        selectedTarget?.kickId ||
+        "",
+    ).trim(),
+    username: String(
+      redemption.productEffectTargetUsername ||
+        responseTarget.username ||
+        responseTarget.name ||
+        selectedTarget?.username ||
+        "",
+    ).trim(),
+  };
 }
 
 function getWheelWinner(result) {

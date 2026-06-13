@@ -14,6 +14,7 @@ export default function ConfirmationDialog({
   cancelDisabled = false,
   aside,
   secondaryAside,
+  secondaryAsideClassName = "bg-fuchsia-400/[0.02]",
   children,
   onConfirm = () => {},
   onCancel = () => {},
@@ -159,7 +160,9 @@ export default function ConfirmationDialog({
             </aside>
           ) : null}
           {secondaryAside ? (
-            <aside className="border-t border-white/10 bg-fuchsia-400/[0.02] p-5 sm:p-6 lg:border-l lg:border-t-0">
+            <aside
+              className={`border-t border-white/10 p-5 sm:p-6 lg:border-l lg:border-t-0 ${secondaryAsideClassName}`}
+            >
               {secondaryAside}
             </aside>
           ) : null}

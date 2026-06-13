@@ -116,7 +116,6 @@ function WheelEffectStatus({ redemption }) {
 
   return (
     <span
-      title={redemption.wheelEffectError || undefined}
       className={`rounded-lg border px-3 py-2 text-sm font-bold ${
         statusStyles[status] || statusStyles.pending
       }`}
@@ -127,24 +126,35 @@ function WheelEffectStatus({ redemption }) {
 }
 
 function ProductEffectStatus({ redemption }) {
+  const isTimeout = [
+    "kick_timeout",
+    "kick_timeout_user",
+  ].includes(redemption.productEffectType);
   const statusStyles = {
     completed: "border-green-300/20 bg-green-400/10 text-green-100",
     pending: "border-amber-300/20 bg-amber-400/10 text-amber-100",
     failed: "border-red-300/20 bg-red-500/10 text-red-100",
   };
-  const statusLabels = {
-    completed: "Acción de Kick aplicada",
-    pending: "Acción de Kick pendiente",
-    failed: "Acción de Kick fallida",
+  const statusLabels = isTimeout
+    ? {
+        completed: "Timeout aplicado",
+        pending: "Timeout pendiente",
+        failed: "Timeout fallido",
+      }
+    : {
+        completed: "Acción de Kick aplicada",
+        pending: "Acción de Kick pendiente",
+        failed: "Acción de Kick fallida",
   };
   const status = redemption.productEffectStatus || "pending";
   const target = redemption.productEffectTargetUsername
-    ? ` a ${redemption.productEffectTargetUsername}`
+    ? status === "completed"
+      ? ` a ${redemption.productEffectTargetUsername}`
+      : ` para ${redemption.productEffectTargetUsername}`
     : "";
 
   return (
     <p
-      title={redemption.productEffectError || undefined}
       className={`mt-3 w-fit rounded-lg border px-3 py-2 text-sm font-bold ${
         statusStyles[status] || statusStyles.pending
       }`}

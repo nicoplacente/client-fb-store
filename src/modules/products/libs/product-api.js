@@ -98,7 +98,6 @@ export function normalizeProductRedemption(redemption) {
     wheelEffectType: redemption.wheelEffectType || "",
     wheelEffectValue: Number(redemption.wheelEffectValue || 0),
     wheelEffectStatus: redemption.wheelEffectStatus || "not_applicable",
-    wheelEffectError: redemption.wheelEffectError || "",
     productEffectType: redemption.productEffectType || "",
     productEffectDurationMinutes: Number(
       redemption.productEffectDurationMinutes || 0,
@@ -109,7 +108,6 @@ export function normalizeProductRedemption(redemption) {
       redemption.productEffectTargetUsername || "",
     productEffectStatus:
       redemption.productEffectStatus || "not_applicable",
-    productEffectError: redemption.productEffectError || "",
     createdAt: redemption.createdAt || "",
     product: normalizeProduct(product),
   };

@@ -110,20 +110,45 @@ export function getLocalRedemptions() {
 }
 
 export function mergeRedemptions(primary, fallback) {
-  const seen = new Set();
+  const merged = [];
+  const indexByKey = new Map();
 
-  return [...primary, ...fallback].filter((redemption) => {
+  [...primary, ...fallback].forEach((redemption) => {
     const productName = String(
       redemption.product?.name || redemption.product?.title || ""
     )
       .trim()
       .toLowerCase();
     const key = `${redemption.id || ""}-${productName}-${redemption.createdAt || ""}`;
+    const existingIndex = indexByKey.get(key);
 
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+    if (existingIndex === undefined) {
+      indexByKey.set(key, merged.length);
+      merged.push(redemption);
+      return;
+    }
+
+    const existing = merged[existingIndex];
+
+    merged[existingIndex] = {
+      ...redemption,
+      ...existing,
+      product: {
+        ...redemption.product,
+        ...existing.product,
+      },
+      productEffectTargetKickId:
+        existing.productEffectTargetKickId ||
+        redemption.productEffectTargetKickId ||
+        "",
+      productEffectTargetUsername:
+        existing.productEffectTargetUsername ||
+        redemption.productEffectTargetUsername ||
+        "",
+    };
   });
+
+  return merged;
 }
 
 export function ticketToRedemption(ticket) {

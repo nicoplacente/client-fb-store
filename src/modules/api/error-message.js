@@ -1,7 +1,3 @@
-export function getErrorMessage(error, fallback) {
-  if (error instanceof Error && error.message) {
-    return error.message;
-  }
-
+export function getErrorMessage(_error, fallback) {
   return fallback;
 }

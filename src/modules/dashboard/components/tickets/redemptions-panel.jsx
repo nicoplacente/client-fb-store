@@ -254,6 +254,11 @@ function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }
               {details.wheelPrize}.
             </p>
           ) : null}
+          {details.timeoutTarget ? (
+            <p className="mt-3 rounded-xl border border-red-300/20 bg-red-500/10 px-3 py-2 text-sm font-bold text-red-100">
+              Usuario objetivo del timeout: {details.timeoutTarget}.
+            </p>
+          ) : null}
         </div>
       </div>
 
@@ -328,11 +333,20 @@ function getRedemptionDetails(ticket) {
   const costMatch = text.match(/por\s+([\d.,]+)\s+cr[eé]ditos/i);
   const quantityMatch = text.match(/Cantidad:\s+(\d+)/i);
   const wheelPrizeMatch = text.match(/gan[oó]\s+(.+?)\./i);
+  const timeoutTargetMatch = text.match(
+    /(?:(?:timeout|tiempo de espera)(?:\s+(?:aplicado|realizado))?\s+a|(?:usuario|objetivo)(?:\s+del\s+timeout)?\s*:)\s*@?([^\s.,;]+)/i,
+  );
+  const structuredTarget =
+    ticket.productEffectTargetUsername || "";
 
   return {
     productName: getRedemptionProductName(ticket),
     cost: costMatch?.[1] || "",
     quantity: quantityMatch?.[1] || "1",
     wheelPrize: wheelPrizeMatch?.[1]?.trim() || "",
+    timeoutTarget:
+      String(structuredTarget).trim() ||
+      timeoutTargetMatch?.[1]?.trim() ||
+      "",
   };
 }
