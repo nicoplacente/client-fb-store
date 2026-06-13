@@ -21,10 +21,13 @@ export default function SupportPanel({
   onStatusChange,
   onReply,
   onDelete,
+  onDeleteAll,
+  onDeleteClosed,
 }) {
   const activeTickets = tickets.filter(
     (ticket) => ticket.status !== "closed",
   ).length;
+  const closedTickets = tickets.length - activeTickets;
 
   return (
     <div className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
@@ -40,16 +43,39 @@ export default function SupportPanel({
             </p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <InboxMetric label="Total" value={tickets.length} />
-          <InboxMetric label="Activos" value={activeTickets} tone="red" />
+        <div className="grid gap-2 xl:grid-cols-[auto_auto] xl:items-start">
+          <div className="grid grid-cols-2 gap-2 xl:order-first">
+            <button
+              type="button"
+              onClick={onDeleteClosed}
+              disabled={isPending || closedTickets === 0}
+              className="inline-flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/25 bg-amber-300/10 px-3 py-2.5 text-sm font-bold text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-300/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar cerrados
+            </button>
+            <button
+              type="button"
+              onClick={onDeleteAll}
+              disabled={isPending || tickets.length === 0}
+              className="inline-flex min-h-16 cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2.5 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconTrash size={16} />
+              Eliminar todos
+            </button>
+          </div>
+          <div className="flex gap-2">
+            <InboxMetric label="Total" value={tickets.length} />
+            <InboxMetric label="Activos" value={activeTickets} tone="red" />
+            <InboxMetric label="Cerrados" value={closedTickets} />
+          </div>
         </div>
       </div>
 
       {loading ? (
         <TicketEmptyState>Cargando tickets...</TicketEmptyState>
       ) : tickets.length === 0 ? (
-        <TicketEmptyState>No hay consultas abiertas.</TicketEmptyState>
+        <TicketEmptyState>No hay consultas para mostrar.</TicketEmptyState>
       ) : (
         <TicketGroup
           tickets={tickets}
@@ -174,7 +200,7 @@ function TicketCardHeader({ ticket, onOpenProfile }) {
     <div className="min-w-0">
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs font-black uppercase text-neutral-400">
-          {ticket.category}
+          {ticket.categoryLabel}
         </span>
         <StatusBadge status={ticket.status} />
         <UserProfileButton

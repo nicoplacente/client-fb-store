@@ -1,5 +1,6 @@
 import { envConfig } from "@/config";
 import { apiRequest, buildResourceUrl } from "@/modules/api/client";
+import { getSupportCategoryLabel } from "./support-categories";
 
 export async function createSupportTicket(ticket) {
   return apiRequest(envConfig.API_SUPPORT, {
@@ -51,6 +52,15 @@ export async function deleteRedemptionTickets(mode) {
   });
 }
 
+export async function deleteSupportTickets(mode) {
+  return apiRequest(`${envConfig.API_SUPPORT_TICKETS}/support`, {
+    method: "DELETE",
+    body: {
+      mode,
+    },
+  });
+}
+
 export function normalizeTicket(ticket) {
   const user = ticket.user
     ? {
@@ -78,6 +88,7 @@ export function normalizeTicket(ticket) {
     message: ticket.message || ticket.description || "",
     status: ticket.status || "open",
     category: ticket.category || "General",
+    categoryLabel: getSupportCategoryLabel(ticket.category),
     username: user?.username || ticket.username || "Sin usuario",
     user,
     createdAt: ticket.createdAt || ticket.date || "",
