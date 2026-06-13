@@ -2,14 +2,18 @@ import Image from "next/image";
 import {
   IconCategory,
   IconGift,
+  IconLockOpen,
   IconPackage,
   IconSparkles,
+  IconUserMinus,
 } from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import { formatNumber } from "../lib/market-utils";
 
 export default function ProductDetail({ product }) {
   const isRewardWheel = product.rewardEffectType === "reward_wheel";
+  const isKickTimeout = product.rewardEffectType === "kick_timeout_user";
+  const isKickUnban = product.rewardEffectType === "kick_unban_self";
 
   return (
     <div className="grid content-start gap-5">
@@ -37,6 +41,18 @@ export default function ProductDetail({ product }) {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-fuchsia-300/20 bg-fuchsia-400/10 px-3 py-1 text-xs font-bold text-fuchsia-200">
               <IconSparkles size={14} />
               Ruleta
+            </span>
+          ) : null}
+          {isKickTimeout ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-100">
+              <IconUserMinus size={14} />
+              Timeout de {product.rewardEffectDurationMinutes || 10} min
+            </span>
+          ) : null}
+          {isKickUnban ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-green-300/20 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-100">
+              <IconLockOpen size={14} />
+              Desbanearse
             </span>
           ) : null}
         </div>

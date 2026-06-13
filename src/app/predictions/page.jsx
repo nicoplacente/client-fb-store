@@ -10,6 +10,7 @@ import {
 import {
   IconAlertTriangle,
   IconArrowUpRight,
+  IconBrandKick,
   IconChartLine,
   IconChartPie,
   IconClock,
@@ -23,7 +24,6 @@ import {
   IconTargetArrow,
   IconTrophy,
   IconUsers,
-  IconWallet,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
@@ -348,13 +348,14 @@ function PredictionsHero({
       label: "Pool abierto",
       value: `${formatNumber(totalPool)} pts`,
       detail: "puntos en juego",
-      icon: IconCoins,
+      icon: IconBrandKick,
     },
     {
       label: "Tu saldo",
       value: `${formatNumber(availablePoints)} pts`,
       detail: "disponibles para apostar",
-      icon: IconWallet,
+      icon: IconBrandKick,
+      tone: "kick",
     },
   ];
   const steps = [
@@ -417,23 +418,49 @@ function PredictionsHero({
   );
 }
 
-function HeroStat({ label, value, detail, icon: Icon }) {
+function HeroStat({ label, value, detail, icon: Icon, tone = "default" }) {
+  const isKick = tone === "kick";
+
   return (
-    <div className="group rounded-2xl border border-white/10 bg-neutral-950/55 p-4 transition hover:-translate-y-0.5 hover:border-red-300/25 hover:bg-neutral-900/70">
+    <div
+      className={`group rounded-2xl border p-4 transition hover:-translate-y-0.5 ${
+        isKick
+          ? "border-green-400/25 bg-green-500/10 hover:border-green-300/45 hover:bg-green-500/15"
+          : "border-white/10 bg-neutral-950/55 hover:border-red-300/25 hover:bg-neutral-900/70"
+      }`}
+    >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-black uppercase tracking-wide text-neutral-500">
+          <p
+            className={`text-[11px] font-black uppercase tracking-wide ${
+              isKick ? "text-green-300/75" : "text-neutral-500"
+            }`}
+          >
             {label}
           </p>
-          <strong className="mt-2 block font-mono text-2xl font-black text-white">
+          <strong
+            className={`mt-2 block font-mono text-2xl font-black ${
+              isKick ? "text-green-300" : "text-white"
+            }`}
+          >
             {value}
           </strong>
         </div>
-        <span className="grid size-10 place-items-center rounded-xl border border-white/10 bg-white/[0.04] text-red-200 transition group-hover:border-red-300/30 group-hover:bg-red-500/10">
+        <span
+          className={`grid size-10 place-items-center rounded-xl border transition ${
+            isKick
+              ? "border-green-300/25 bg-green-400/10 text-green-300 group-hover:border-green-300/45 group-hover:bg-green-400/15"
+              : "border-white/10 bg-white/[0.04] text-red-200 group-hover:border-red-300/30 group-hover:bg-red-500/10"
+          }`}
+        >
           <Icon size={20} />
         </span>
       </div>
-      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+      <p
+        className={`mt-3 text-xs font-semibold uppercase tracking-wide ${
+          isKick ? "text-green-300/55" : "text-neutral-600"
+        }`}
+      >
         {detail}
       </p>
     </div>

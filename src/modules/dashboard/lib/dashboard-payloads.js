@@ -12,9 +12,12 @@ export function buildProductPayload(productForm) {
     rewardEffectValue: productForm.rewardEffectType === "stream_special_hour"
       ? "happy"
       : "",
-    rewardEffectDurationMinutes: productForm.rewardEffectType === "stream_special_hour"
-      ? 60
-      : "",
+    rewardEffectDurationMinutes:
+      productForm.rewardEffectType === "stream_special_hour"
+        ? 60
+        : productForm.rewardEffectType === "kick_timeout_user"
+          ? Number(productForm.rewardEffectDurationMinutes || 10)
+          : "",
     alertEnabled: false,
     alertType: productForm.alertType || "confetti",
     alertMessage: productForm.alertMessage.trim(),

@@ -29,13 +29,38 @@ export async function deleteProduct(productId) {
   });
 }
 
-export async function redeemProduct(productId, { quantity = 1 } = {}) {
+export async function redeemProduct(
+  productId,
+  {
+    quantity = 1,
+    moderationTargetMode,
+    moderationTargetKickId,
+  } = {},
+) {
   return apiRequest(`${buildResourceUrl(envConfig.API_PRODUCTS, productId)}/redeem`, {
     method: "POST",
     body: {
       quantity: Math.max(1, Math.floor(Number(quantity || 1))),
+      ...(moderationTargetMode
+        ? {
+            moderationTargetMode,
+          }
+        : {}),
+      ...(moderationTargetKickId
+        ? {
+            moderationTargetKickId,
+          }
+        : {}),
     },
   });
+}
+
+export async function getProductModerationTargets(productId) {
+  const data = await apiRequest(
+    `${buildResourceUrl(envConfig.API_PRODUCTS, productId)}/moderation-targets`,
+  );
+
+  return Array.isArray(data) ? data : data.targets || [];
 }
 
 export async function getMyProductRedemptions() {
@@ -74,6 +99,17 @@ export function normalizeProductRedemption(redemption) {
     wheelEffectValue: Number(redemption.wheelEffectValue || 0),
     wheelEffectStatus: redemption.wheelEffectStatus || "not_applicable",
     wheelEffectError: redemption.wheelEffectError || "",
+    productEffectType: redemption.productEffectType || "",
+    productEffectDurationMinutes: Number(
+      redemption.productEffectDurationMinutes || 0,
+    ),
+    productEffectTargetKickId:
+      redemption.productEffectTargetKickId || "",
+    productEffectTargetUsername:
+      redemption.productEffectTargetUsername || "",
+    productEffectStatus:
+      redemption.productEffectStatus || "not_applicable",
+    productEffectError: redemption.productEffectError || "",
     createdAt: redemption.createdAt || "",
     product: normalizeProduct(product),
   };

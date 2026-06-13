@@ -1,5 +1,10 @@
-import { useId, useState } from "react";
-import { IconPackage } from "@tabler/icons-react";
+import { useDeferredValue, useId, useMemo, useState } from "react";
+import {
+  IconAdjustmentsHorizontal,
+  IconPackage,
+  IconSearch,
+  IconX,
+} from "@tabler/icons-react";
 import AdminCard from "../admin-card";
 import {
   Field,
@@ -14,6 +19,12 @@ import ItemGrid from "../item-grid";
 import { CreateButton, ModalForm, PanelTitle } from "./catalog-layout";
 import { getProductCardDetails } from "./catalog-formatters";
 import ImageInput from "./image-input";
+import {
+  filterProducts,
+  getProductCategories,
+  hasActiveProductFilters,
+  initialProductFilters,
+} from "./product-filters";
 import { FeaturedToggle, RewardEffectFields } from "./product-form-sections";
 
 export default function ProductsPanel({
@@ -29,18 +40,53 @@ export default function ProductsPanel({
   onEdit,
   onDelete,
 }) {
+  const [filters, setFilters] = useState(initialProductFilters);
+  const deferredQuery = useDeferredValue(filters.query);
+  const categories = useMemo(() => getProductCategories(items), [items]);
+  const { category, status, stock, featured } = filters;
+  const visibleProducts = useMemo(
+    () =>
+      filterProducts(items, {
+        query: deferredQuery,
+        category,
+        status,
+        stock,
+        featured,
+      }),
+    [category, deferredQuery, featured, items, status, stock],
+  );
+  const filtersAreActive = hasActiveProductFilters(filters);
+
+  function updateFilter(name, value) {
+    setFilters((current) => ({ ...current, [name]: value }));
+  }
+
   return (
     <div className="space-y-5">
       <PanelTitle
         title="Productos"
-        subtitle="Gestiona visibilidad, stock, precios y destacados del market."
+        subtitle="Gestiona la visibilidad, el stock, los precios y los destacados del market."
         action={<CreateButton onClick={onCreate}>Crear nuevo producto</CreateButton>}
+      />
+
+      <ProductFilters
+        filters={filters}
+        categories={categories}
+        resultCount={visibleProducts.length}
+        totalCount={items.length}
+        showClearButton={filtersAreActive}
+        onFilterChange={updateFilter}
+        onClear={() => setFilters(initialProductFilters)}
       />
 
       <ItemGrid
         loading={loading}
-        emptyText="Todavia no hay productos."
-        items={items}
+        emptyText={
+          filtersAreActive
+            ? "No hay productos que coincidan con los filtros."
+            : "Todavía no hay productos."
+        }
+        items={visibleProducts}
         renderItem={(product) => (
           <AdminCard
             key={product.id}
@@ -71,6 +117,126 @@ export default function ProductsPanel({
         />
       ) : null}
     </div>
+  );
+}
+
+function ProductFilters({
+  filters,
+  categories,
+  resultCount,
+  totalCount,
+  showClearButton,
+  onFilterChange,
+  onClear,
+}) {
+  return (
+    <section
+      aria-label="Filtros de productos"
+      className="rounded-2xl border border-white/10 bg-neutral-950/75 p-4 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5"
+    >
+      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <IconAdjustmentsHorizontal
+            size={19}
+            aria-hidden="true"
+            className="text-red-300"
+          />
+          <div>
+            <h3 className="text-sm font-bold text-white">Filtrar productos</h3>
+            <p className="text-xs text-neutral-500" aria-live="polite">
+              {resultCount} de {totalCount} productos
+            </p>
+          </div>
+        </div>
+
+        {showClearButton ? (
+          <button
+            type="button"
+            onClick={onClear}
+            className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-white/10 bg-neutral-900/80 px-3 py-2 text-xs font-semibold text-neutral-300 transition hover:border-red-300/30 hover:text-white focus:outline-none focus-visible:border-red-300/60"
+          >
+            <IconX size={15} aria-hidden="true" />
+            Limpiar filtros
+          </button>
+        ) : null}
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-[minmax(15rem,1.6fr)_repeat(4,minmax(0,1fr))]">
+        <label className="flex items-center gap-2 rounded-xl border border-white/10 bg-neutral-900/90 px-3 text-neutral-500 shadow-inner shadow-black/10 transition hover:border-red-300/25 focus-within:border-red-300/60">
+          <IconSearch size={18} aria-hidden="true" />
+          <span className="sr-only">Buscar productos</span>
+          <input
+            type="search"
+            name="dashboard-product-search"
+            autoComplete="off"
+            value={filters.query}
+            placeholder="Buscar por nombre..."
+            onChange={(event) => onFilterChange("query", event.target.value)}
+            className="min-w-0 flex-1 bg-transparent py-2.5 text-sm text-white outline-none placeholder:text-neutral-600"
+          />
+        </label>
+
+        <FilterSelect
+          label="Categoría"
+          value={filters.category}
+          onChange={(event) =>
+            onFilterChange("category", event.target.value)
+          }
+        >
+          <option value="all">Todas las categorías</option>
+          {categories.map((category) => (
+            <option key={category} value={category}>
+              {category}
+            </option>
+          ))}
+        </FilterSelect>
+
+        <FilterSelect
+          label="Estado"
+          value={filters.status}
+          onChange={(event) => onFilterChange("status", event.target.value)}
+        >
+          <option value="all">Todos los estados</option>
+          <option value="active">Activos</option>
+          <option value="disabled">Deshabilitados</option>
+          <option value="hidden">Ocultos</option>
+        </FilterSelect>
+
+        <FilterSelect
+          label="Stock"
+          value={filters.stock}
+          onChange={(event) => onFilterChange("stock", event.target.value)}
+        >
+          <option value="all">Cualquier stock</option>
+          <option value="available">Disponibles</option>
+          <option value="out">Sin stock</option>
+          <option value="infinite">Stock ilimitado</option>
+        </FilterSelect>
+
+        <FilterSelect
+          label="Destacados"
+          value={filters.featured}
+          onChange={(event) =>
+            onFilterChange("featured", event.target.value)
+          }
+        >
+          <option value="all">Todos</option>
+          <option value="featured">Destacados</option>
+          <option value="regular">No destacados</option>
+        </FilterSelect>
+      </div>
+    </section>
+  );
+}
+
+function FilterSelect({ label, children, ...props }) {
+  return (
+    <label className="grid gap-1.5 text-xs font-semibold text-neutral-500">
+      <span className="sr-only">{label}</span>
+      <SelectInput {...props} aria-label={`Filtrar por ${label.toLowerCase()}`}>
+        {children}
+      </SelectInput>
+    </label>
   );
 }
 

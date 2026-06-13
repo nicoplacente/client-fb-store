@@ -11,6 +11,16 @@ export function formatProductRewardEffect(product) {
     return "Recupera racha perdida";
   }
 
+  if (product.rewardEffectType === "kick_timeout_user") {
+    const duration = Number(product.rewardEffectDurationMinutes || 10);
+
+    return `Timeout dirigido de ${duration} min`;
+  }
+
+  if (product.rewardEffectType === "kick_unban_self") {
+    return "Desbanea al comprador en Kick";
+  }
+
   if (product.rewardEffectType !== "stream_special_hour") return "";
 
   const label = rewardEffectLabels[product.rewardEffectValue] || "Hora especial";

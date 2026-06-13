@@ -20,7 +20,9 @@ export function productToForm(product) {
     rewardEffectDurationMinutes:
       product.rewardEffectType === "stream_special_hour"
         ? "60"
-        : String(product.rewardEffectDurationMinutes || 60),
+        : product.rewardEffectType === "kick_timeout_user"
+          ? String(product.rewardEffectDurationMinutes || 10)
+          : String(product.rewardEffectDurationMinutes || 60),
     alertEnabled: Boolean(product.alertEnabled),
     alertType: product.alertType || "confetti",
     alertMessage: product.alertMessage || "",

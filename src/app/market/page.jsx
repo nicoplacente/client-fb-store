@@ -15,6 +15,7 @@ import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import {
+  getProductModerationTargets,
   getProducts,
   normalizeProduct,
   redeemProduct,
@@ -34,6 +35,7 @@ import ProductsGrid from "@/modules/market/components/products-grid";
 import ProductDetail, {
   WheelPrizes,
 } from "@/modules/market/components/product-detail";
+import ModerationTargetSelector from "@/modules/market/components/moderation-target-selector";
 import {
   getActionConfirmation,
   getCreditPurchaseQuantity,
@@ -54,6 +56,10 @@ export default function MarketPage() {
   const [pendingAction, setPendingAction] = useState(null);
   const [wheelResult, setWheelResult] = useState(null);
   const [wheelRedeeming, setWheelRedeeming] = useState(false);
+  const [moderationTargets, setModerationTargets] = useState([]);
+  const [moderationTargetsLoading, setModerationTargetsLoading] =
+    useState(false);
+  const [moderationTargetsError, setModerationTargetsError] = useState("");
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
   const userId = user?.id;
@@ -136,16 +142,46 @@ export default function MarketPage() {
 
   const actionsDisabled = isPending;
 
+  const loadModerationTargets = useCallback(async (productId) => {
+    try {
+      setModerationTargetsLoading(true);
+      setModerationTargetsError("");
+      const targets = await getProductModerationTargets(productId);
+
+      setModerationTargets(
+        targets.map(normalizeModerationTarget).filter(Boolean),
+      );
+    } catch (error) {
+      setModerationTargets([]);
+      setModerationTargetsError(
+        getErrorMessage(error, "No se pudieron cargar los usuarios de Kick"),
+      );
+    } finally {
+      setModerationTargetsLoading(false);
+    }
+  }, []);
+
   const handleRequestRedeem = useCallback((product) => {
     if (isPending) return;
 
     setWheelResult(null);
+    setModerationTargets([]);
+    setModerationTargetsError("");
     setPendingAction({
       type: "redeem",
       item: product,
       quantity: 1,
+      moderationTargetMode:
+        product.rewardEffectType === "kick_timeout_user"
+          ? "selected"
+          : "",
+      moderationTargetKickId: "",
     });
-  }, [isPending]);
+
+    if (product.rewardEffectType === "kick_timeout_user") {
+      void loadModerationTargets(product.id);
+    }
+  }, [isPending, loadModerationTargets]);
 
   const handleRequestPurchase = useCallback((creditPackage) => {
     if (isPending) return;
@@ -171,11 +207,36 @@ export default function MarketPage() {
 
     setPendingAction(null);
     setWheelResult(null);
+    setModerationTargets([]);
+    setModerationTargetsError("");
   }, [wheelRedeeming]);
 
   const handleQuantityChange = useCallback((quantity) => {
     setPendingAction((current) =>
       current ? { ...current, quantity } : current,
+    );
+  }, []);
+
+  const handleModerationTargetModeChange = useCallback((mode) => {
+    setPendingAction((current) =>
+      current
+        ? {
+            ...current,
+            moderationTargetMode: mode,
+          }
+        : current,
+    );
+  }, []);
+
+  const handleModerationTargetChange = useCallback((kickId) => {
+    setPendingAction((current) =>
+      current
+        ? {
+            ...current,
+            moderationTargetMode: "selected",
+            moderationTargetKickId: kickId,
+          }
+        : current,
     );
   }, []);
 
@@ -298,6 +359,21 @@ export default function MarketPage() {
     () => getActionConfirmation(pendingAction, { availablePoints }),
     [availablePoints, pendingAction],
   );
+  const isTimeoutAction =
+    pendingAction?.type === "redeem" &&
+    pendingAction.item.rewardEffectType === "kick_timeout_user";
+  const selectedModerationTargetIsValid =
+    pendingAction?.moderationTargetMode === "random"
+      ? moderationTargets.length > 0
+      : moderationTargets.some(
+          (target) =>
+            target.kickId === pendingAction?.moderationTargetKickId,
+        );
+  const moderationConfirmationDisabled =
+    isTimeoutAction &&
+    (moderationTargetsLoading ||
+      Boolean(moderationTargetsError) ||
+      !selectedModerationTargetIsValid);
 
   return (
     <SectionContainer className="space-y-8">
@@ -339,7 +415,11 @@ export default function MarketPage() {
               : confirmation?.confirmLabel
         }
         cancelLabel={wheelResult ? "Volver a la tienda" : "Cancelar"}
-        confirmDisabled={confirmation?.confirmDisabled || wheelRedeeming}
+        confirmDisabled={
+          confirmation?.confirmDisabled ||
+          wheelRedeeming ||
+          moderationConfirmationDisabled
+        }
         cancelDisabled={wheelRedeeming}
         onConfirm={handleConfirmAction}
         onCancel={handleCancelAction}
@@ -359,13 +439,29 @@ export default function MarketPage() {
           wheelResult ? (
             <WheelResult winner={wheelResult} />
           ) : (
-            <ActionSummary
-              action={pendingAction}
-              availablePoints={availablePoints}
-              maxPurchasePlan={maxPurchasePlan}
-              onMaxPurchase={handleRequestMaxPurchase}
-              onQuantityChange={handleQuantityChange}
-            />
+            <>
+              <ActionSummary
+                action={pendingAction}
+                availablePoints={availablePoints}
+                maxPurchasePlan={maxPurchasePlan}
+                onMaxPurchase={handleRequestMaxPurchase}
+                onQuantityChange={handleQuantityChange}
+              />
+              {isTimeoutAction ? (
+                <ModerationTargetSelector
+                  targets={moderationTargets}
+                  loading={moderationTargetsLoading}
+                  error={moderationTargetsError}
+                  mode={pendingAction.moderationTargetMode}
+                  targetKickId={pendingAction.moderationTargetKickId}
+                  onModeChange={handleModerationTargetModeChange}
+                  onTargetChange={handleModerationTargetChange}
+                  onRetry={() =>
+                    loadModerationTargets(pendingAction.item.id)
+                  }
+                />
+              ) : null}
+            </>
           )
         ) : null}
       </ConfirmationDialog>
@@ -431,7 +527,11 @@ async function confirmProductRedemption({
   setProducts,
 }) {
   const quantity = getRedemptionQuantity(action.quantity, action.item);
-  const result = await redeemProduct(action.item.id, { quantity });
+  const result = await redeemProduct(action.item.id, {
+    quantity,
+    moderationTargetMode: action.moderationTargetMode,
+    moderationTargetKickId: action.moderationTargetKickId,
+  });
 
   if (result?.redemption) {
     saveLocalRedemption({
@@ -450,7 +550,14 @@ async function confirmProductRedemption({
     await loadMarket({ showLoading: false });
   }
 
-  toast.success(getRedemptionSuccessMessage(result, action.item));
+  if (result?.redemption?.productEffectStatus === "failed") {
+    toast.error(
+      result.redemption.productEffectError ||
+        "El canje quedó registrado, pero Kick rechazó la acción",
+    );
+  } else {
+    toast.success(getRedemptionSuccessMessage(result, action.item));
+  }
   await Promise.resolve(refreshUser?.()).catch(() => {});
 
   return result;
@@ -516,5 +623,26 @@ function getRedemptionSuccessMessage(result, product) {
     return "Ruleta activada";
   }
 
+  if (product.rewardEffectType === "kick_timeout_user") {
+    return "Timeout aplicado";
+  }
+
+  if (product.rewardEffectType === "kick_unban_self") {
+    return "Usuario desbaneado";
+  }
+
   return "Canje solicitado";
+}
+
+function normalizeModerationTarget(target) {
+  const kickId = String(target?.kickId || "").trim();
+  const username = String(target?.username || "").trim();
+
+  if (!kickId || !username) return null;
+
+  return {
+    kickId,
+    username,
+    sources: Array.isArray(target.sources) ? target.sources : [],
+  };
 }

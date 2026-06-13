@@ -2,8 +2,10 @@ import {
   IconBroadcast,
   IconFlame,
   IconGift,
+  IconLockOpen,
   IconRestore,
   IconSparkles,
+  IconUserMinus,
   IconWheel,
 } from "@tabler/icons-react";
 import { Field, TextInput } from "../form-controls";
@@ -46,8 +48,14 @@ export function RewardEffectFields({ form, setForm }) {
   const hasRewardEffect = form.rewardEffectType === "stream_special_hour";
   const restoresStreamStreak = form.rewardEffectType === "restore_stream_streak";
   const isRewardWheel = form.rewardEffectType === "reward_wheel";
+  const isKickTimeout = form.rewardEffectType === "kick_timeout_user";
+  const isKickUnban = form.rewardEffectType === "kick_unban_self";
   const hasStreamEvent =
-    hasRewardEffect || restoresStreamStreak || isRewardWheel;
+    hasRewardEffect ||
+    restoresStreamStreak ||
+    isRewardWheel ||
+    isKickTimeout ||
+    isKickUnban;
 
   return (
     <div className="grid gap-4 rounded-2xl border border-red-300/15 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(10,10,10,0.78)_44%,rgba(10,10,10,0.92))] p-4 shadow-inner shadow-black/10">
@@ -148,6 +156,36 @@ export function RewardEffectFields({ form, setForm }) {
               }))
             }
           />
+          <RewardTypeCard
+            active={isKickTimeout}
+            icon={<IconUserMinus size={19} />}
+            title="Timeout dirigido"
+            description="Permite elegir un usuario o seleccionar uno aleatorio."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "kick_timeout_user",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "10",
+                infiniteStock: true,
+              }))
+            }
+          />
+          <RewardTypeCard
+            active={isKickUnban}
+            icon={<IconLockOpen size={19} />}
+            title="Desbanearse"
+            description="Desbanea de Kick a la persona que realiza el canje."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "kick_unban_self",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "",
+                infiniteStock: true,
+              }))
+            }
+          />
         </div>
       ) : null}
 
@@ -170,6 +208,45 @@ export function RewardEffectFields({ form, setForm }) {
           Este producto tendrá una ruleta propia. Sus premios y probabilidades
           se configuran en Dashboard, Stream, Ruleta. Cada canje admite una sola
           unidad.
+        </div>
+      ) : null}
+
+      {isKickTimeout ? (
+        <div className="grid gap-4 rounded-2xl border border-red-300/20 bg-red-500/[0.08] p-4">
+          <Field label="Duración del timeout">
+            <div className="flex items-center gap-3">
+              <TextInput
+                type="number"
+                min="1"
+                max="10080"
+                step="1"
+                value={form.rewardEffectDurationMinutes}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    rewardEffectDurationMinutes: event.target.value,
+                  }))
+                }
+                className="w-32"
+                required
+              />
+              <span className="text-sm font-bold text-neutral-400">
+                minutos
+              </span>
+            </div>
+          </Field>
+          <p className="text-sm font-medium leading-6 text-red-100">
+            Al canjear, el comprador deberá elegir un usuario de la audiencia o
+            marcar la opción aleatoria. El streamer y el comprador quedan
+            excluidos.
+          </p>
+        </div>
+      ) : null}
+
+      {isKickUnban ? (
+        <div className="rounded-2xl border border-green-300/20 bg-green-400/10 p-4 text-sm font-medium leading-6 text-green-100">
+          Este producto utiliza la cuenta de Kick vinculada al comprador y
+          solicita su desbaneo automáticamente.
         </div>
       ) : null}
     </div>
