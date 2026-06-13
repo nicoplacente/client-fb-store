@@ -111,7 +111,7 @@ export function RewardEffectFields({ form, setForm }) {
       </button>
 
       {hasStreamEvent ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2">
           <RewardTypeCard
             active={hasRewardEffect}
             icon={<IconBroadcast size={19} />}
