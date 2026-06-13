@@ -30,8 +30,11 @@ function formatHeaderNumber(value) {
   const absolute = Math.abs(number);
   const sign = number < 0 ? "-" : "";
 
-  const compact = (divisor, suffix) =>
-    `${sign}${(absolute / divisor).toFixed(1).replace(/\.0$/, "")}${suffix}`;
+  const compact = (divisor, suffix) => {
+    const truncated = Math.trunc((absolute / divisor) * 10) / 10;
+
+    return `${sign}${truncated}${suffix}`;
+  };
 
   if (absolute >= 1_000_000_000) return compact(1_000_000_000, "B");
   if (absolute >= 1_000_000) return compact(1_000_000, "M");
