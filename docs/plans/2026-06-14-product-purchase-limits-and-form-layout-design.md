@@ -9,8 +9,8 @@ usuario seleccione mas unidades de las que puede pagar o de las disponibles.
 
 La opcion `Una unidad por canje` se mostrara debajo de la fila formada por
 `Precio` y `Stock`, ocupando todo el ancho del formulario. Mantendra el patron
-visual de configuraciones del dashboard sin alterar el campo de stock ni el
-selector de stock ilimitado.
+visual de configuraciones del dashboard y utilizara el mismo switch que
+`Stock infinito`.
 
 ## Market
 

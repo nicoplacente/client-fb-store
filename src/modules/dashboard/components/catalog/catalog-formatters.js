@@ -7,6 +7,10 @@ const rewardEffectLabels = {
 };
 
 export function formatProductRewardEffect(product) {
+  if (product.rewardEffectType === "unique") {
+    return "Único por usuario";
+  }
+
   if (product.rewardEffectType === "restore_stream_streak") {
     return "Recupera racha perdida";
   }
@@ -50,6 +54,11 @@ export function getProductCardDetails(product) {
       ? `${product.stock} disponibles`
       : "Sin stock";
   const stockDetail = `${stockLabel} - ${formatProductStatus(product.status)}`;
+  const purchaseLimit = product.singleUnitPerRedemption
+    ? "Una unidad por canje"
+    : "";
 
-  return [stockDetail, rewardEffect, streamAlert].filter(Boolean).join(" - ");
+  return [stockDetail, purchaseLimit, rewardEffect, streamAlert]
+    .filter(Boolean)
+    .join(" - ");
 }

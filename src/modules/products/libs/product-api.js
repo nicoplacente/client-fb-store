@@ -195,6 +195,7 @@ export function normalizeProduct(product) {
     price: Number(product.price || product.cost || 0),
     stock: Number(product.stock || product.quantity || 0),
     infiniteStock: Boolean(product.infiniteStock),
+    singleUnitPerRedemption: Boolean(product.singleUnitPerRedemption),
     category: product.category || "General",
     imageUrl: product.imageUrl || product.image || product.img || "",
     status,

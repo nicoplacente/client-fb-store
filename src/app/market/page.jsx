@@ -70,6 +70,7 @@ export default function MarketPage() {
   const [isPending, startTransition] = useTransition();
   const deferredQuery = useDeferredValue(query);
   const userId = user?.id;
+  const availableCredits = Number(user?.credits || 0);
 
   const normalizedProducts = useMemo(
     () =>
@@ -277,6 +278,7 @@ export default function MarketPage() {
         try {
           const result = await confirmProductRedemption({
             action,
+            availableCredits,
             loadMarket,
             refreshUser,
             setProducts,
@@ -318,6 +320,7 @@ export default function MarketPage() {
         try {
           const result = await confirmProductRedemption({
             action,
+            availableCredits,
             loadMarket,
             refreshUser,
             setProducts,
@@ -355,6 +358,7 @@ export default function MarketPage() {
         if (action.type === "redeem") {
           await confirmProductRedemption({
             action,
+            availableCredits,
             loadMarket,
             refreshUser,
             setProducts,
@@ -416,6 +420,7 @@ export default function MarketPage() {
       }
     });
   }, [
+    availableCredits,
     availablePoints,
     loadAvailablePoints,
     loadMarket,
@@ -482,8 +487,12 @@ export default function MarketPage() {
   }, []);
 
   const confirmation = useMemo(
-    () => getActionConfirmation(pendingAction, { availablePoints }),
-    [availablePoints, pendingAction],
+    () =>
+      getActionConfirmation(pendingAction, {
+        availablePoints,
+        availableCredits,
+      }),
+    [availableCredits, availablePoints, pendingAction],
   );
   const isTimeoutAction =
     pendingAction?.type === "redeem" &&
@@ -625,6 +634,7 @@ export default function MarketPage() {
               <ActionSummary
                 action={pendingAction}
                 availablePoints={availablePoints}
+                availableCredits={availableCredits}
                 maxPurchasePlan={maxPurchasePlan}
                 onMaxPurchase={handleRequestMaxPurchase}
                 onQuantityChange={handleQuantityChange}
@@ -690,11 +700,16 @@ async function confirmBulkCreditPurchase({
 
 async function confirmProductRedemption({
   action,
+  availableCredits,
   loadMarket,
   refreshUser,
   setProducts,
 }) {
-  const quantity = getRedemptionQuantity(action.quantity, action.item);
+  const quantity = getRedemptionQuantity(
+    action.quantity,
+    action.item,
+    availableCredits,
+  );
   const result = await redeemProduct(action.item.id, {
     quantity,
     moderationTargetMode: action.moderationTargetMode,

@@ -7,6 +7,7 @@ export function productToForm(product) {
     price: String(product.price),
     stock: String(product.stock),
     infiniteStock: Boolean(product.infiniteStock),
+    singleUnitPerRedemption: Boolean(product.singleUnitPerRedemption),
     category: product.category,
     imageUrl: product.imageUrl,
     imageFile: null,
