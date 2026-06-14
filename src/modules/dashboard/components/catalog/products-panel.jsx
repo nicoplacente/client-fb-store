@@ -297,6 +297,7 @@ function ProductFormFields({ form, setForm }) {
         </Field>
         <StockField form={form} setForm={setForm} />
       </div>
+      <SingleUnitField form={form} setForm={setForm} />
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Categoria">
           <TextInput
@@ -372,46 +373,70 @@ function StockField({ form, setForm }) {
           required
         />
         <div className="flex items-center">
-          <input
+          <WideToggle
             id={infiniteStockId}
-            type="checkbox"
             checked={form.infiniteStock}
-            onChange={(event) =>
+            onChange={(checked) =>
               setForm((current) => ({
                 ...current,
-                infiniteStock: event.target.checked,
-                stock: event.target.checked ? current.stock || "0" : current.stock,
+                infiniteStock: checked,
+                stock: checked ? current.stock || "0" : current.stock,
               }))
             }
-            className="sr-only"
+            ariaLabel="Alternar stock ilimitado"
           />
-          <button
-            type="button"
-            onClick={() =>
-              setForm((current) => ({
-                ...current,
-                infiniteStock: !current.infiniteStock,
-                stock: !current.infiniteStock ? current.stock || "0" : current.stock,
-              }))
-            }
-            className={`relative h-11 w-24 cursor-pointer rounded-xl border shadow-inner shadow-black/10 transition hover:border-red-300/25 focus:outline-none ${
-              form.infiniteStock
-                ? "border-red-300/45 bg-red-500/15"
-                : "border-white/10 bg-neutral-900/90"
-            }`}
-            aria-pressed={form.infiniteStock}
-            aria-label="Alternar stock ilimitado"
-          >
-            <span
-              className={`absolute top-1/2 size-6 -translate-y-1/2 rounded-full shadow-sm transition ${
-                form.infiniteStock
-                  ? "left-15 bg-red-100"
-                  : "left-2 bg-white"
-              }`}
-            />
-          </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function SingleUnitField({ form, setForm }) {
+  return (
+    <div
+      className="flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-white/10 bg-neutral-950/70 p-4 transition hover:border-red-300/25 hover:bg-white/[0.03]"
+    >
+      <span>
+        <span className="block text-sm font-black text-white">
+          Una unidad por canje
+        </span>
+        <span className="mt-0.5 block text-xs font-medium text-neutral-500">
+          Obliga a cerrar y volver a abrir el modal para comprar otra unidad.
+        </span>
+      </span>
+      <WideToggle
+        checked={form.singleUnitPerRedemption}
+        onChange={(checked) =>
+          setForm((current) => ({
+            ...current,
+            singleUnitPerRedemption: checked,
+          }))
+        }
+        ariaLabel="Alternar una unidad por canje"
+      />
+    </div>
+  );
+}
+
+function WideToggle({ id, checked, onChange, ariaLabel }) {
+  return (
+    <button
+      id={id}
+      type="button"
+      onClick={() => onChange(!checked)}
+      className={`relative h-11 w-24 shrink-0 cursor-pointer rounded-xl border shadow-inner shadow-black/10 transition hover:border-red-300/25 focus:outline-none ${
+        checked
+          ? "border-red-300/45 bg-red-500/15"
+          : "border-white/10 bg-neutral-900/90"
+      }`}
+      aria-pressed={checked}
+      aria-label={ariaLabel}
+    >
+      <span
+        className={`absolute top-1/2 size-6 -translate-y-1/2 rounded-full shadow-sm transition ${
+          checked ? "left-15 bg-red-100" : "left-2 bg-white"
+        }`}
+      />
+    </button>
   );
 }

@@ -24,6 +24,7 @@ export const emptyProduct = {
   price: "",
   stock: "",
   infiniteStock: false,
+  singleUnitPerRedemption: false,
   category: "",
   imageUrl: "",
   imageFile: null,

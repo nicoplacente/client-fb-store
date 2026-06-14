@@ -11,44 +11,44 @@ export function clampRedemptionQuantity(value, stock) {
   return Math.min(Math.max(quantity, 1), maxStock);
 }
 
-function normalizeText(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/\s+/g, " ");
-}
-
-export function isVipProduct(product) {
-  const category = normalizeText(product?.category);
-  const title = normalizeText(product?.title || product?.name);
-
-  return category === "vip" || /\bvip\b/.test(title);
-}
-
 export function hasSingleRedemptionEffect(product) {
   return (
-    isVipProduct(product) ||
+    product?.singleUnitPerRedemption ||
     product?.rewardEffectType === "stream_special_hour" ||
     product?.rewardEffectType === "restore_stream_streak" ||
     product?.rewardEffectType === "kick_timeout_user" ||
     product?.rewardEffectType === "kick_unban_self" ||
     product?.rewardEffectType === "audio_submission" ||
+    product?.rewardEffectType === "unique" ||
     product?.rewardEffectType === "reward_wheel"
   );
 }
 
-export function getRedemptionQuantity(value, product) {
+export function getRedemptionLimit(product, availableCredits) {
+  const price = Number(product?.price || 0);
+  const hasCreditLimit = availableCredits !== undefined;
+  const credits = Math.max(0, Math.floor(Number(availableCredits || 0)));
+  const creditLimit =
+    hasCreditLimit && Number.isFinite(price) && price > 0
+      ? Math.floor(credits / price)
+      : Number.MAX_SAFE_INTEGER;
+  const stockLimit = product?.infiniteStock
+    ? Number.MAX_SAFE_INTEGER
+    : Math.max(0, Math.floor(Number(product?.stock || 0)));
+
+  return Math.max(0, Math.min(creditLimit, stockLimit));
+}
+
+export function getRedemptionQuantity(value, product, availableCredits) {
+  const limit = getRedemptionLimit(product, availableCredits);
+
+  if (limit <= 0) return 0;
   if (hasSingleRedemptionEffect(product)) return 1;
 
-  if (product?.infiniteStock) {
-    const quantity = Math.floor(Number(value || 1));
+  const quantity = Math.floor(Number(value || 1));
+  const safeQuantity = Number.isFinite(quantity) ? Math.max(quantity, 1) : 1;
 
-    return Number.isFinite(quantity) ? Math.max(quantity, 1) : 1;
-  }
-
-  return clampRedemptionQuantity(value, product?.stock);
+  return Math.min(safeQuantity, limit);
 }
 
 export function getCreditPurchaseLimit(creditPackage, availablePoints) {
@@ -285,7 +285,10 @@ export function saveLocalRedemption(redemption) {
   }
 }
 
-export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
+export function getActionConfirmation(
+  action,
+  { availablePoints = 0, availableCredits = 0 } = {},
+) {
   if (!action) return null;
 
   if (action.type === "bulkPurchase") {
@@ -322,15 +325,23 @@ export function getActionConfirmation(action, { availablePoints = 0 } = {}) {
     };
   }
 
-  const quantity = getRedemptionQuantity(action.quantity, action.item);
+  const quantity = getRedemptionQuantity(
+    action.quantity,
+    action.item,
+    availableCredits,
+  );
   const totalCost = Number(action.item.price || 0) * quantity;
   const singleRedemption = hasSingleRedemptionEffect(action.item);
+  const hasEnoughCredits = quantity > 0;
 
   return {
     title: "Confirmar canje",
-    description: singleRedemption
-      ? `Vas a usar ${formatNumber(totalCost)} creditos para activar este canje.`
-      : `Vas a usar ${formatNumber(totalCost)} creditos para solicitar ${quantity} ${quantity === 1 ? "unidad" : "unidades"} de este producto.`,
+    description: hasEnoughCredits
+      ? singleRedemption
+        ? `Vas a usar ${formatNumber(totalCost)} creditos para activar este canje.`
+        : `Vas a usar ${formatNumber(totalCost)} creditos para solicitar ${quantity} ${quantity === 1 ? "unidad" : "unidades"} de este producto.`
+      : "Créditos insuficientes",
     confirmLabel: "Canjear",
+    confirmDisabled: !hasEnoughCredits,
   };
 }

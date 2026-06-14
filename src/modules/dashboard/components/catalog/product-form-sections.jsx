@@ -6,6 +6,7 @@ import {
   IconMicrophone,
   IconRestore,
   IconSparkles,
+  IconUserCheck,
   IconUserMinus,
   IconWheel,
 } from "@tabler/icons-react";
@@ -52,13 +53,15 @@ export function RewardEffectFields({ form, setForm }) {
   const isKickTimeout = form.rewardEffectType === "kick_timeout_user";
   const isKickUnban = form.rewardEffectType === "kick_unban_self";
   const isAudioSubmission = form.rewardEffectType === "audio_submission";
-  const hasStreamEvent =
+  const isUnique = form.rewardEffectType === "unique";
+  const hasProductEvent =
     hasRewardEffect ||
     restoresStreamStreak ||
     isRewardWheel ||
     isKickTimeout ||
     isKickUnban ||
-    isAudioSubmission;
+    isAudioSubmission ||
+    isUnique;
 
   return (
     <div className="grid gap-4 rounded-2xl border border-red-300/15 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(10,10,10,0.78)_44%,rgba(10,10,10,0.92))] p-4 shadow-inner shadow-black/10">
@@ -67,9 +70,9 @@ export function RewardEffectFields({ form, setForm }) {
           <IconBroadcast size={19} />
         </span>
         <div>
-          <h3 className="text-base font-bold text-white">Eventos del stream</h3>
+          <h3 className="text-base font-bold text-white">Eventos del producto</h3>
           <p className="mt-1 text-sm text-neutral-500">
-            Opcionalmente convierte este producto en un disparador de efectos del stream.
+            Define una regla o un efecto opcional para este producto.
           </p>
         </div>
       </div>
@@ -78,7 +81,7 @@ export function RewardEffectFields({ form, setForm }) {
         type="button"
         onClick={() =>
           setForm((current) =>
-            hasStreamEvent
+            hasProductEvent
               ? {
                   ...current,
                   rewardEffectType: "",
@@ -94,7 +97,7 @@ export function RewardEffectFields({ form, setForm }) {
                 }
           )
         }
-        aria-pressed={hasStreamEvent}
+        aria-pressed={hasProductEvent}
         className="flex w-full cursor-pointer items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-950/70 p-4 text-left transition hover:border-red-300/25 hover:bg-white/[0.03] focus:outline-none"
       >
         <span className="flex min-w-0 items-center gap-3">
@@ -110,10 +113,10 @@ export function RewardEffectFields({ form, setForm }) {
             </span>
           </span>
         </span>
-        <ToggleKnob checked={hasStreamEvent} color="red" />
+        <ToggleKnob checked={hasProductEvent} color="red" />
       </button>
 
-      {hasStreamEvent ? (
+      {hasProductEvent ? (
         <div className="grid gap-3 sm:grid-cols-2">
           <RewardTypeCard
             active={hasRewardEffect}
@@ -206,6 +209,21 @@ export function RewardEffectFields({ form, setForm }) {
               }))
             }
           />
+          <RewardTypeCard
+            active={isUnique}
+            icon={<IconUserCheck size={19} />}
+            title="Único"
+            description="Cada usuario puede canjear este producto una sola vez."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "unique",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "",
+                singleUnitPerRedemption: true,
+              }))
+            }
+          />
         </div>
       ) : null}
 
@@ -228,6 +246,13 @@ export function RewardEffectFields({ form, setForm }) {
           Este producto tendrá una ruleta propia. Sus premios y probabilidades
           se configuran en Dashboard, Stream, Ruleta. Cada canje admite una sola
           unidad.
+        </div>
+      ) : null}
+
+      {isUnique ? (
+        <div className="rounded-2xl border border-emerald-300/20 bg-emerald-400/10 p-4 text-sm font-medium leading-6 text-emerald-100">
+          Cada usuario podrá canjear este producto una sola vez. El canje siempre
+          será de una unidad.
         </div>
       ) : null}
 

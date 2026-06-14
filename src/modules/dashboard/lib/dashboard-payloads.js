@@ -5,6 +5,7 @@ export function buildProductPayload(productForm) {
     price: Number(productForm.price),
     stock: Number(productForm.stock),
     infiniteStock: Boolean(productForm.infiniteStock),
+    singleUnitPerRedemption: Boolean(productForm.singleUnitPerRedemption),
     category: productForm.category.trim() || "General",
     status: productForm.status,
     featured: productForm.featured,

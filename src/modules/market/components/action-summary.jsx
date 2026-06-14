@@ -2,10 +2,10 @@ import Image from "next/image";
 import { IconBrandKick, IconMinus, IconPlus, IconSparkles } from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import {
-  clampRedemptionQuantity,
   formatNumber,
   getCreditPurchaseLimit,
   getCreditPurchaseQuantity,
+  getRedemptionLimit,
   getRedemptionQuantity,
   hasSingleRedemptionEffect,
 } from "../lib/market-utils";
@@ -13,6 +13,7 @@ import {
 export default function ActionSummary({
   action,
   availablePoints = 0,
+  availableCredits = 0,
   maxPurchasePlan,
   onMaxPurchase,
   onQuantityChange,
@@ -25,9 +26,11 @@ export default function ActionSummary({
   const item = action.item;
   const quantity = isPurchase
     ? getCreditPurchaseQuantity(action.quantity, item, availablePoints)
-    : getRedemptionQuantity(action.quantity, item);
+    : getRedemptionQuantity(action.quantity, item, availableCredits);
   const totalCost =
     Number(isPurchase ? item.pointsCost : item.price || 0) * quantity;
+  const displayedCost =
+    !isPurchase && quantity <= 0 ? Number(item.price || 0) : totalCost;
   const totalCredits = Number(item.credits || 0) * quantity;
   const isSingleRedemption = hasSingleRedemptionEffect(item);
 
@@ -39,7 +42,7 @@ export default function ActionSummary({
       />
       <SummaryRow
         label={isPurchase ? "Costo unitario del pack" : "Creditos necesarios"}
-        value={formatNumber(isPurchase ? item.pointsCost : totalCost)}
+        value={formatNumber(isPurchase ? item.pointsCost : displayedCost)}
         valueClassName={isPurchase ? "text-green-300" : "text-amber-200"}
         icon={isPurchase ? <PointsIcon /> : <CreditsIcon />}
       />
@@ -64,12 +67,19 @@ export default function ActionSummary({
             icon={<CreditsIcon />}
           />
         </>
+      ) : quantity <= 0 ? (
+        <SummaryRow
+          label="Estado"
+          value="Créditos insuficientes"
+          valueClassName="text-red-300"
+        />
       ) : isSingleRedemption ? (
-        <SummaryRow label="Unidades" value="1 canje" />
+        <SummaryRow label="Unidades" value="1 unidad" />
       ) : (
         <QuantityControl
           value={quantity}
-          max={item.stock}
+          max={getRedemptionLimit(item, availableCredits)}
+          stock={item.stock}
           infiniteStock={item.infiniteStock}
           onChange={onQuantityChange}
         />
@@ -259,24 +269,28 @@ function CreditPurchaseQuantityControl({
   );
 }
 
-function QuantityControl({ value, max, infiniteStock, onChange }) {
-  const stock = Math.max(0, Number(max || 0));
+function QuantityControl({ value, max, stock, infiniteStock, onChange }) {
+  const limit = Math.max(0, Math.floor(Number(max || 0)));
+  const availableStock = Math.max(0, Number(stock || 0));
   const numericValue = Math.floor(Number(value || 1));
-  const safeValue = infiniteStock
-    ? Number.isFinite(numericValue)
-      ? Math.max(1, numericValue)
-      : 1
-    : clampRedemptionQuantity(value, stock);
+  const safeValue =
+    limit <= 0
+      ? 0
+      : Math.min(
+          Number.isFinite(numericValue) ? Math.max(1, numericValue) : 1,
+          limit,
+        );
 
   function updateQuantity(nextValue) {
     const nextQuantity = Math.floor(Number(nextValue || 1));
 
     onChange(
-      infiniteStock
-        ? Number.isFinite(nextQuantity)
-          ? Math.max(1, nextQuantity)
-          : 1
-        : clampRedemptionQuantity(nextValue, stock)
+      limit <= 0
+        ? 0
+        : Math.min(
+            Number.isFinite(nextQuantity) ? Math.max(1, nextQuantity) : 1,
+            limit,
+          ),
     );
   }
 
@@ -287,7 +301,7 @@ function QuantityControl({ value, max, infiniteStock, onChange }) {
           Unidades
         </label>
         <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-black text-neutral-400">
-          Disponible: {infiniteStock ? "Ilimitado" : formatNumber(stock)}
+          Disponible: {infiniteStock ? "Ilimitado" : formatNumber(availableStock)}
         </span>
       </div>
 
@@ -304,9 +318,10 @@ function QuantityControl({ value, max, infiniteStock, onChange }) {
         <input
           id="redeem-quantity"
           type="number"
-          min="1"
-          max={infiniteStock ? undefined : stock}
+          min={limit > 0 ? "1" : "0"}
+          max={limit}
           value={safeValue}
+          disabled={limit <= 0}
           onChange={(event) => updateQuantity(event.target.value)}
           className="h-12 w-full bg-transparent px-3 text-center text-lg font-black text-white outline-none"
           aria-label="Unidades a canjear"
@@ -314,7 +329,7 @@ function QuantityControl({ value, max, infiniteStock, onChange }) {
         <button
           type="button"
           onClick={() => updateQuantity(safeValue + 1)}
-          disabled={!infiniteStock && safeValue >= stock}
+          disabled={limit <= 0 || safeValue >= limit}
           className="grid h-12 cursor-pointer place-items-center border-l border-white/10 text-neutral-300 transition hover:bg-white/[0.04] hover:text-white disabled:cursor-not-allowed disabled:text-neutral-700"
           aria-label="Aumentar unidades"
         >
@@ -324,7 +339,8 @@ function QuantityControl({ value, max, infiniteStock, onChange }) {
 
       <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
         <span>
-          {infiniteStock ? "Sin limite de stock" : "Maximo segun stock disponible"}
+          Máximo según stock y créditos:{" "}
+          {limit === Number.MAX_SAFE_INTEGER ? "Sin límite" : formatNumber(limit)}
         </span>
         <strong className="font-black text-amber-200">
           {safeValue} {safeValue === 1 ? "unidad" : "unidades"}
