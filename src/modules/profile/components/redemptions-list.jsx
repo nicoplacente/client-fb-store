@@ -7,8 +7,13 @@ import {
 } from "@tabler/icons-react";
 import coins from "@/assets/coins.webp";
 import { formatDate } from "../lib/profile-utils";
+import AudioRecorder from "@/modules/audio/components/audio-recorder";
 
-export default function RedemptionsList({ loading, redemptions }) {
+export default function RedemptionsList({
+  loading,
+  redemptions,
+  onAudioUpdated,
+}) {
   if (loading) {
     return (
       <div className="rounded-lg border border-white/10 bg-neutral-900/60 p-8 text-center text-neutral-400">
@@ -69,6 +74,14 @@ export default function RedemptionsList({ loading, redemptions }) {
               ) : null}
               {redemption.productEffectType ? (
                 <ProductEffectStatus redemption={redemption} />
+              ) : null}
+              {redemption.audioStatus !== "not_applicable" ? (
+                <div className="mt-4 max-w-2xl">
+                  <AudioRecorder
+                    redemption={redemption}
+                    onUpdated={onAudioUpdated}
+                  />
+                </div>
               ) : null}
             </div>
             <div className="flex flex-wrap items-center gap-4 text-sm text-neutral-400">

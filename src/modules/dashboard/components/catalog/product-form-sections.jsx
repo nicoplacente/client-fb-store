@@ -3,6 +3,7 @@ import {
   IconFlame,
   IconGift,
   IconLockOpen,
+  IconMicrophone,
   IconRestore,
   IconSparkles,
   IconUserMinus,
@@ -50,12 +51,14 @@ export function RewardEffectFields({ form, setForm }) {
   const isRewardWheel = form.rewardEffectType === "reward_wheel";
   const isKickTimeout = form.rewardEffectType === "kick_timeout_user";
   const isKickUnban = form.rewardEffectType === "kick_unban_self";
+  const isAudioSubmission = form.rewardEffectType === "audio_submission";
   const hasStreamEvent =
     hasRewardEffect ||
     restoresStreamStreak ||
     isRewardWheel ||
     isKickTimeout ||
-    isKickUnban;
+    isKickUnban ||
+    isAudioSubmission;
 
   return (
     <div className="grid gap-4 rounded-2xl border border-red-300/15 bg-[linear-gradient(135deg,rgba(220,38,38,0.12),rgba(10,10,10,0.78)_44%,rgba(10,10,10,0.92))] p-4 shadow-inner shadow-black/10">
@@ -186,6 +189,23 @@ export function RewardEffectFields({ form, setForm }) {
               }))
             }
           />
+          <RewardTypeCard
+            active={isAudioSubmission}
+            icon={<IconMicrophone size={19} />}
+            title="Audio para el stream"
+            description="Habilita una grabación moderada que se reproduce en OBS."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "audio_submission",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "",
+                audioMaxDurationSeconds:
+                  current.audioMaxDurationSeconds || "15",
+                infiniteStock: true,
+              }))
+            }
+          />
         </div>
       ) : null}
 
@@ -247,6 +267,38 @@ export function RewardEffectFields({ form, setForm }) {
         <div className="rounded-2xl border border-green-300/20 bg-green-400/10 p-4 text-sm font-medium leading-6 text-green-100">
           Este producto utiliza la cuenta de Kick vinculada al comprador y
           solicita su desbaneo automáticamente.
+        </div>
+      ) : null}
+
+      {isAudioSubmission ? (
+        <div className="grid gap-4 rounded-2xl border border-sky-300/20 bg-sky-400/[0.08] p-4">
+          <Field label="Duración máxima de la grabación">
+            <div className="flex items-center gap-3">
+              <TextInput
+                type="number"
+                min="5"
+                max="60"
+                step="1"
+                value={form.audioMaxDurationSeconds}
+                onChange={(event) =>
+                  setForm((current) => ({
+                    ...current,
+                    audioMaxDurationSeconds: event.target.value,
+                  }))
+                }
+                className="w-32"
+                required
+              />
+              <span className="text-sm font-bold text-neutral-400">
+                segundos
+              </span>
+            </div>
+          </Field>
+          <p className="text-sm font-medium leading-6 text-sky-100">
+            Cada canje habilita una sola grabación y admite hasta dos intentos
+            si el moderador rechaza el primero. Los audios aprobados ingresan a
+            la cola de OBS.
+          </p>
         </div>
       ) : null}
     </div>

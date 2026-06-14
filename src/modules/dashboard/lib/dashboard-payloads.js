@@ -18,6 +18,10 @@ export function buildProductPayload(productForm) {
         : productForm.rewardEffectType === "kick_timeout_user"
           ? Number(productForm.rewardEffectDurationMinutes || 10)
           : "",
+    audioMaxDurationSeconds:
+      productForm.rewardEffectType === "audio_submission"
+        ? Number(productForm.audioMaxDurationSeconds || 15)
+        : 15,
     alertEnabled: false,
     alertType: productForm.alertType || "confetti",
     alertMessage: productForm.alertMessage.trim(),

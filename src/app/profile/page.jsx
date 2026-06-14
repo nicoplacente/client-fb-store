@@ -67,6 +67,28 @@ export default function ProfilePage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user?.id) return undefined;
+
+    const refreshAudioRedemptions = () => {
+      getMyProductRedemptions()
+        .then((data) => setRedemptions(data))
+        .catch(() => {});
+    };
+
+    window.addEventListener(
+      "audio-redemption-updated",
+      refreshAudioRedemptions,
+    );
+
+    return () => {
+      window.removeEventListener(
+        "audio-redemption-updated",
+        refreshAudioRedemptions,
+      );
+    };
+  }, [user?.id]);
+
+  useEffect(() => {
     if (!user) return;
     let cancelled = false;
 
@@ -171,6 +193,14 @@ export default function ProfilePage() {
     }
   }
 
+  function handleAudioRedemptionUpdated(redemption) {
+    setRedemptions((current) =>
+      current.map((item) =>
+        String(item.id) === String(redemption.id) ? redemption : item,
+      ),
+    );
+  }
+
   if (!user) {
     return (
       <SectionContainer className="space-y-6">
@@ -204,6 +234,7 @@ export default function ProfilePage() {
             <RedemptionsList
               loading={loadingRedemptions}
               redemptions={normalizedRedemptions}
+              onAudioUpdated={handleAudioRedemptionUpdated}
             />
           ) : (
             <SubscriptionsTimeline

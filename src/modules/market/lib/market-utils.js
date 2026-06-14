@@ -17,6 +17,7 @@ export function hasSingleRedemptionEffect(product) {
     product?.rewardEffectType === "restore_stream_streak" ||
     product?.rewardEffectType === "kick_timeout_user" ||
     product?.rewardEffectType === "kick_unban_self" ||
+    product?.rewardEffectType === "audio_submission" ||
     product?.rewardEffectType === "reward_wheel"
   );
 }

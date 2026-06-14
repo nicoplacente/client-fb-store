@@ -32,6 +32,7 @@ export const emptyProduct = {
   rewardEffectType: "",
   rewardEffectValue: "happy",
   rewardEffectDurationMinutes: "60",
+  audioMaxDurationSeconds: "15",
   alertEnabled: false,
   alertType: "confetti",
   alertMessage: "",

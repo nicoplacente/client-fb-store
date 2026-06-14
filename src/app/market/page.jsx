@@ -15,9 +15,11 @@ import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import useAppContext from "@/context/use-app-context";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import {
+  executeWheelRedemptionEffect,
   getProductModerationTargets,
   getProducts,
   normalizeProduct,
+  normalizeProductRedemption,
   redeemProduct,
 } from "@/modules/products/libs/product-api";
 import { getErrorMessage } from "@/modules/api/error-message";
@@ -36,6 +38,10 @@ import ProductDetail, {
   WheelPrizes,
 } from "@/modules/market/components/product-detail";
 import ModerationTargetSelector from "@/modules/market/components/moderation-target-selector";
+import RewardWheel, {
+  normalizeRewardWheelSpin,
+} from "@/modules/reward-wheel/components/reward-wheel";
+import AudioRecorder from "@/modules/audio/components/audio-recorder";
 import {
   getActionConfirmation,
   getCreditPurchaseQuantity,
@@ -54,6 +60,7 @@ export default function MarketPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [pendingAction, setPendingAction] = useState(null);
+  const [wheelSpin, setWheelSpin] = useState(null);
   const [wheelResult, setWheelResult] = useState(null);
   const [wheelRedeeming, setWheelRedeeming] = useState(false);
   const [moderationTargets, setModerationTargets] = useState([]);
@@ -165,6 +172,7 @@ export default function MarketPage() {
     if (isPending) return;
 
     setWheelResult(null);
+    setWheelSpin(null);
     setModerationTargets([]);
     setModerationTargetsError("");
     setPendingAction({
@@ -206,6 +214,7 @@ export default function MarketPage() {
     if (wheelRedeeming) return;
 
     setPendingAction(null);
+    setWheelSpin(null);
     setWheelResult(null);
     setModerationTargets([]);
     setModerationTargetsError("");
@@ -255,8 +264,14 @@ export default function MarketPage() {
       return;
     }
 
-    if (action.type === "redeem" && action.item.rewardEffectType === "reward_wheel") {
-      setWheelRedeeming(true);
+    if (
+      action.type === "redeem" &&
+      action.item.rewardEffectType === "audio_submission"
+    ) {
+      if (action.redemption) {
+        setPendingAction(null);
+        return;
+      }
 
       startTransition(async () => {
         try {
@@ -266,10 +281,52 @@ export default function MarketPage() {
             refreshUser,
             setProducts,
           });
-          const winner = getWheelWinner(result);
+          const product = normalizeProduct(result.product || action.item);
+          const redemption = normalizeProductRedemption({
+            ...result.redemption,
+            product: result.product || action.item,
+          });
 
-          if (winner) {
-            setWheelResult(winner);
+          setPendingAction((current) =>
+            current
+              ? {
+                  ...current,
+                  item: product,
+                  redemption,
+                }
+              : current,
+          );
+        } catch (error) {
+          toast.error(
+            getErrorMessage(
+              error,
+              "Ocurrió un error al canjear el producto.",
+            ),
+          );
+          await loadMarket({ showLoading: false });
+        }
+      });
+      return;
+    }
+
+    if (action.type === "redeem" && action.item.rewardEffectType === "reward_wheel") {
+      setWheelRedeeming(true);
+
+      startTransition(async () => {
+        let spinStarted = false;
+
+        try {
+          const result = await confirmProductRedemption({
+            action,
+            loadMarket,
+            refreshUser,
+            setProducts,
+          });
+          const spin = getWheelSpin(result);
+
+          if (spin) {
+            spinStarted = true;
+            setWheelSpin(spin);
           } else {
             toast.error("La ruleta se canjeó, pero no se pudo mostrar el premio");
             setPendingAction(null);
@@ -283,7 +340,9 @@ export default function MarketPage() {
           );
           await loadMarket({ showLoading: false });
         } finally {
-          setWheelRedeeming(false);
+          if (!spinStarted) {
+            setWheelRedeeming(false);
+          }
         }
       });
       return;
@@ -366,6 +425,62 @@ export default function MarketPage() {
     wheelResult,
   ]);
 
+  const handleWheelSpinComplete = useCallback(() => {
+    const completedSpin = wheelSpin;
+
+    if (!completedSpin) return;
+
+    setWheelResult(completedSpin.winner);
+    setWheelSpin(null);
+    setWheelRedeeming(false);
+
+    if (!completedSpin.redemptionId) return;
+
+    window.requestAnimationFrame(() => {
+      executeWheelRedemptionEffect(completedSpin.redemptionId)
+        .then((result) => {
+          const redemption = result?.redemption;
+
+          if (
+            redemption &&
+            ["completed", "failed"].includes(redemption.wheelEffectStatus)
+          ) {
+            saveLocalRedemption({
+              ...redemption,
+              product: pendingAction?.item || {},
+            });
+          }
+
+          if (redemption?.wheelEffectStatus === "failed") {
+            toast.error(
+              "El premio quedó registrado, pero no se pudo aplicar la acción.",
+            );
+          }
+        })
+        .catch(() => {
+          // El servidor conserva una ejecución diferida de respaldo.
+        });
+    });
+  }, [pendingAction?.item, wheelSpin]);
+
+  const handleAudioRedemptionUpdated = useCallback((redemption) => {
+    setPendingAction((current) => {
+      if (!current) return current;
+
+      const updated = {
+        ...redemption,
+        product: current.item,
+      };
+
+      saveLocalRedemption(updated);
+
+      return {
+        ...current,
+        redemption: updated,
+      };
+    });
+  }, []);
+
   const confirmation = useMemo(
     () => getActionConfirmation(pendingAction, { availablePoints }),
     [availablePoints, pendingAction],
@@ -373,6 +488,9 @@ export default function MarketPage() {
   const isTimeoutAction =
     pendingAction?.type === "redeem" &&
     pendingAction.item.rewardEffectType === "kick_timeout_user";
+  const isAudioAction =
+    pendingAction?.type === "redeem" &&
+    pendingAction.item.rewardEffectType === "audio_submission";
   const selectedModerationTargetIsValid =
     pendingAction?.moderationTargetMode === "random"
       ? moderationTargets.length > 0
@@ -412,20 +530,38 @@ export default function MarketPage() {
 
       <ConfirmationDialog
         open={Boolean(pendingAction)}
-        title={wheelResult ? "Resultado de la ruleta" : confirmation?.title}
+        title={
+          isAudioAction && pendingAction.redemption
+            ? "Canje de audio confirmado"
+            : wheelResult
+            ? "Resultado de la ruleta"
+            : wheelSpin
+              ? "Girando la ruleta"
+              : confirmation?.title
+        }
         description={
-          wheelResult
+          isAudioAction && pendingAction.redemption
+            ? "Podés grabar ahora o retomar el canje más tarde desde Mis canjes."
+            : wheelResult
             ? "Tu premio quedó registrado en el historial de canjes."
-            : confirmation?.description
+            : wheelSpin
+              ? "El resultado aparecerá cuando la ruleta se detenga."
+              : confirmation?.description
         }
         confirmLabel={
-          wheelResult
+          isAudioAction && pendingAction.redemption
             ? "Cerrar"
-            : wheelRedeeming
+            : wheelResult
+            ? "Cerrar"
+            : wheelRedeeming || wheelSpin
               ? "Girando..."
               : confirmation?.confirmLabel
         }
-        cancelLabel={wheelResult ? "Volver a la tienda" : "Cancelar"}
+        cancelLabel={
+          wheelResult || (isAudioAction && pendingAction.redemption)
+            ? "Volver a la tienda"
+            : "Cancelar"
+        }
         confirmDisabled={
           confirmation?.confirmDisabled ||
           wheelRedeeming ||
@@ -440,7 +576,19 @@ export default function MarketPage() {
           ) : null
         }
         secondaryAside={
-          isTimeoutAction ? (
+          isAudioAction ? (
+            <AudioRecorder
+              redemption={
+                pendingAction.redemption || {
+                  audioStatus: "awaiting_audio",
+                  audioAttemptsUsed: 0,
+                  product: pendingAction.item,
+                }
+              }
+              locked={!pendingAction.redemption}
+              onUpdated={handleAudioRedemptionUpdated}
+            />
+          ) : isTimeoutAction ? (
             <ModerationTargetSelector
               targets={moderationTargets}
               loading={moderationTargetsLoading}
@@ -457,12 +605,21 @@ export default function MarketPage() {
           ) : null
         }
         secondaryAsideClassName={
-          isTimeoutAction ? "bg-red-500/[0.02]" : undefined
+          isAudioAction
+            ? "bg-sky-400/[0.02]"
+            : isTimeoutAction
+              ? "bg-red-500/[0.02]"
+              : undefined
         }
       >
         {pendingAction ? (
           wheelResult ? (
             <WheelResult winner={wheelResult} />
+          ) : wheelSpin ? (
+            <ModalRewardWheel
+              spin={wheelSpin}
+              onSpinComplete={handleWheelSpinComplete}
+            />
           ) : (
             <>
               <ActionSummary
@@ -629,6 +786,47 @@ function getWheelWinner(result) {
   };
 }
 
+function getWheelSpin(result) {
+  const winner = getWheelWinner(result);
+  const wheel = result?.wheel || {};
+  const payload = result?.wheelSpin || {};
+  const prizes = payload.prizes || wheel.prizes || [];
+
+  if (!winner || !Array.isArray(prizes) || !prizes.length) return null;
+
+  const spin = normalizeRewardWheelSpin({
+    ...payload,
+    id:
+      payload.id ||
+      `reward-wheel-${result?.redemption?.id || Date.now()}`,
+    redemptionId:
+      payload.redemptionId || result?.redemption?.id,
+    prizes,
+    winner,
+  });
+
+  return spin.prizes.length ? spin : null;
+}
+
+function ModalRewardWheel({ spin, onSpinComplete }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="grid justify-items-center gap-3 overflow-hidden py-3"
+    >
+      <RewardWheel
+        spin={spin}
+        size="modal"
+        onSpinComplete={onSpinComplete}
+      />
+      <p className="text-sm font-black uppercase tracking-[0.16em] text-fuchsia-100">
+        Girando...
+      </p>
+    </div>
+  );
+}
+
 function WheelResult({ winner }) {
   return (
     <div
@@ -679,6 +877,10 @@ function getRedemptionSuccessMessage(result, product) {
 
   if (product.rewardEffectType === "kick_unban_self") {
     return "Usuario desbaneado";
+  }
+
+  if (product.rewardEffectType === "audio_submission") {
+    return "Canje confirmado. Ya podés grabar tu audio";
   }
 
   return "Canje solicitado";

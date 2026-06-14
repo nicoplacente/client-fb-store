@@ -62,6 +62,8 @@ export async function deleteSupportTickets(mode) {
 }
 
 export function normalizeTicket(ticket) {
+  const redemption =
+    ticket.productRedemption || ticket.redemption || null;
   const user = ticket.user
     ? {
         id: ticket.user.id || ticket.user._id,
@@ -93,10 +95,37 @@ export function normalizeTicket(ticket) {
     user,
     productEffectTargetUsername:
       ticket.productEffectTargetUsername ||
-      ticket.redemption?.productEffectTargetUsername ||
+      redemption?.productEffectTargetUsername ||
       ticket.metadata?.productEffectTargetUsername ||
       ticket.metadata?.moderationTargetUsername ||
       "",
+    redemption: redemption
+      ? {
+          id: redemption.id,
+          productId: redemption.productId,
+          userId: redemption.userId,
+          audioStatus: redemption.audioStatus || "not_applicable",
+          audioAttemptsUsed: Number(redemption.audioAttemptsUsed || 0),
+          audioRejectionReason: redemption.audioRejectionReason || "",
+          audioPlayedAt: redemption.audioPlayedAt || "",
+          audioSubmission: redemption.audioSubmission
+            ? {
+                id: redemption.audioSubmission.id,
+                status: redemption.audioSubmission.status || "",
+                attemptNumber: Number(
+                  redemption.audioSubmission.attemptNumber || 0,
+                ),
+                mimeType: redemption.audioSubmission.mimeType || "",
+                fileSize: Number(redemption.audioSubmission.fileSize || 0),
+                durationSeconds: Number(
+                  redemption.audioSubmission.durationSeconds || 0,
+                ),
+                reviewedAt: redemption.audioSubmission.reviewedAt || "",
+                approvedAt: redemption.audioSubmission.approvedAt || "",
+              }
+            : null,
+        }
+      : null,
     createdAt: ticket.createdAt || ticket.date || "",
     messages: Array.isArray(ticket.messages)
       ? ticket.messages.map((message) => ({

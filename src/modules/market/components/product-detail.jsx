@@ -3,6 +3,7 @@ import {
   IconCategory,
   IconGift,
   IconLockOpen,
+  IconMicrophone,
   IconPackage,
   IconSparkles,
   IconUserMinus,
@@ -14,6 +15,8 @@ export default function ProductDetail({ product }) {
   const isRewardWheel = product.rewardEffectType === "reward_wheel";
   const isKickTimeout = product.rewardEffectType === "kick_timeout_user";
   const isKickUnban = product.rewardEffectType === "kick_unban_self";
+  const isAudioSubmission =
+    product.rewardEffectType === "audio_submission";
 
   return (
     <div className="grid content-start gap-5">
@@ -53,6 +56,12 @@ export default function ProductDetail({ product }) {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-green-300/20 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-100">
               <IconLockOpen size={14} />
               Desbanearse
+            </span>
+          ) : null}
+          {isAudioSubmission ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-xs font-bold text-sky-100">
+              <IconMicrophone size={14} />
+              Audio de hasta {product.audioMaxDurationSeconds || 15} s
             </span>
           ) : null}
         </div>

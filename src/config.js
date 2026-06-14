@@ -44,6 +44,8 @@ export const envConfig = {
   API_PREDICTIONS: `${SERVER_URL}/predictions`,
   API_LIVE_STATUS: `${SERVER_URL}/live/status`,
   API_UPLOAD_IMAGE: `${SERVER_URL}/uploads/image`,
+  API_AUDIO_SUBMISSIONS: `${SERVER_URL}/audio-submissions`,
+  API_AUDIO_OBS: `${SERVER_URL}/audio-obs`,
   API_LOGOUT: `${SERVER_URL}/logout`,
   API_KICK_AUTH: `${SERVER_URL}/auth/kick`,
   API_LINK_EXTENSION_VIEWER: `${SERVER_URL}/auth/link-extension-viewer`,

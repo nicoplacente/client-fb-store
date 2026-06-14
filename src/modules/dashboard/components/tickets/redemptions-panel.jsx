@@ -21,6 +21,7 @@ import {
 } from "./redemption-filters";
 import { StatusBadge, TicketEmptyState } from "./ticket-status";
 import UserProfileModal, { UserProfileButton } from "./user-profile-modal";
+import AudioReviewControls from "./audio-review-controls";
 
 export default function RedemptionsPanel({
   tickets,
@@ -31,6 +32,8 @@ export default function RedemptionsPanel({
   onDelete,
   onDeleteAll,
   onDeleteClosed,
+  onApproveAudio,
+  onRejectAudio,
 }) {
   const [dateFilter, setDateFilter] = useState("");
   const [calendarDate, setCalendarDate] = useState("");
@@ -85,6 +88,8 @@ export default function RedemptionsPanel({
               isPending={isPending}
               onStatusChange={onStatusChange}
               onDelete={onDelete}
+              onApproveAudio={onApproveAudio}
+              onRejectAudio={onRejectAudio}
             />
           ))}
         </div>
@@ -198,10 +203,21 @@ function FilterField({ label, icon, children }) {
   );
 }
 
-function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }) {
+function RedemptionCard({
+  ticket,
+  product,
+  isPending,
+  onStatusChange,
+  onDelete,
+  onApproveAudio,
+  onRejectAudio,
+}) {
   const [profileOpen, setProfileOpen] = useState(false);
   const details = getRedemptionDetails(ticket);
   const productImage = product?.imageUrl || "";
+  const isAudioRedemption =
+    ticket.redemption?.audioStatus &&
+    ticket.redemption.audioStatus !== "not_applicable";
 
   return (
     <article className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-3 shadow-lg shadow-black/15 transition hover:border-red-300/20 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-4">
@@ -259,6 +275,15 @@ function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }
               Usuario objetivo del timeout: {details.timeoutTarget}.
             </p>
           ) : null}
+          {ticket.redemption?.audioStatus &&
+          ticket.redemption.audioStatus !== "not_applicable" ? (
+            <AudioReviewControls
+              redemption={ticket.redemption}
+              isPending={isPending}
+              onApprove={onApproveAudio}
+              onReject={onRejectAudio}
+            />
+          ) : null}
         </div>
       </div>
 
@@ -267,6 +292,7 @@ function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }
         isPending={isPending}
         onStatusChange={onStatusChange}
         onDelete={onDelete}
+        deleteDisabled={Boolean(isAudioRedemption)}
       />
       <UserProfileModal
         user={ticket.user}
@@ -278,7 +304,13 @@ function RedemptionCard({ ticket, product, isPending, onStatusChange, onDelete }
   );
 }
 
-function TicketActions({ ticket, isPending, onStatusChange, onDelete }) {
+function TicketActions({
+  ticket,
+  isPending,
+  onStatusChange,
+  onDelete,
+  deleteDisabled,
+}) {
   return (
     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
       <SelectInput
@@ -292,9 +324,13 @@ function TicketActions({ ticket, isPending, onStatusChange, onDelete }) {
       </SelectInput>
       <button
         onClick={() => onDelete(ticket)}
-        disabled={isPending}
+        disabled={isPending || deleteDisabled}
         className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-        aria-label={`Eliminar ticket ${ticket.subject}`}
+        aria-label={
+          deleteDisabled
+            ? "El historial de audio no puede eliminarse"
+            : `Eliminar ticket ${ticket.subject}`
+        }
       >
         <IconTrash size={17} />
       </button>

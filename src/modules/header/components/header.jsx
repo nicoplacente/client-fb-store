@@ -20,6 +20,7 @@ import { apiRequest } from "@/modules/api/client";
 import { legalMenuItems, menuItems } from "@/modules/sidebar/libs/menu-items";
 import { hasDashboardAccess } from "@/modules/auth/libs/permissions";
 import { KICK_POINTS_UPDATED_EVENT } from "@/modules/ranking/libs/points-events";
+import useAudioRedemptionNotifications from "@/modules/audio/hooks/use-audio-redemption-notifications";
 
 function formatExactNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
@@ -48,6 +49,8 @@ export default function Header() {
   const { user, logout } = useAppContext(AuthContext);
   const pathname = usePathname();
   const userId = user?.id;
+
+  useAudioRedemptionNotifications(userId);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [kickPoints, setKickPoints] = useState(0);

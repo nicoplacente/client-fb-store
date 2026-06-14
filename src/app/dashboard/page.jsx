@@ -245,6 +245,8 @@ function DashboardActivePanel({ dashboard }) {
         products={dashboard.products}
         onDeleteAll={dashboard.removeAllRedemptions}
         onDeleteClosed={dashboard.removeClosedRedemptions}
+        onApproveAudio={dashboard.approveAudioRedemption}
+        onRejectAudio={dashboard.rejectAudioRedemption}
         {...ticketProps}
       />
     );

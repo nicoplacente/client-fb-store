@@ -79,6 +79,40 @@ export async function apiRequest(url, options = {}) {
   return data;
 }
 
+export async function apiBlobRequest(url, options = {}) {
+  if (!url) {
+    throw new ApiError("Endpoint no configurado", 0, null);
+  }
+
+  const { skipRefresh = false, ...requestOptions } = options;
+  const request = {
+    credentials: "include",
+    cache: "no-store",
+    ...requestOptions,
+  };
+  let response = await fetch(url, request);
+
+  if (response.status === 401 && !skipRefresh) {
+    const refreshed = await refreshSession();
+
+    if (refreshed) {
+      response = await fetch(url, request);
+    }
+  }
+
+  if (!response.ok) {
+    const data = await parseResponse(response);
+    const message =
+      typeof data === "object" && data
+        ? data.error || data.message || "Error del servidor"
+        : data || "Error del servidor";
+
+    throw new ApiError(message, response.status, data);
+  }
+
+  return response.blob();
+}
+
 export function buildResourceUrl(baseUrl, id) {
   return `${baseUrl}/${encodeURIComponent(id)}`;
 }

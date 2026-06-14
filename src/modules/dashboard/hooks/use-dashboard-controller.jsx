@@ -7,11 +7,14 @@ import {
   hasKickModerationAccess,
 } from "@/modules/auth/libs/permissions";
 import {
+  approveRedemptionAudio,
   createProduct,
   deleteProduct,
   normalizeProduct,
+  rejectRedemptionAudio,
   updateProduct,
 } from "@/modules/products/libs/product-api";
+import { socket } from "@/modules/auth/libs/socket";
 import {
   createCreditPackage,
   deleteCreditPackage,
@@ -233,6 +236,20 @@ export default function useDashboardController() {
   }, [canManageDashboard]);
 
   useEffect(() => {
+    if (!canManageDashboard) return undefined;
+
+    const handleAudioReviewUpdate = () => {
+      loadDashboard({ showLoading: false });
+    };
+
+    socket.on("audio:review:updated", handleAudioReviewUpdate);
+
+    return () => {
+      socket.off("audio:review:updated", handleAudioReviewUpdate);
+    };
+  }, [canManageDashboard]);
+
+  useEffect(() => {
     function syncActiveTabFromHash() {
       setActiveTabState(getDashboardTabFromHash());
       setActiveTabReady(true);
@@ -279,6 +296,16 @@ export default function useDashboardController() {
 
     if (!payloadBase.title || Number.isNaN(payloadBase.price)) {
       toast.error("Completa nombre y precio");
+      return;
+    }
+
+    if (
+      payloadBase.rewardEffectType === "audio_submission" &&
+      (!Number.isFinite(payloadBase.audioMaxDurationSeconds) ||
+        payloadBase.audioMaxDurationSeconds < 5 ||
+        payloadBase.audioMaxDurationSeconds > 60)
+    ) {
+      toast.error("La duración del audio debe estar entre 5 y 60 segundos");
       return;
     }
 
@@ -464,6 +491,37 @@ export default function useDashboardController() {
         await loadDashboard();
       } catch {
         toast.error("No se pudo actualizar el ticket");
+      }
+    });
+  }
+
+  function approveAudioRedemption(redemption) {
+    startTransition(async () => {
+      try {
+        await approveRedemptionAudio(redemption.id);
+        toast.success("Audio aprobado y agregado a la cola");
+        await loadDashboard({ showLoading: false });
+      } catch {
+        toast.error("No se pudo aprobar el audio");
+      }
+    });
+  }
+
+  function rejectAudioRedemption(redemption, reason) {
+    startTransition(async () => {
+      try {
+        const result = await rejectRedemptionAudio(redemption.id, reason);
+        const canRetry =
+          result?.redemption?.audioStatus === "retry_allowed";
+
+        toast.success(
+          canRetry
+            ? "Audio rechazado. El usuario puede regrabar"
+            : "Segundo audio rechazado. El canje quedó cerrado",
+        );
+        await loadDashboard({ showLoading: false });
+      } catch {
+        toast.error("No se pudo rechazar el audio");
       }
     });
   }
@@ -858,7 +916,8 @@ export default function useDashboardController() {
       confirmLabel: "Eliminar cerrados",
       cancelLabel: "Conservar canjes",
       details: [
-        "Solo se eliminaran canjes de productos con estado Cerrado.",
+        "Solo se eliminarán canjes de productos con estado Cerrado.",
+        "Los canjes de audio se conservarán como historial.",
         "Los canjes abiertos o en proceso se conservaran.",
         "Esta accion no depende del filtro de fecha visible.",
       ],
@@ -875,7 +934,8 @@ export default function useDashboardController() {
       confirmLabel: "Eliminar todos",
       cancelLabel: "Conservar canjes",
       details: [
-        "Se eliminaran canjes abiertos, en proceso y cerrados.",
+        "Se eliminarán canjes abiertos, en proceso y cerrados.",
+        "Los canjes de audio se conservarán como historial.",
         "Esta accion limpia todos los canjes de productos, aunque no esten visibles por filtros.",
         "No se eliminaran tickets de soporte.",
       ],
@@ -1077,6 +1137,8 @@ export default function useDashboardController() {
     },
     removeGiveaway,
     updateTicketStatus,
+    approveAudioRedemption,
+    rejectAudioRedemption,
     replyToTicket,
     removeTicket,
     removeClosedRedemptions,

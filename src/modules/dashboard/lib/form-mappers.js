@@ -23,6 +23,7 @@ export function productToForm(product) {
         : product.rewardEffectType === "kick_timeout_user"
           ? String(product.rewardEffectDurationMinutes || 10)
           : String(product.rewardEffectDurationMinutes || 60),
+    audioMaxDurationSeconds: String(product.audioMaxDurationSeconds || 15),
     alertEnabled: Boolean(product.alertEnabled),
     alertType: product.alertType || "confetti",
     alertMessage: product.alertMessage || "",
