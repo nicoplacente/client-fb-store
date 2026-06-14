@@ -4,6 +4,7 @@ import {
   IconBroadcast,
   IconRefreshAlert,
   IconShieldExclamation,
+  IconTrash,
 } from "@tabler/icons-react";
 import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 
@@ -51,6 +52,7 @@ export default function StreamDangerPanel({
   isPending,
   liveStatus,
   streamHour,
+  onRemovePredictionsHistory,
   onResetRankingPoints,
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
@@ -102,7 +104,8 @@ export default function StreamDangerPanel({
             </div>
           </div>
 
-          <div className="flex h-full flex-col justify-between rounded-2xl border border-red-300/20 bg-red-950/20 p-4">
+          <div className="grid gap-3">
+          <div className="flex flex-col justify-between rounded-2xl border border-red-300/20 bg-red-950/20 p-4">
             <div>
               <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
                 <IconRefreshAlert size={19} />
@@ -121,6 +124,28 @@ export default function StreamDangerPanel({
               <IconRefreshAlert size={18} />
               Reiniciar puntos y creditos
             </button>
+          </div>
+
+          <div className="flex flex-col justify-between rounded-2xl border border-red-300/20 bg-neutral-950/65 p-4">
+            <div>
+              <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
+                <IconTrash size={19} />
+                Borrar historial de predicciones
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-400">
+                Elimina las predicciones cerradas o resueltas del historial global. Las predicciones activas se conservan.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onRemovePredictionsHistory}
+              disabled={isPending}
+              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-neutral-950 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <IconTrash size={18} />
+              Borrar historial
+            </button>
+          </div>
           </div>
         </div>
       </section>

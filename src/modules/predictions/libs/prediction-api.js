@@ -28,6 +28,31 @@ export async function votePrediction(predictionId, payload) {
   );
 }
 
+export async function deletePredictionHistoryItem(predictionId) {
+  const data = await apiRequest(
+    `${buildResourceUrl(envConfig.API_PREDICTIONS, predictionId)}/history`,
+    {
+      method: "DELETE",
+    },
+  );
+
+  return data.prediction || data;
+}
+
+export async function clearPredictionHistory() {
+  const data = await apiRequest(`${envConfig.API_PREDICTIONS}/history`, {
+    method: "DELETE",
+  });
+
+  return Array.isArray(data) ? data : data.predictions || [];
+}
+
+export async function deleteAllPredictionHistory() {
+  return apiRequest(`${envConfig.API_PREDICTIONS}/history/all`, {
+    method: "DELETE",
+  });
+}
+
 export async function closePrediction(predictionId) {
   const data = await apiRequest(
     `${buildResourceUrl(envConfig.API_PREDICTIONS, predictionId)}/close`,

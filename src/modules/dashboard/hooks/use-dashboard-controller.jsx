@@ -51,6 +51,7 @@ import {
 } from "@/modules/stream/libs/stream-api";
 import {
   createPrediction,
+  deleteAllPredictionHistory,
   normalizePrediction,
   resolvePrediction,
 } from "@/modules/predictions/libs/prediction-api";
@@ -887,6 +888,24 @@ export default function useDashboardController() {
     });
   }
 
+  function deletePredictionsHistory() {
+    startTransition(async () => {
+      try {
+        const data = await deleteAllPredictionHistory();
+        const deletedCount = Number(data.deletedCount || 0);
+
+        toast.success(
+          deletedCount === 1
+            ? "Se elimino 1 prediccion del historial"
+            : `Se eliminaron ${deletedCount} predicciones del historial`,
+        );
+        await loadDashboard();
+      } catch {
+        toast.error("No se pudo eliminar el historial de predicciones");
+      }
+    });
+  }
+
   function removeTicket(ticket) {
     setConfirmation({
       type: "delete-ticket",
@@ -1027,7 +1046,36 @@ export default function useDashboardController() {
 
     if (current.type === "delete-all-support-tickets") {
       deleteSupportTicketsByMode("all");
+      return;
     }
+
+    if (current.type === "delete-predictions-history") {
+      deletePredictionsHistory();
+    }
+  }
+
+  function removePredictionsHistory() {
+    const historyCount = predictions.filter(
+      (prediction) => prediction.status !== "active" || prediction.resolvedAt,
+    ).length;
+
+    setConfirmation({
+      type: "delete-predictions-history",
+      title: "Eliminar historial de predicciones",
+      description: `Vas a eliminar ${historyCount} prediccion${
+        historyCount === 1 ? "" : "es"
+      } cerrada${historyCount === 1 ? "" : "s"} o resuelta${
+        historyCount === 1 ? "" : "s"
+      } del historial global.`,
+      confirmLabel: "Eliminar historial",
+      cancelLabel: "Conservar historial",
+      details: [
+        "Se eliminaran las predicciones cerradas o resueltas para todos los usuarios.",
+        "Las predicciones activas y pendientes se conservaran.",
+        "Los puntos ya acreditados o descontados no se recalculan.",
+        "Esta accion no se puede deshacer desde el dashboard.",
+      ],
+    });
   }
 
   function removeGiveaway(giveaway) {
@@ -1160,6 +1208,7 @@ export default function useDashboardController() {
     disconnectKickModeration,
     submitStreamPrediction,
     resolveStreamPrediction,
+    removePredictionsHistory,
     resetRankingPointsToZero,
     useAutomaticStreamHour,
   };

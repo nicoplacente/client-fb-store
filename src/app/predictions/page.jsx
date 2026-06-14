@@ -22,6 +22,7 @@ import {
   IconRefresh,
   IconSparkles,
   IconTargetArrow,
+  IconTrash,
   IconTrophy,
   IconUsers,
 } from "@tabler/icons-react";
@@ -33,6 +34,8 @@ import { getMyRanking } from "@/modules/ranking/libs/ranking-api";
 import { emitKickPointsUpdated } from "@/modules/ranking/libs/points-events";
 import { getErrorMessage } from "@/modules/api/error-message";
 import {
+  clearPredictionHistory,
+  deletePredictionHistoryItem,
   getPredictions,
   normalizePrediction,
   votePrediction,
@@ -86,8 +89,78 @@ function formatDelta(value) {
   const sign = number >= 0 ? "+" : "-";
 
   return `${sign}${formatNumber(Math.abs(number), {
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
   })} pts`;
+}
+
+function groupIntegerDigits(value) {
+  return String(value || "0").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+
+function splitPointsInput(value) {
+  const raw = String(value ?? "").trim();
+  const sanitized = raw.replace(/[^\d.,]/g, "");
+  const commaIndex = sanitized.lastIndexOf(",");
+  const dotIndex = sanitized.lastIndexOf(".");
+  const hasComma = commaIndex >= 0;
+  const dotGroups = sanitized.split(".");
+  const dotFraction = dotIndex >= 0 ? sanitized.slice(dotIndex + 1) : "";
+  const usesDotAsDecimal =
+    !hasComma &&
+    dotIndex >= 0 &&
+    dotGroups.length === 2 &&
+    (raw.endsWith(".") || dotFraction.length !== 3);
+  const decimalIndex = hasComma ? commaIndex : usesDotAsDecimal ? dotIndex : -1;
+  const integerPart =
+    decimalIndex >= 0 ? sanitized.slice(0, decimalIndex) : sanitized;
+  const decimalPart = decimalIndex >= 0 ? sanitized.slice(decimalIndex + 1) : "";
+  const integerDigits = integerPart.replace(/\D/g, "") || "0";
+  const decimalDigits = decimalPart.replace(/\D/g, "");
+
+  return {
+    integerDigits,
+    decimalDigits,
+    hasDecimal: decimalIndex >= 0,
+  };
+}
+
+function parsePointsInput(value) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw) return 0;
+
+  const { integerDigits, decimalDigits, hasDecimal } = splitPointsInput(raw);
+  const parsed = Number(
+    `${integerDigits}${hasDecimal ? `.${decimalDigits}` : ""}`,
+  );
+
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatPointsInput(value) {
+  const raw = String(value ?? "").trim();
+
+  if (!raw) return "";
+
+  const { integerDigits, decimalDigits, hasDecimal } = splitPointsInput(raw);
+  const formattedDecimalDigits = decimalDigits.slice(0, 2);
+
+  return `${groupIntegerDigits(integerDigits)}${
+    hasDecimal ? `,${formattedDecimalDigits}` : ""
+  }`;
+}
+
+function formatPointsInputValue(value) {
+  const number = Number(value || 0);
+
+  if (!Number.isFinite(number) || number <= 0) return "";
+
+  const roundedNumber = Math.round((number + Number.EPSILON) * 100) / 100;
+  const [integerPart, decimalPart] = String(roundedNumber).split(".");
+
+  return `${groupIntegerDigits(integerPart)}${
+    decimalPart ? `,${decimalPart}` : ""
+  }`;
 }
 
 export default function PredictionsPage() {
@@ -205,7 +278,7 @@ export default function PredictionsPage() {
 
   function handleVote(prediction) {
     const optionId = selectedOptions[prediction.id];
-    const points = Math.floor(Number(betAmounts[prediction.id] || 0));
+    const points = parsePointsInput(betAmounts[prediction.id]);
 
     if (!user) {
       toast.error("Inicia sesion para votar");
@@ -254,6 +327,60 @@ export default function PredictionsPage() {
       } catch (err) {
         toast.error(getErrorMessage(err, "No se pudo votar"));
         await loadAvailablePoints();
+      }
+    });
+  }
+
+  function handleDeleteHistoryItem(prediction) {
+    if (!user) {
+      toast.error("Inicia sesion para borrar historial");
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const updatedPrediction = await deletePredictionHistoryItem(
+          prediction.id,
+        );
+
+        setPredictions((current) =>
+          current.map((item) =>
+            Number(item.id) === Number(prediction.id)
+              ? updatedPrediction
+              : item,
+          ),
+        );
+        toast.success("Prediccion eliminada del historial");
+      } catch (err) {
+        toast.error(getErrorMessage(err, "No se pudo borrar el historial"));
+      }
+    });
+  }
+
+  function handleClearHistory() {
+    if (!user) {
+      toast.error("Inicia sesion para borrar historial");
+      return;
+    }
+
+    if (!myClosedPredictions.length) return;
+
+    if (
+      !window.confirm(
+        "¿Borrar todo tu historial de predicciones? Los resultados publicos se conservan.",
+      )
+    ) {
+      return;
+    }
+
+    startTransition(async () => {
+      try {
+        const data = await clearPredictionHistory();
+
+        setPredictions(data);
+        toast.success("Historial de predicciones eliminado");
+      } catch (err) {
+        toast.error(getErrorMessage(err, "No se pudo borrar el historial"));
       }
     });
   }
@@ -321,8 +448,11 @@ export default function PredictionsPage() {
           <PredictionHistory
             activeFilter={historyFilter}
             allCount={closedPredictions.length}
+            isPending={isPending}
             myCount={myClosedPredictions.length}
             predictions={visibleHistoryPredictions}
+            onClearHistory={handleClearHistory}
+            onDeletePrediction={handleDeleteHistoryItem}
             onFilterChange={setHistoryFilter}
           />
         </>
@@ -494,26 +624,24 @@ function PredictionCard({
   const selectedOption = prediction.options.find(
     (option) => Number(option.id) === Number(selectedOptionId),
   );
-  const betPoints = Math.floor(Number(betAmount || 0));
+  const betPoints = parsePointsInput(betAmount);
   const bettingClosed = prediction.endsAt
     ? getRemainingMs(prediction.endsAt) <= 0
     : false;
   const availableBetPoints = Math.max(
     0,
-    Math.floor(Number(availablePoints || 0)),
+    Number(availablePoints || 0),
   );
   const rawPredictionMaxBetPoints = Number(prediction.maxBetPoints);
   const predictionMaxBetPoints =
     Number.isFinite(rawPredictionMaxBetPoints) && rawPredictionMaxBetPoints > 0
-      ? Math.floor(rawPredictionMaxBetPoints)
+      ? rawPredictionMaxBetPoints
       : availableBetPoints;
   const maxBetAmount = Math.max(
     0,
     Math.min(availableBetPoints, predictionMaxBetPoints),
   );
-  const possiblePayout = selectedOption
-    ? betPoints * Number(prediction.payoutMultiplier || 2)
-    : 0;
+  const possiblePayout = betPoints * Number(prediction.payoutMultiplier || 2);
   const maxBetDisabled =
     prediction.hasVoted || bettingClosed || isPending || maxBetAmount < 1;
 
@@ -598,7 +726,9 @@ function PredictionCard({
                 </label>
                 <button
                   type="button"
-                  onClick={() => onBetChange(String(maxBetAmount))}
+                  onClick={() =>
+                    onBetChange(formatPointsInputValue(maxBetAmount))
+                  }
                   disabled={maxBetDisabled}
                   className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-lg border border-red-300/25 bg-red-500/10 px-3 text-[11px] font-black uppercase tracking-wide text-red-100 transition hover:border-red-200/45 hover:bg-red-500/20 focus:outline-none  disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:text-neutral-600"
                 >
@@ -607,11 +737,12 @@ function PredictionCard({
               </div>
               <input
                 id={`prediction-bet-${prediction.id}`}
-                type="number"
-                min={prediction.minBetPoints}
-                max={prediction.maxBetPoints || availableBetPoints}
+                type="text"
+                inputMode="decimal"
                 value={betAmount}
-                onChange={(event) => onBetChange(event.target.value)}
+                onChange={(event) =>
+                  onBetChange(formatPointsInput(event.target.value))
+                }
                 disabled={prediction.hasVoted || bettingClosed}
                 className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="100"
@@ -632,7 +763,11 @@ function PredictionCard({
               <p className="flex items-center justify-between gap-3 text-neutral-500">
                 Si ganas
                 <span className="font-black text-green-300">
-                  +{formatNumber(possiblePayout)} pts
+                  +
+                  {formatNumber(possiblePayout, {
+                    maximumFractionDigits: 2,
+                  })}{" "}
+                  pts
                 </span>
               </p>
               <p className="mt-2 flex items-center justify-between gap-3 text-neutral-500">
@@ -1056,8 +1191,11 @@ function ResolvedOutcomePanel({ prediction, outcome }) {
 function PredictionHistory({
   activeFilter,
   allCount,
+  isPending,
   myCount,
   predictions,
+  onClearHistory,
+  onDeletePrediction,
   onFilterChange,
 }) {
   return (
@@ -1075,7 +1213,7 @@ function PredictionHistory({
             Revisá tus balances y las rondas cerradas del stream.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <HistoryFilterButton
             active={activeFilter === "mine"}
             label="Mis predicciones"
@@ -1088,13 +1226,30 @@ function PredictionHistory({
             count={allCount}
             onClick={() => onFilterChange("all")}
           />
+          {myCount ? (
+            <button
+              type="button"
+              aria-label="Borrar todo mi historial de predicciones"
+              onClick={onClearHistory}
+              disabled={isPending}
+              className="inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-xl border border-red-300/25 bg-red-500/10 px-4 py-2 text-xs font-black uppercase tracking-wide text-red-100 transition hover:border-red-200/45 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:text-neutral-600"
+            >
+              <IconTrash size={15} />
+              Borrar todo
+            </button>
+          ) : null}
         </div>
       </div>
 
       {predictions.length ? (
         <div className="grid gap-2">
           {predictions.map((prediction) => (
-            <HistoryRow key={prediction.id} prediction={prediction} />
+            <HistoryRow
+              key={prediction.id}
+              prediction={prediction}
+              isPending={isPending}
+              onDelete={() => onDeletePrediction(prediction)}
+            />
           ))}
         </div>
       ) : (
@@ -1123,10 +1278,11 @@ function HistoryFilterButton({ active, label, count, onClick }) {
   );
 }
 
-function HistoryRow({ prediction }) {
+function HistoryRow({ prediction, isPending, onDelete }) {
   const outcome = getPredictionOutcome(prediction);
   const won = outcome.status === "won";
   const lost = outcome.status === "lost";
+  const canDelete = Boolean(prediction.currentUserBet);
   const badgeClasses = won
     ? "border-green-300/35 bg-green-400/10 text-green-300"
     : lost
@@ -1151,11 +1307,24 @@ function HistoryRow({ prediction }) {
           </span>
         </p>
       </div>
-      <span
-        className={`inline-flex min-h-9 shrink-0 items-center justify-center rounded-xl border px-3 py-1 text-xs font-black uppercase ${badgeClasses}`}
-      >
-        {outcome.status === "none" ? "Resuelta" : formatDelta(outcome.delta)}
-      </span>
+      <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+        <span
+          className={`inline-flex min-h-9 shrink-0 items-center justify-center rounded-xl border px-3 py-1 text-xs font-black uppercase ${badgeClasses}`}
+        >
+          {outcome.status === "none" ? "Resuelta" : formatDelta(outcome.delta)}
+        </span>
+        {canDelete ? (
+          <button
+            type="button"
+            aria-label={`Borrar ${prediction.title} del historial`}
+            onClick={onDelete}
+            disabled={isPending}
+            className="inline-flex min-h-9 shrink-0 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-neutral-900 px-3 text-neutral-500 transition hover:border-red-300/30 hover:bg-red-500/10 hover:text-red-200 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            <IconTrash size={15} />
+          </button>
+        ) : null}
+      </div>
     </article>
   );
 }

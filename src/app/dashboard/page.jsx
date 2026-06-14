@@ -298,6 +298,7 @@ function DashboardActivePanel({ dashboard }) {
         isPending={dashboard.isPending}
         liveStatus={dashboard.liveStatus}
         streamHour={dashboard.streamHour}
+        onRemovePredictionsHistory={dashboard.removePredictionsHistory}
         onResetRankingPoints={dashboard.resetRankingPointsToZero}
       />
     );
