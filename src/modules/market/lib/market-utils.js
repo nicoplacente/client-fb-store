@@ -11,8 +11,25 @@ export function clampRedemptionQuantity(value, stock) {
   return Math.min(Math.max(quantity, 1), maxStock);
 }
 
+function normalizeText(value) {
+  return String(value || "")
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ");
+}
+
+export function isVipProduct(product) {
+  const category = normalizeText(product?.category);
+  const title = normalizeText(product?.title || product?.name);
+
+  return category === "vip" || /\bvip\b/.test(title);
+}
+
 export function hasSingleRedemptionEffect(product) {
   return (
+    isVipProduct(product) ||
     product?.rewardEffectType === "stream_special_hour" ||
     product?.rewardEffectType === "restore_stream_streak" ||
     product?.rewardEffectType === "kick_timeout_user" ||

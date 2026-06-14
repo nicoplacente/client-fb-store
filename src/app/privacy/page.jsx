@@ -25,7 +25,7 @@ export default function PrivacyPage() {
     <LegalDocument
       eyebrow="Privacidad"
       title="Política de privacidad"
-      description="Esta política explica qué información recopilamos, para qué la usamos y cómo se administra dentro del store, la extensión y las funciones de comunidad."
+      description="Esta política explica qué información recopilamos, para qué la usamos y cómo se administra dentro de la tienda, la extensión y las funciones de comunidad."
       updatedAt={legalUpdatedAt}
       sections={privacySections}
     />
