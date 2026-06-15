@@ -96,12 +96,21 @@ export function formatCompactNumber(value) {
   }).format(Number(value || 0));
 }
 
+export function formatWatchtime(value) {
+  const totalMinutes = Math.max(0, Math.floor(Number(value) || 0));
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+
+  return [`${days}d`, `${hours}h`, `${minutes}m`].join(", ");
+}
+
 export function getLocalRedemptions() {
   if (typeof window === "undefined") return [];
 
   try {
     const data = JSON.parse(
-      window.localStorage.getItem("fbStoreLocalRedemptions") || "[]"
+      window.localStorage.getItem("fbStoreLocalRedemptions") || "[]",
     );
     return Array.isArray(data) ? data : [];
   } catch {
@@ -115,7 +124,7 @@ export function mergeRedemptions(primary, fallback) {
 
   [...primary, ...fallback].forEach((redemption) => {
     const productName = String(
-      redemption.product?.name || redemption.product?.title || ""
+      redemption.product?.name || redemption.product?.title || "",
     )
       .trim()
       .toLowerCase();
@@ -209,7 +218,7 @@ export function getSubscriptionStatusCopy(status) {
 
 export function buildMilestoneRail(timeline, currentMonths) {
   const rewardByMonth = new Map(
-    timeline.map((item) => [Number(item.milestoneMonth), item])
+    timeline.map((item) => [Number(item.milestoneMonth), item]),
   );
   const cycleStart =
     currentMonths > SUB_REWARD_CYCLE_MONTHS

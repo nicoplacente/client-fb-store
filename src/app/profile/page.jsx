@@ -39,6 +39,7 @@ import {
   emptyProfile,
   emptyLevelStats,
   formatCompactNumber,
+  formatWatchtime,
   getLocalRedemptions,
   mergeRedemptions,
   normalizeLevelStats,
@@ -255,8 +256,9 @@ function ProfileXpCard({ stats, loading }) {
   const sources = [
     {
       label: "Watchtime",
-      value: `${formatCompactNumber(stats.watchtime)} min`,
+      value: formatWatchtime(stats.watchtime),
       icon: IconVideo,
+      allowWrap: true,
     },
     {
       label: "Mensajes",
@@ -343,7 +345,13 @@ function ProfileXpCard({ stats, loading }) {
                 <p className="text-[11px] font-bold uppercase text-neutral-500">
                   {source.label}
                 </p>
-                <p className="truncate text-sm font-black text-white">
+                <p
+                  className={`font-black text-white ${
+                    source.allowWrap
+                      ? "text-xs leading-5 sm:text-sm"
+                      : "truncate text-sm"
+                  }`}
+                >
                   {source.value}
                 </p>
               </div>

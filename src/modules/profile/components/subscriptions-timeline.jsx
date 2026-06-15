@@ -46,10 +46,10 @@ export default function SubscriptionsTimeline({
         <SubStat label="Ultimo evento" value={formatShortDate(subscription?.lastEventAt) || "-"} />
       </div>
 
-      <div className="rounded-lg border border-white/10 bg-neutral-950/60 p-4">
-        <div className="mb-4 flex items-center gap-2 text-sm font-bold text-neutral-300">
-          <IconCrown size={18} className="text-red-200" />
-          Linea de tiempo de premios por sub
+      <div className="min-w-0 rounded-lg border border-white/10 bg-neutral-950/60 p-3 sm:p-4">
+        <div className="mb-4 flex items-start gap-2 text-sm font-bold text-neutral-300 sm:items-center">
+          <IconCrown size={18} className="mt-0.5 shrink-0 text-red-200 sm:mt-0" />
+          <span>Línea de tiempo de premios por sub</span>
         </div>
 
         <div className="grid gap-3">
@@ -89,14 +89,16 @@ function SubTimelineItem({ item, claimingRewardId, onClaim }) {
   const StatusIcon = getStatusIcon(item.status);
 
   return (
-    <article className="relative grid gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-4 transition hover:border-white/20 sm:grid-cols-[72px_1fr_auto] sm:items-center">
-      <div className="flex size-14 items-center justify-center rounded-md border border-red-400/25 bg-red-500/10 text-red-100">
+    <article className="relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-3 transition hover:border-white/20 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:items-center sm:p-4">
+      <div className="flex size-12 items-center justify-center rounded-md border border-red-400/25 bg-red-500/10 text-red-100 sm:size-14">
         <span className="text-lg font-black">M{item.milestoneMonth}</span>
       </div>
 
-      <div>
+      <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <h3 className="font-bold text-white">Mes {item.milestoneMonth} de suscripcion</h3>
+          <h3 className="break-words font-bold text-white">
+            Mes {item.milestoneMonth} de suscripción
+          </h3>
           <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-bold ${status.className}`}>
             <StatusIcon size={16} />
             {status.label}
@@ -119,7 +121,7 @@ function SubTimelineItem({ item, claimingRewardId, onClaim }) {
           type="button"
           disabled={isClaiming}
           onClick={() => onClaim(item.rewardId)}
-          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-black text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+          className="col-span-2 inline-flex min-h-10 w-full items-center justify-center gap-2 rounded-md bg-red-500 px-4 py-2 text-sm font-black text-white transition hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50 sm:col-span-1 sm:w-auto"
         >
           <IconGift size={17} />
           {isClaiming ? "Reclamando..." : "Reclamar"}
@@ -133,8 +135,8 @@ function SubscriptionMilestoneRail({ currentMonths, timeline }) {
   const milestones = buildMilestoneRail(timeline, currentMonths);
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-white/10 bg-[radial-gradient(circle_at_center,rgba(248,113,113,0.08),transparent_42%),rgba(10,10,10,0.82)] px-4 py-6">
-      <div className="mx-auto flex min-w-max max-w-4xl items-start justify-center px-2">
+    <div className="max-w-full overflow-x-auto overscroll-x-contain rounded-lg border border-white/10 bg-[radial-gradient(circle_at_center,rgba(248,113,113,0.08),transparent_42%),rgba(10,10,10,0.82)] px-3 py-5 sm:px-4 sm:py-6">
+      <div className="flex w-max min-w-full items-start justify-start px-1 sm:justify-center sm:px-2">
         {milestones.map((item, index) => {
           const isLast = index === milestones.length - 1;
           const locked = item.status === "locked";
@@ -143,23 +145,23 @@ function SubscriptionMilestoneRail({ currentMonths, timeline }) {
           return (
             <div
               key={item.milestoneMonth}
-              className="flex min-w-24 items-start justify-center"
+              className="flex shrink-0 items-start"
               aria-label={`Mes ${item.displayMonth}`}
             >
-              <div className="grid justify-items-center gap-2">
+              <div className="grid w-16 shrink-0 justify-items-center gap-2">
                 <span
                   className={`relative flex size-12 items-center justify-center rounded-full border text-sm font-black shadow-lg transition ${getRailPointClass(item.status)}`}
                 >
                   {locked ? <IconLock size={16} aria-hidden="true" /> : item.displayMonth}
                 </span>
-                <span className={`text-xs font-black ${locked ? "text-neutral-500" : "text-neutral-200"}`}>
+                <span className={`whitespace-nowrap text-xs font-black ${locked ? "text-neutral-500" : "text-neutral-200"}`}>
                   {item.displayMonth} mes{item.displayMonth === 1 ? "" : "es"}
                 </span>
                 <span className="h-1.5 w-1.5 rounded-full bg-red-300/50 shadow-sm shadow-red-300/20" />
               </div>
 
               {!isLast ? (
-                <div className="relative mt-6 h-px w-16">
+                <div className="relative mt-6 h-px w-8 shrink-0 sm:w-12">
                   <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
                   <div className={`absolute inset-x-0 top-0 h-px bg-gradient-to-r ${getRailSegmentClass(nextStatus)}`} />
                 </div>
@@ -174,9 +176,9 @@ function SubscriptionMilestoneRail({ currentMonths, timeline }) {
 
 function SubStat({ label, value }) {
   return (
-    <div className="rounded-md border border-white/10 bg-neutral-950/70 p-3">
+    <div className="min-w-0 rounded-md border border-white/10 bg-neutral-950/70 p-3">
       <p className="text-xs font-semibold uppercase text-neutral-500">{label}</p>
-      <p className="mt-1 text-lg font-black text-white">{value}</p>
+      <p className="mt-1 break-words text-lg font-black text-white">{value}</p>
     </div>
   );
 }
