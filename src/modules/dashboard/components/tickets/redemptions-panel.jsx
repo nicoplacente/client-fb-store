@@ -215,9 +215,6 @@ function RedemptionCard({
   const [profileOpen, setProfileOpen] = useState(false);
   const details = getRedemptionDetails(ticket);
   const productImage = product?.imageUrl || "";
-  const isAudioRedemption =
-    ticket.redemption?.audioStatus &&
-    ticket.redemption.audioStatus !== "not_applicable";
 
   return (
     <article className="grid gap-4 rounded-2xl border border-white/10 bg-neutral-900/60 p-3 shadow-lg shadow-black/15 transition hover:border-red-300/20 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-4">
@@ -292,7 +289,6 @@ function RedemptionCard({
         isPending={isPending}
         onStatusChange={onStatusChange}
         onDelete={onDelete}
-        deleteDisabled={Boolean(isAudioRedemption)}
       />
       <UserProfileModal
         user={ticket.user}
@@ -309,7 +305,6 @@ function TicketActions({
   isPending,
   onStatusChange,
   onDelete,
-  deleteDisabled,
 }) {
   return (
     <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
@@ -324,13 +319,9 @@ function TicketActions({
       </SelectInput>
       <button
         onClick={() => onDelete(ticket)}
-        disabled={isPending || deleteDisabled}
+        disabled={isPending}
         className="inline-flex size-11 cursor-pointer items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 text-red-200 transition hover:-translate-y-0.5 hover:bg-red-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-        aria-label={
-          deleteDisabled
-            ? "El historial de audio no puede eliminarse"
-            : `Eliminar ticket ${ticket.subject}`
-        }
+        aria-label={`Eliminar ticket ${ticket.subject}`}
       >
         <IconTrash size={17} />
       </button>

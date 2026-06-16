@@ -951,7 +951,7 @@ export default function useDashboardController() {
       cancelLabel: "Conservar canjes",
       details: [
         "Solo se eliminarán canjes de productos con estado Cerrado.",
-        "Los canjes de audio se conservarán como historial.",
+        "Los canjes de audio cerrados también se eliminarán.",
         "Los canjes abiertos o en proceso se conservaran.",
         "Esta accion no depende del filtro de fecha visible.",
       ],
@@ -969,7 +969,7 @@ export default function useDashboardController() {
       cancelLabel: "Conservar canjes",
       details: [
         "Se eliminarán canjes abiertos, en proceso y cerrados.",
-        "Los canjes de audio se conservarán como historial.",
+        "Los canjes de audio también se eliminarán.",
         "Esta accion limpia todos los canjes de productos, aunque no esten visibles por filtros.",
         "No se eliminaran tickets de soporte.",
       ],
