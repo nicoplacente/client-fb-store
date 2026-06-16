@@ -282,8 +282,8 @@ export function RewardEffectFields({ form, setForm }) {
           </Field>
           <p className="text-sm font-medium leading-6 text-red-100">
             Al canjear, el comprador deberá elegir un usuario de la audiencia o
-            marcar la opción aleatoria. El streamer y el comprador quedan
-            excluidos.
+            marcar la opción aleatoria. El streamer, el comprador y los
+            moderadores quedan excluidos.
           </p>
         </div>
       ) : null}
