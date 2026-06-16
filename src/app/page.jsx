@@ -77,7 +77,7 @@ export default function Home() {
               width="1246"
               className="aspect-video h-auto w-full rounded-lg"
               height="701"
-              src="https://player.kick.com/francobertello74"
+              src="https://www.youtube.com/embed/_7a2hXKuuc0"
               title="FrancoBertello74"
               loading="lazy"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; storage-access; web-share"
