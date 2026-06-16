@@ -35,6 +35,8 @@ export const envConfig = {
   API_SUPPORT_TICKETS: `${SERVER_URL}/support/tickets`,
   API_USER: `${SERVER_URL}/user`,
   API_USER_REDEMPTIONS: `${SERVER_URL}/user/redemptions`,
+  API_SUBSCRIPTIONS: `${SERVER_URL}/subscriptions`,
+  API_SUBSCRIPTIONS_TEST_EVENT: `${SERVER_URL}/subscriptions/test-event`,
   API_MY_SUBSCRIPTIONS: `${SERVER_URL}/subscriptions/me`,
   API_SUBSCRIPTION_REWARDS: `${SERVER_URL}/subscriptions/rewards`,
   API_STREAM_HOURS: `${SERVER_URL}/stream/hours`,

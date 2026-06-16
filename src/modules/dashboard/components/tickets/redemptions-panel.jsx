@@ -366,7 +366,11 @@ function getRedemptionProductName(ticket) {
 
 function getRedemptionDetails(ticket) {
   const text = `${ticket.message || ""} ${ticket.messages?.[0]?.message || ""}`;
-  const costMatch = text.match(/por\s+([\d.,]+)\s+cr[eé]ditos/i);
+  const creditPurchaseMatch = text.match(
+    /acreditados:\s*([\d.,]+)\s+cr[eé]ditos/i,
+  );
+  const costMatch =
+    creditPurchaseMatch || text.match(/por\s+([\d.,]+)\s+cr[eé]ditos/i);
   const quantityMatch = text.match(/Cantidad:\s+(\d+)/i);
   const wheelPrizeMatch = text.match(/gan[oó]\s+(.+?)\./i);
   const timeoutTargetMatch = text.match(

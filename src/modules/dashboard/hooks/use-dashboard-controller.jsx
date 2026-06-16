@@ -55,6 +55,7 @@ import {
   normalizePrediction,
   resolvePrediction,
 } from "@/modules/predictions/libs/prediction-api";
+import { simulateSubscriptionTestEvent } from "@/modules/subscriptions/libs/subscription-api";
 import {
   dashboardTabs,
   emptyCreditPackage,
@@ -101,6 +102,7 @@ export default function useDashboardController() {
   const [creditPackages, setCreditPackages] = useState([]);
   const [giveaways, setGiveaways] = useState([]);
   const [tickets, setTickets] = useState([]);
+  const [subscriptions, setSubscriptions] = useState([]);
   const [streamHour, setStreamHour] = useState(null);
   const [streamRewards, setStreamRewards] = useState(null);
   const [liveStatus, setLiveStatus] = useState(null);
@@ -160,6 +162,13 @@ export default function useDashboardController() {
       ),
     [normalizedTickets],
   );
+  const subscriptionRewards = useMemo(
+    () =>
+      subscriptions.flatMap((subscription) =>
+        Array.isArray(subscription.rewards) ? subscription.rewards : [],
+      ),
+    [subscriptions],
+  );
   const openSupportTickets = useMemo(
     () => supportTickets.filter((ticket) => ticket.status !== "closed"),
     [supportTickets],
@@ -173,6 +182,10 @@ export default function useDashboardController() {
       purchases: redemptionTickets.filter(
         (ticket) => ticket.status !== "closed",
       ).length,
+      subscriptions: subscriptions.length,
+      subscriptionRewards: subscriptionRewards.filter(
+        (reward) => reward.status === "available",
+      ).length,
     }),
     [
       normalizedProducts,
@@ -180,6 +193,8 @@ export default function useDashboardController() {
       normalizedGiveaways,
       openSupportTickets,
       redemptionTickets,
+      subscriptionRewards,
+      subscriptions,
     ],
   );
 
@@ -193,6 +208,7 @@ export default function useDashboardController() {
       setCreditPackages(data.creditPackageData);
       setGiveaways(data.giveawayData);
       setTickets(data.ticketData);
+      setSubscriptions(data.subscriptions || []);
       if (data.streamHour) setStreamHour(data.streamHour);
       if (data.streamRewards) setStreamRewards(data.streamRewards);
       if (data.liveStatus) setLiveStatus(data.liveStatus);
@@ -460,7 +476,7 @@ export default function useDashboardController() {
       cancelLabel: "Conservar pack",
       details: [
         "El pack dejara de estar disponible para nuevas compras.",
-        "Tambien se eliminara el historial de compras asociado a este pack.",
+        "El historial de compras asociado a este pack se conservara.",
       ],
       target: creditPackage,
     });
@@ -1107,6 +1123,22 @@ export default function useDashboardController() {
     });
   }
 
+  function simulateCurrentUserSubscription() {
+    startTransition(async () => {
+      try {
+        await simulateSubscriptionTestEvent({
+          eventType: "channel.subscription.renewal",
+          duration: 1,
+          username: user?.username,
+        });
+        toast.success("Sub de prueba registrada");
+        await loadDashboard({ showLoading: false });
+      } catch {
+        toast.error("No se pudo simular la sub");
+      }
+    });
+  }
+
   return {
     user,
     canManageDashboard,
@@ -1124,6 +1156,7 @@ export default function useDashboardController() {
     giveaways: normalizedGiveaways,
     supportTickets,
     redemptionTickets,
+    subscriptions,
     streamHour,
     streamRewards,
     liveStatus,
@@ -1210,6 +1243,7 @@ export default function useDashboardController() {
     resolveStreamPrediction,
     removePredictionsHistory,
     resetRankingPointsToZero,
+    simulateCurrentUserSubscription,
     useAutomaticStreamHour,
   };
 }

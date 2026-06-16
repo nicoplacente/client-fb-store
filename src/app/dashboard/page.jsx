@@ -14,6 +14,7 @@ import RewardWheelPanel from "@/modules/dashboard/components/reward-wheel-panel"
 import KickModerationPanel from "@/modules/dashboard/components/kick-moderation-panel";
 import {
   RedemptionsPanel,
+  SubscriptionsPanel,
   SupportPanel,
 } from "@/modules/dashboard/components/ticket-panels";
 import useDashboardController from "@/modules/dashboard/hooks/use-dashboard-controller";
@@ -114,11 +115,12 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
 
 function DashboardStats({ stats }) {
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
+    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
       <StatCard label="Productos" value={stats.products} />
       <StatCard label="Packs de creditos" value={stats.credits} />
       <StatCard label="Sorteos" value={stats.giveaways} />
       <StatCard label="Compras pendientes" value={stats.purchases} />
+      <StatCard label="Subscripciones" value={stats.subscriptions} />
       <StatCard label="Tickets abiertos" value={stats.tickets} />
     </div>
   );
@@ -252,6 +254,15 @@ function DashboardActivePanel({ dashboard }) {
     );
   }
 
+  if (dashboard.activeTab === "subscriptions") {
+    return (
+      <SubscriptionsPanel
+        subscriptions={dashboard.subscriptions}
+        loading={dashboard.loading}
+      />
+    );
+  }
+
   if (dashboard.activeTab === "stream") {
     return (
       <div className="space-y-6">
@@ -300,6 +311,7 @@ function DashboardActivePanel({ dashboard }) {
         streamHour={dashboard.streamHour}
         onRemovePredictionsHistory={dashboard.removePredictionsHistory}
         onResetRankingPoints={dashboard.resetRankingPointsToZero}
+        onSimulateSubscription={dashboard.simulateCurrentUserSubscription}
       />
     );
   }

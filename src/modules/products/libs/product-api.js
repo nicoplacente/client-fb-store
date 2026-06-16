@@ -173,6 +173,7 @@ export function normalizeProductRedemption(redemption) {
     audioPlayedAt: redemption.audioPlayedAt || "",
     audioSubmission: normalizeAudioSubmission(redemption.audioSubmission),
     createdAt: redemption.createdAt || "",
+    redemptionType: redemption.redemptionType || redemption.type || "",
     product: normalizeProduct(product),
   };
 }

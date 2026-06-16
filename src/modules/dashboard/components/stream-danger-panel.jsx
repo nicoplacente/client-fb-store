@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   IconAlertTriangle,
   IconBroadcast,
+  IconCrown,
   IconRefreshAlert,
   IconShieldExclamation,
   IconTrash,
@@ -54,6 +55,7 @@ export default function StreamDangerPanel({
   streamHour,
   onRemovePredictionsHistory,
   onResetRankingPoints,
+  onSimulateSubscription,
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const live = Boolean(liveStatus?.isConfirmedLive);
@@ -105,6 +107,27 @@ export default function StreamDangerPanel({
           </div>
 
           <div className="grid gap-3">
+          <div className="flex flex-col justify-between rounded-2xl border border-emerald-300/20 bg-emerald-950/10 p-4">
+            <div>
+              <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
+                <IconCrown size={19} />
+                Probar sub local
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-neutral-400">
+                Simula una sub de 1 mes para tu usuario logueado y la registra en Subscripciones.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onSimulateSubscription}
+              disabled={isPending}
+              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-500/10 px-4 py-3 text-sm font-black text-emerald-100 transition hover:-translate-y-0.5 hover:border-emerald-200/50 hover:bg-emerald-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <IconCrown size={18} />
+              Suscribirme de prueba
+            </button>
+          </div>
+
           <div className="flex flex-col justify-between rounded-2xl border border-red-300/20 bg-red-950/20 p-4">
             <div>
               <h3 className="inline-flex items-center gap-2 text-base font-black text-white">

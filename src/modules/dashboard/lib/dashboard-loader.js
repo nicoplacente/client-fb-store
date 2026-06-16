@@ -15,6 +15,7 @@ import {
   getPredictions,
   normalizePrediction,
 } from "@/modules/predictions/libs/prediction-api";
+import { getSubscriptions } from "@/modules/subscriptions/libs/subscription-api";
 
 export async function loadDashboardData() {
   const [
@@ -28,6 +29,7 @@ export async function loadDashboardData() {
     rewardWheelData,
     predictionData,
     moderationData,
+    subscriptionData,
   ] = await Promise.all([
     getProducts({ includeDisabled: true }),
     getCreditPackages({ includeDisabled: true }),
@@ -39,6 +41,7 @@ export async function loadDashboardData() {
     getRewardWheelConfigs().catch(() => []),
     getPredictions({ includeInactive: true }).catch(() => []),
     getRewardWheelModerationStatus().catch(() => null),
+    getSubscriptions().catch(() => []),
   ]);
 
   return {
@@ -56,5 +59,6 @@ export async function loadDashboardData() {
     rewardWheels: rewardWheelData,
     predictions: predictionData.map(normalizePrediction),
     kickModeration: moderationData,
+    subscriptions: subscriptionData,
   };
 }
