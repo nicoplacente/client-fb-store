@@ -450,6 +450,8 @@ function StreamPredictionsPanel({
                     minBetPoints: value,
                   }))
                 }
+                allowDecimals
+                decimalScale={2}
                 aria-label="Apuesta minima en puntos"
               />
             </Field>
@@ -464,6 +466,8 @@ function StreamPredictionsPanel({
                   }))
                 }
                 placeholder="Sin limite"
+                allowDecimals
+                decimalScale={2}
                 aria-label="Apuesta maxima en puntos"
               />
             </Field>

@@ -97,57 +97,53 @@ function groupIntegerDigits(value) {
   return String(value || "0").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-function splitPointsInput(value) {
-  const raw = String(value ?? "").trim();
-  const sanitized = raw.replace(/[^\d.,]/g, "");
-  const commaIndex = sanitized.lastIndexOf(",");
-  const dotIndex = sanitized.lastIndexOf(".");
-  const hasComma = commaIndex >= 0;
-  const dotGroups = sanitized.split(".");
-  const dotFraction = dotIndex >= 0 ? sanitized.slice(dotIndex + 1) : "";
-  const usesDotAsDecimal =
-    !hasComma &&
-    dotIndex >= 0 &&
-    dotGroups.length === 2 &&
-    (raw.endsWith(".") || dotFraction.length !== 3);
-  const decimalIndex = hasComma ? commaIndex : usesDotAsDecimal ? dotIndex : -1;
-  const integerPart =
-    decimalIndex >= 0 ? sanitized.slice(0, decimalIndex) : sanitized;
-  const decimalPart = decimalIndex >= 0 ? sanitized.slice(decimalIndex + 1) : "";
-  const integerDigits = integerPart.replace(/\D/g, "") || "0";
-  const decimalDigits = decimalPart.replace(/\D/g, "");
+function normalizePointsInput(value) {
+  const cleanValue = String(value ?? "").replace(/[^\d.,]/g, "");
+
+  if (!cleanValue) return {
+    integerValue: "",
+    decimalValue: "",
+    hasDecimalSeparator: false,
+  };
+
+  const decimalSeparatorIndex = getPointsDecimalSeparatorIndex(cleanValue);
+  const hasDecimalSeparator = decimalSeparatorIndex !== -1;
+  const integerSource = hasDecimalSeparator
+    ? cleanValue.slice(0, decimalSeparatorIndex)
+    : cleanValue;
+  const decimalSource = hasDecimalSeparator
+    ? cleanValue.slice(decimalSeparatorIndex + 1)
+    : "";
 
   return {
-    integerDigits,
-    decimalDigits,
-    hasDecimal: decimalIndex >= 0,
+    integerValue: normalizePointsInteger(integerSource),
+    decimalValue: decimalSource.replace(/\D/g, "").slice(0, 2),
+    hasDecimalSeparator,
   };
 }
 
 function parsePointsInput(value) {
-  const raw = String(value ?? "").trim();
-
-  if (!raw) return 0;
-
-  const { integerDigits, decimalDigits, hasDecimal } = splitPointsInput(raw);
-  const parsed = Number(
-    `${integerDigits}${hasDecimal ? `.${decimalDigits}` : ""}`,
-  );
+  const { integerValue, decimalValue, hasDecimalSeparator } =
+    normalizePointsInput(value);
+  const numericValue = hasDecimalSeparator
+    ? `${integerValue || "0"}.${decimalValue}`
+    : integerValue;
+  const parsed = Number(numericValue);
 
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
 function formatPointsInput(value) {
-  const raw = String(value ?? "").trim();
+  const { integerValue, decimalValue, hasDecimalSeparator } =
+    normalizePointsInput(value);
 
-  if (!raw) return "";
+  if (!integerValue && !hasDecimalSeparator) return "";
 
-  const { integerDigits, decimalDigits, hasDecimal } = splitPointsInput(raw);
-  const formattedDecimalDigits = decimalDigits.slice(0, 2);
+  const formattedInteger = groupIntegerDigits(integerValue || "0");
 
-  return `${groupIntegerDigits(integerDigits)}${
-    hasDecimal ? `,${formattedDecimalDigits}` : ""
-  }`;
+  if (!hasDecimalSeparator) return formattedInteger;
+
+  return `${formattedInteger},${decimalValue}`;
 }
 
 function formatPointsInputValue(value) {
@@ -155,12 +151,38 @@ function formatPointsInputValue(value) {
 
   if (!Number.isFinite(number) || number <= 0) return "";
 
-  const roundedNumber = Math.round((number + Number.EPSILON) * 100) / 100;
-  const [integerPart, decimalPart] = String(roundedNumber).split(".");
+  return formatPointsInput(
+    String(number).replace(".", ","),
+  );
+}
 
-  return `${groupIntegerDigits(integerPart)}${
-    decimalPart ? `,${decimalPart}` : ""
-  }`;
+function normalizePointsInteger(value) {
+  return String(value || "")
+    .replace(/\D/g, "")
+    .replace(/^0+(?=\d)/, "");
+}
+
+function getPointsDecimalSeparatorIndex(value) {
+  const lastCommaIndex = value.lastIndexOf(",");
+  const lastDotIndex = value.lastIndexOf(".");
+  const separatorIndex = Math.max(lastCommaIndex, lastDotIndex);
+
+  if (separatorIndex === -1) return -1;
+
+  const separator = value[separatorIndex];
+  const decimalsLength = value
+    .slice(separatorIndex + 1)
+    .replace(/\D/g, "").length;
+
+  if (separator === ",") return separatorIndex;
+  if (
+    value.endsWith(".") ||
+    (decimalsLength > 0 && decimalsLength <= 2)
+  ) {
+    return separatorIndex;
+  }
+
+  return -1;
 }
 
 export default function PredictionsPage() {

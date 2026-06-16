@@ -808,9 +808,9 @@ export default function useDashboardController() {
     const durationMinutes = Math.floor(
       parseNumericInput(payload.durationMinutes, 0),
     );
-    const minBetPoints = Math.floor(parseNumericInput(payload.minBetPoints, 1));
+    const minBetPoints = parseNumericInput(payload.minBetPoints, 1);
     const maxBetPoints = payload.maxBetPoints
-      ? Math.floor(parseNumericInput(payload.maxBetPoints, 0))
+      ? parseNumericInput(payload.maxBetPoints, 0)
       : null;
 
     if (!String(payload.title || "").trim()) {

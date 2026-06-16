@@ -35,7 +35,7 @@ export default function AdminCard({
           <img
             src={imageUrl}
             alt={title}
-            className={`h-full w-full object-cover transition duration-700 group-hover:scale-105 ${unavailable ? "grayscale" : ""}`}
+            className={`h-full w-full object-scale-down transition duration-700 group-hover:scale-105 ${unavailable ? "grayscale" : ""}`}
             loading="lazy"
             decoding="async"
           />
