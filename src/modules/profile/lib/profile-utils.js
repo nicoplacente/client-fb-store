@@ -16,6 +16,9 @@ export const emptyProfile = {
 export const INITIAL_VISIBLE_SUB_MILESTONES = 1;
 export const SUB_REWARD_CYCLE_MONTHS = 18;
 export const SUB_REWARD_CYCLE_LABELS = [1, 3, 6, 9, 12, 15, 18];
+const SUBSCRIPTION_REWARD_NAMES = new Map([
+  [1, "Booster Mc Donalds 2023 Pokémon Español"],
+]);
 export const emptyLevelStats = {
   xp: 0,
   level: 1,
@@ -214,6 +217,12 @@ export function getSubscriptionStatusCopy(status) {
     label: "Bloqueado",
     className: "border-white/10 bg-neutral-950 text-neutral-500",
   };
+}
+
+export function getSubscriptionRewardName(milestoneMonth) {
+  return (
+    SUBSCRIPTION_REWARD_NAMES.get(Number(milestoneMonth)) || "Premio de sub"
+  );
 }
 
 export function buildMilestoneRail(timeline, currentMonths) {

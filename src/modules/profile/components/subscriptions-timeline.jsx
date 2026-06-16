@@ -5,6 +5,7 @@ import {
   buildMilestoneRail,
   formatShortDate,
   getSubscriptionStatusCopy,
+  getSubscriptionRewardName,
   getVisibleSubscriptionTimeline,
 } from "../lib/profile-utils";
 
@@ -87,6 +88,8 @@ function SubTimelineItem({ item, claimingRewardId, onClaim }) {
   const status = getSubscriptionStatusCopy(item.status);
   const isClaiming = Number(claimingRewardId) === Number(item.rewardId);
   const StatusIcon = getStatusIcon(item.status);
+  const rewardName =
+    item.rewardName || getSubscriptionRewardName(item.milestoneMonth);
 
   return (
     <article className="relative grid min-w-0 grid-cols-[auto_minmax(0,1fr)] gap-3 rounded-lg border border-white/10 bg-neutral-900/60 p-3 transition hover:border-white/20 sm:grid-cols-[72px_minmax(0,1fr)_auto] sm:items-center sm:p-4">
@@ -104,6 +107,9 @@ function SubTimelineItem({ item, claimingRewardId, onClaim }) {
             {status.label}
           </span>
         </div>
+        <p className="mt-1 text-sm text-neutral-400">
+          Premio: <span className="font-bold text-red-100">{rewardName}</span>
+        </p>
         <p className="mt-1 text-sm text-neutral-400">
           {item.unlockedAt
             ? `Desbloqueado el ${formatShortDate(item.unlockedAt)}`

@@ -10,11 +10,16 @@ import {
 import { formatDateTime } from "../../lib/formatters";
 import { TicketEmptyState } from "./ticket-status";
 import UserProfileModal, { UserProfileButton } from "./user-profile-modal";
+import { getSubscriptionRewardName } from "@/modules/profile/lib/profile-utils";
 
 export default function SubscriptionsPanel({ subscriptions, loading }) {
-  const metrics = useMemo(
-    () => getSubscriptionMetrics(subscriptions),
+  const subscriptionAlerts = useMemo(
+    () => buildSubscriptionAlerts(subscriptions),
     [subscriptions],
+  );
+  const metrics = useMemo(
+    () => getSubscriptionMetrics(subscriptions, subscriptionAlerts),
+    [subscriptions, subscriptionAlerts],
   );
 
   return (
@@ -23,14 +28,14 @@ export default function SubscriptionsPanel({ subscriptions, loading }) {
 
       {loading ? (
         <TicketEmptyState>Cargando subscripciones...</TicketEmptyState>
-      ) : subscriptions.length === 0 ? (
+      ) : subscriptionAlerts.length === 0 ? (
         <TicketEmptyState>No hay subscripciones registradas.</TicketEmptyState>
       ) : (
         <div className="grid gap-3">
-          {subscriptions.map((subscription) => (
-            <SubscriptionCard
-              key={subscription.id}
-              subscription={subscription}
+          {subscriptionAlerts.map((alert) => (
+            <SubscriptionAlertCard
+              key={alert.id}
+              alert={alert}
             />
           ))}
         </div>
@@ -49,13 +54,13 @@ function SubscriptionsHeader({ metrics }) {
         <div>
           <h2 className="text-lg font-black text-white">Subscripciones</h2>
           <p className="mt-1 text-sm text-neutral-500">
-            Registro de usuarios suscriptos, meses acumulados y premios de sub.
+            Registro de cada mes de sub, usuarios suscriptos y premios.
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <SubscriptionMetric label="Usuarios" value={metrics.total} />
+        <SubscriptionMetric label="Alertas" value={metrics.total} />
         <SubscriptionMetric label="Activas" value={metrics.active} tone="red" />
         <SubscriptionMetric label="Pendientes" value={metrics.availableRewards} tone="emerald" />
         <SubscriptionMetric label="Reclamados" value={metrics.claimedRewards} tone="sky" />
@@ -64,13 +69,14 @@ function SubscriptionsHeader({ metrics }) {
   );
 }
 
-function SubscriptionCard({ subscription }) {
+function SubscriptionAlertCard({ alert }) {
   const [profileOpen, setProfileOpen] = useState(false);
+  const subscription = alert.subscription;
   const rewards = Array.isArray(subscription.rewards)
     ? subscription.rewards
     : [];
   const rewardSummary = getRewardSummary(rewards);
-  const currentReward = getCurrentMonthReward(subscription, rewards);
+  const currentReward = getRewardForMonth(rewards, alert.month);
   const CurrentRewardIcon = currentReward.Icon;
   const status = subscription.isActive ? "Activa" : "Inactiva";
   const username =
@@ -99,12 +105,12 @@ function SubscriptionCard({ subscription }) {
 
         <div className="mt-4 grid gap-2 sm:grid-cols-3">
           <SubscriptionDetail
-            label="Meses de sub"
-            value={subscription.currentMonths || 0}
+            label="Mes de sub"
+            value={alert.month}
             icon={<IconCrown size={14} />}
           />
           <SubscriptionDetail
-            label="Premio actual"
+            label="Premio"
             value={currentReward.shortLabel}
             icon={<IconGift size={14} />}
           />
@@ -132,7 +138,7 @@ function SubscriptionCard({ subscription }) {
       <div className="rounded-2xl border border-white/10 bg-neutral-950/65 p-3">
         <div className="mb-3 flex items-center justify-between gap-3">
           <p className="text-xs font-black uppercase text-neutral-500">
-            Mes actual
+            Alerta de sub
           </p>
           <span className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-1 text-xs font-bold ${currentReward.className}`}>
             <CurrentRewardIcon size={14} />
@@ -158,6 +164,22 @@ function SubscriptionCard({ subscription }) {
       />
     </article>
   );
+}
+
+function buildSubscriptionAlerts(subscriptions) {
+  return subscriptions.flatMap((subscription) => {
+    const currentMonths = Math.max(0, Number(subscription.currentMonths || 0));
+
+    return Array.from({ length: currentMonths }, (_, index) => {
+      const month = currentMonths - index;
+
+      return {
+        id: `${subscription.id}-${month}`,
+        month,
+        subscription,
+      };
+    });
+  });
 }
 
 function SubscriptionMetric({ label, value, tone = "neutral" }) {
@@ -192,15 +214,15 @@ function SubscriptionDetail({ label, value, icon }) {
   );
 }
 
-function getSubscriptionMetrics(subscriptions) {
+function getSubscriptionMetrics(subscriptions, alerts) {
   return subscriptions.reduce(
     (metrics, subscription) => {
       const rewards = Array.isArray(subscription.rewards)
         ? subscription.rewards
         : [];
+      const currentMonths = Math.max(0, Number(subscription.currentMonths || 0));
 
-      metrics.total += 1;
-      if (subscription.isActive) metrics.active += 1;
+      if (subscription.isActive) metrics.active += currentMonths;
 
       rewards.forEach((reward) => {
         if (reward.status === "available") metrics.availableRewards += 1;
@@ -210,7 +232,7 @@ function getSubscriptionMetrics(subscriptions) {
       return metrics;
     },
     {
-      total: 0,
+      total: alerts.length,
       active: 0,
       availableRewards: 0,
       claimedRewards: 0,
@@ -233,8 +255,8 @@ function getRewardSummary(rewards) {
   );
 }
 
-function getCurrentMonthReward(subscription, rewards) {
-  const currentMonths = Number(subscription.currentMonths || 0);
+function getRewardForMonth(rewards, month) {
+  const currentMonths = Number(month || 0);
   const currentReward = rewards.find(
     (reward) => Number(reward.milestoneMonth) === currentMonths,
   );
@@ -242,44 +264,44 @@ function getCurrentMonthReward(subscription, rewards) {
     currentMonths === 1 ? "" : "es"
   }`;
 
+  if (!currentReward) {
+    return {
+      Icon: IconClock,
+      monthsLabel,
+      statusLabel: "Registrada",
+      shortLabel: "Sin premio",
+      description: "Mes de sub registrado sin premio configurado.",
+      className: "border-white/10 bg-neutral-900 text-neutral-400",
+      textClassName: "text-neutral-400",
+    };
+  }
+
+  const rewardName =
+    currentReward.rewardName || getSubscriptionRewardName(currentMonths);
+
   if (currentReward?.status === "claimed") {
     return {
       Icon: IconCircleCheck,
       monthsLabel,
       statusLabel: "Reclamado",
-      shortLabel: "Reclamado",
+      shortLabel: rewardName,
       description: currentReward.claimedAt
-        ? `Premio reclamado el ${formatDateTime(currentReward.claimedAt)}.`
-        : "Premio reclamado.",
+        ? `${rewardName} reclamado el ${formatDateTime(currentReward.claimedAt)}.`
+        : `${rewardName} reclamado.`,
       className: "border-sky-400/30 bg-sky-500/10 text-sky-200",
       textClassName: "text-sky-200",
     };
   }
 
-  if (currentReward) {
-    return {
-      Icon: IconGift,
-      monthsLabel,
-      statusLabel: "No reclamado",
-      shortLabel: "No reclamado",
-      description: currentReward.unlockedAt
-        ? `Premio desbloqueado el ${formatDateTime(currentReward.unlockedAt)}.`
-        : "Premio disponible sin reclamar.",
-      className: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
-      textClassName: "text-emerald-200",
-    };
-  }
-
   return {
-    Icon: IconClock,
+    Icon: IconGift,
     monthsLabel,
-    statusLabel: "Sin premio",
-    shortLabel: "Sin premio",
-    description:
-      currentMonths > 0
-        ? "No hay premio desbloqueado para este mes."
-        : "Todavia no tiene meses de sub registrados.",
-    className: "border-white/10 bg-neutral-900 text-neutral-500",
-    textClassName: "text-neutral-500",
+    statusLabel: "No reclamado",
+    shortLabel: rewardName,
+    description: currentReward.unlockedAt
+      ? `${rewardName} desbloqueado el ${formatDateTime(currentReward.unlockedAt)}.`
+      : `${rewardName} disponible sin reclamar.`,
+    className: "border-emerald-400/30 bg-emerald-500/10 text-emerald-200",
+    textClassName: "text-emerald-200",
   };
 }
