@@ -12,6 +12,7 @@ import SectionContainer from "@/modules/ui/section-container";
 import { ITEMS_PER_PAGE } from "@/modules/ranking/libs/constants";
 import RankingSearchBar from "@/modules/ranking/components/ranking-searchbar";
 import TH from "@/modules/ranking/ui/th";
+import { formatWatchtime } from "@/modules/profile/lib/profile-utils";
 import { envConfig } from "@/config";
 
 function formatExactNumber(value) {
@@ -147,12 +148,16 @@ export default function RankingPage() {
               <TH>
                 <RankingSearchBar value={searchTerm} onSearch={setSearchTerm} />
               </TH>
-              <TH>Watchtime</TH>
+              <TH>
+                <span className="whitespace-nowrap">Watchtime</span>
+              </TH>
               <TH>Puntos</TH>
               <TH>Cofres</TH>
               <TH>Racha</TH>
               <TH>Mensajes</TH>
-              <TH>Rec. Chat</TH>
+              <TH>
+                <span className="whitespace-nowrap">Rec. Chat</span>
+              </TH>
             </tr>
           </thead>
           <tbody>
@@ -173,8 +178,6 @@ export default function RankingPage() {
                 const absoluteIndex = startIndex + index;
                 const isPodium = absoluteIndex < 3;
                 const watchTimePoints = Number(user.watchTimePoints || 0);
-                const hours = Math.floor(watchTimePoints / 60);
-                const minutes = watchTimePoints % 60;
 
                 return (
                   <tr
@@ -189,7 +192,9 @@ export default function RankingPage() {
                         {user.username}
                       </span>
                     </td>
-                    <td>{`${hours}h ${minutes}m`}</td>
+                    <td className="whitespace-nowrap">
+                      {formatWatchtime(watchTimePoints)}
+                    </td>
                     <td>
                       <RoundedStat value={user.totalPoints} />
                     </td>

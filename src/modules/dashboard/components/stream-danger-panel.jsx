@@ -29,14 +29,14 @@ function formatLiveMode(liveStatus) {
     return `${source} · online confirmado`;
   }
 
-  if (hasOnlineSignal) return `${source} · esperando confirmacion`;
+  if (hasOnlineSignal) return `${source} · esperando confirmación`;
 
   return `${source}: ${liveStatus.status || "auto"}`;
 }
 
 function formatLiveSource(source) {
   if (source === "chrome_extension" || source === "chrome_extension_page") {
-    return "Extension (diagnostico)";
+    return "Extensión (diagnóstico)";
   }
 
   if (source === "kick_api") return "Kick API";
@@ -69,25 +69,25 @@ export default function StreamDangerPanel({
   return (
     <>
       <section className="overflow-hidden rounded-2xl border border-red-300/20 bg-[linear-gradient(135deg,rgba(127,29,29,0.28),rgba(10,10,10,0.86)_46%,rgba(10,10,10,0.95))] p-4 shadow-2xl shadow-black/25 ring-1 ring-red-300/[0.04] sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
-          <div className="space-y-4">
-            <div className="flex items-start gap-3">
-              <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
-                <IconShieldExclamation size={23} />
-              </span>
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-red-300/80">
-                  Zona de peligro
-                </p>
-                <h2 className="mt-1 text-xl font-black text-white">
-                  Controles sensibles
-                </h2>
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400">
-                  Revisa el estado actual del stream antes de ejecutar acciones que afectan el ranking de toda la comunidad.
-                </p>
-              </div>
+        <div className="space-y-4">
+          <div className="flex items-start gap-3">
+            <span className="grid size-12 shrink-0 place-items-center rounded-xl border border-red-300/25 bg-red-500/10 text-red-100">
+              <IconShieldExclamation size={23} />
+            </span>
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-wide text-red-300/80">
+                Zona de peligro
+              </p>
+              <h2 className="mt-1 text-xl font-black text-white">
+                Controles sensibles
+              </h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-neutral-400">
+                Revisa el estado actual del stream antes de ejecutar acciones que afectan el ranking de toda la comunidad.
+              </p>
             </div>
+          </div>
 
+          <div className="grid gap-3">
             <div className="grid gap-3 md:grid-cols-2">
               <StatusCard
                 icon={IconBroadcast}
@@ -100,75 +100,27 @@ export default function StreamDangerPanel({
                 icon={IconAlertTriangle}
                 label="Bonus activo"
                 title={streamHour?.activeLabel || "Sin hora especial"}
-                detail={isManual ? "Control manual" : "Control automatico"}
+                detail={isManual ? "Control manual" : "Control automático"}
                 active={isManual}
               />
+              <ActionCard
+                icon={IconRefreshAlert}
+                title="Reiniciar ranking"
+                text="Esta acción deja en 0 los créditos y todos los valores del ranking de la comunidad, conservando los usuarios existentes."
+                actionLabel="Reiniciar puntos y créditos"
+                variant="danger"
+                disabled={isPending}
+                onClick={() => setConfirmOpen(true)}
+              />
+              <ActionCard
+                icon={IconTrash}
+                title="Borrar historial de predicciones"
+                text="Elimina las predicciones cerradas o resueltas del historial global. Las predicciones activas se conservan."
+                actionLabel="Borrar historial"
+                disabled={isPending}
+                onClick={onRemovePredictionsHistory}
+              />
             </div>
-          </div>
-
-          <div className="grid gap-3">
-          <div className="flex flex-col justify-between rounded-2xl border border-emerald-300/20 bg-emerald-950/10 p-4">
-            <div>
-              <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
-                <IconCrown size={19} />
-                Probar sub local
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Simula una sub de 1 mes para tu usuario logueado y la registra en Subscripciones.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onSimulateSubscription}
-              disabled={isPending}
-              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-emerald-300/30 bg-emerald-500/10 px-4 py-3 text-sm font-black text-emerald-100 transition hover:-translate-y-0.5 hover:border-emerald-200/50 hover:bg-emerald-500/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <IconCrown size={18} />
-              Suscribirme de prueba
-            </button>
-          </div>
-
-          <div className="flex flex-col justify-between rounded-2xl border border-red-300/20 bg-red-950/20 p-4">
-            <div>
-              <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
-                <IconRefreshAlert size={19} />
-                Reiniciar ranking
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Esta accion deja en 0 los creditos y todos los valores del ranking de la comunidad, conservando los usuarios existentes.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => setConfirmOpen(true)}
-              disabled={isPending}
-              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-red-500/15 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/25 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <IconRefreshAlert size={18} />
-              Reiniciar puntos y creditos
-            </button>
-          </div>
-
-          <div className="flex flex-col justify-between rounded-2xl border border-red-300/20 bg-neutral-950/65 p-4">
-            <div>
-              <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
-                <IconTrash size={19} />
-                Borrar historial de predicciones
-              </h3>
-              <p className="mt-2 text-sm leading-6 text-neutral-400">
-                Elimina las predicciones cerradas o resueltas del historial global. Las predicciones activas se conservan.
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={onRemovePredictionsHistory}
-              disabled={isPending}
-              className="mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 bg-neutral-950 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 hover:bg-red-500/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              <IconTrash size={18} />
-              Borrar historial
-            </button>
-          </div>
           </div>
         </div>
       </section>
@@ -176,9 +128,9 @@ export default function StreamDangerPanel({
       <ConfirmationDialog
         open={confirmOpen}
         variant="danger"
-        title="Reiniciar puntos y creditos"
-        description="Esta accion impacta a todos los usuarios. Los usuarios se conservan, pero sus creditos y valores del ranking vuelven a 0."
-        confirmLabel={isPending ? "Reiniciando..." : "Si, reiniciar todo"}
+        title="Reiniciar puntos y créditos"
+        description="Esta acción impacta a todos los usuarios. Los usuarios se conservan, pero sus créditos y valores del ranking vuelven a 0."
+        confirmLabel={isPending ? "Reiniciando..." : "Sí, reiniciar todo"}
         cancelLabel="Mantener saldos"
         onCancel={() => setConfirmOpen(false)}
         onConfirm={confirmResetRankingPoints}
@@ -188,15 +140,56 @@ export default function StreamDangerPanel({
             Antes de confirmar, revisa el alcance:
           </p>
           <ul className="list-disc space-y-2 pl-5 text-neutral-400">
-            <li>Todos los puntos del ranking quedaran en 0.</li>
-            <li>Todos los creditos de usuario quedaran en 0.</li>
-            <li>Watchtime, cofres, rachas, mensajes y recompensas de chat quedaran en 0.</li>
+            <li>Todos los puntos del ranking quedarán en 0.</li>
+            <li>Todos los créditos de usuario quedarán en 0.</li>
+            <li>Watchtime, cofres, rachas, mensajes y recompensas de chat quedarán en 0.</li>
             <li>Los usuarios existentes no se eliminan.</li>
-            <li>La accion no se puede deshacer desde el dashboard.</li>
+            <li>La acción no se puede deshacer desde el dashboard.</li>
           </ul>
         </div>
       </ConfirmationDialog>
     </>
+  );
+}
+
+function ActionCard({
+  icon: Icon,
+  title,
+  text,
+  actionLabel,
+  variant = "default",
+  disabled,
+  onClick,
+}) {
+  const isDanger = variant === "danger";
+
+  return (
+    <div
+      className={`flex min-h-48 flex-col justify-between rounded-2xl border border-red-300/20 p-4 ${
+        isDanger ? "bg-red-950/20" : "bg-neutral-950/65"
+      }`}
+    >
+      <div>
+        <h3 className="inline-flex items-center gap-2 text-base font-black text-white">
+          <Icon size={19} />
+          {title}
+        </h3>
+        <p className="mt-2 text-sm leading-6 text-neutral-400">{text}</p>
+      </div>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className={`mt-5 inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/35 px-4 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-200/50 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
+          isDanger
+            ? "bg-red-500/15 hover:bg-red-500/25"
+            : "bg-neutral-950 hover:bg-red-500/15"
+        }`}
+      >
+        <Icon size={18} />
+        {actionLabel}
+      </button>
+    </div>
   );
 }
 
