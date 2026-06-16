@@ -102,7 +102,6 @@ function CreditPackageFormFields({ form, setForm }) {
             onValueChange={(pointsCost) =>
               setForm((current) => ({ ...current, pointsCost }))
             }
-            allowDecimals
             required
           />
         </Field>
