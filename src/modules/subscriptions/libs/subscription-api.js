@@ -17,13 +17,6 @@ export async function getSubscriptions() {
   return Array.isArray(data.subscriptions) ? data.subscriptions : [];
 }
 
-export async function simulateSubscriptionTestEvent(payload = {}) {
-  return apiRequest(envConfig.API_SUBSCRIPTIONS_TEST_EVENT, {
-    method: "POST",
-    body: payload,
-  });
-}
-
 export async function claimSubscriptionReward(rewardId) {
   return apiRequest(
     `${buildResourceUrl(envConfig.API_SUBSCRIPTION_REWARDS, rewardId)}/claim`,

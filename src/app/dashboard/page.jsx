@@ -311,7 +311,6 @@ function DashboardActivePanel({ dashboard }) {
         streamHour={dashboard.streamHour}
         onRemovePredictionsHistory={dashboard.removePredictionsHistory}
         onResetRankingPoints={dashboard.resetRankingPointsToZero}
-        onSimulateSubscription={dashboard.simulateCurrentUserSubscription}
       />
     );
   }

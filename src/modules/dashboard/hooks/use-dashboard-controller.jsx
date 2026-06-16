@@ -55,7 +55,6 @@ import {
   normalizePrediction,
   resolvePrediction,
 } from "@/modules/predictions/libs/prediction-api";
-import { simulateSubscriptionTestEvent } from "@/modules/subscriptions/libs/subscription-api";
 import {
   dashboardTabs,
   emptyCreditPackage,
@@ -1123,22 +1122,6 @@ export default function useDashboardController() {
     });
   }
 
-  function simulateCurrentUserSubscription() {
-    startTransition(async () => {
-      try {
-        await simulateSubscriptionTestEvent({
-          eventType: "channel.subscription.renewal",
-          duration: 1,
-          username: user?.username,
-        });
-        toast.success("Sub de prueba registrada");
-        await loadDashboard({ showLoading: false });
-      } catch {
-        toast.error("No se pudo simular la sub");
-      }
-    });
-  }
-
   return {
     user,
     canManageDashboard,
@@ -1243,7 +1226,6 @@ export default function useDashboardController() {
     resolveStreamPrediction,
     removePredictionsHistory,
     resetRankingPointsToZero,
-    simulateCurrentUserSubscription,
     useAutomaticStreamHour,
   };
 }

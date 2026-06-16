@@ -2,7 +2,6 @@ import { useState } from "react";
 import {
   IconAlertTriangle,
   IconBroadcast,
-  IconCrown,
   IconRefreshAlert,
   IconShieldExclamation,
   IconTrash,
@@ -55,7 +54,6 @@ export default function StreamDangerPanel({
   streamHour,
   onRemovePredictionsHistory,
   onResetRankingPoints,
-  onSimulateSubscription,
 }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const live = Boolean(liveStatus?.isConfirmedLive);
