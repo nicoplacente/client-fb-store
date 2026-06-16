@@ -6,9 +6,14 @@ import { IconGift, IconSparkles } from "@tabler/icons-react";
 import { envConfig } from "@/config";
 
 const ALERT_EVENT = "product:redemption:alert";
+const ALERT_SOUNDS = {
+  alarm: "/sounds/alarm.mp3",
+  magical_reveal: "/sounds/magical-reveal.mp3",
+};
 const DEFAULT_ALERT = {
   type: "confetti",
   message: "",
+  sound: "",
   username: "",
   product: {
     name: "",
@@ -148,6 +153,7 @@ function StreamAlert({ alert }) {
 
 export default function StreamAlertsPage() {
   const [activeAlert, setActiveAlert] = useState(null);
+  const audioRef = useRef(null);
   const queueRef = useRef([]);
   const timeoutRef = useRef(null);
   const activeRef = useRef(false);
@@ -160,6 +166,28 @@ export default function StreamAlertsPage() {
       document.body.style.background = "";
     };
   }, []);
+
+  useEffect(() => {
+    if (!activeAlert?.sound) return;
+
+    const soundPath = ALERT_SOUNDS[activeAlert.sound];
+    if (!soundPath) return;
+
+    const audio = new Audio(soundPath);
+    audio.volume = activeAlert.highlighted ? 0.85 : 0.62;
+
+    if (activeAlert.sound === "magical_reveal") {
+      audio.currentTime = 1;
+    }
+
+    audioRef.current = audio;
+    audio.play().catch(() => {});
+
+    return () => {
+      audio.pause();
+      audioRef.current = null;
+    };
+  }, [activeAlert]);
 
   useEffect(() => {
     function showNextAlert() {
