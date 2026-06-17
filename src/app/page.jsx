@@ -75,14 +75,15 @@ export default function Home() {
           <div className="overflow-hidden rounded-xl border border-white/[0.08] bg-[#0A0A0A] p-2 shadow-2xl shadow-black/40">
             <iframe
               width="1246"
-              className="aspect-video h-auto w-full rounded-lg"
               height="701"
-              src="https://www.youtube.com/embed/_7a2hXKuuc0"
-              title="FrancoBertello74"
+              className="aspect-video h-auto w-full rounded-lg"
+              src="https://www.youtube.com/embed/FXDkPYtcOHw"
+              title="GANÁ PUNTOS MIRANDO EL STREAM!"
               loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; storage-access; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
+              frameborder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerpolicy="strict-origin-when-cross-origin"
+              allowfullscreen
             ></iframe>
           </div>
         </div>
