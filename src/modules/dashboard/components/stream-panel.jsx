@@ -5,6 +5,7 @@ import {
   IconClockCog,
   IconChartPie,
   IconDeviceFloppy,
+  IconLock,
   IconMessageCircle,
   IconPlus,
   IconPower,
@@ -53,6 +54,7 @@ export default function StreamPanel({
   onActivateChest,
   onActivateChatReward,
   onCreatePrediction,
+  onClosePrediction,
   onResolvePrediction,
   onDisableHour,
   predictions = [],
@@ -256,6 +258,7 @@ export default function StreamPanel({
           isPending={isPending}
           predictions={predictions}
           onCreatePrediction={onCreatePrediction}
+          onClosePrediction={onClosePrediction}
           onResolvePrediction={onResolvePrediction}
         />
     </section>
@@ -308,21 +311,26 @@ function AutoDisableToggle({ checked, expiresAt, onChange }) {
 
 const defaultPredictionOptions = ["", ""];
 
-function StreamPredictionsPanel({
-  isPending,
-  predictions,
-  onCreatePrediction,
-  onResolvePrediction,
-}) {
-  const [form, setForm] = useState({
+function createDefaultPredictionForm() {
+  return {
     title: "",
     description: "",
     payoutMultiplier: "2",
     durationMinutes: "1",
     minBetPoints: "1",
     maxBetPoints: "",
-    options: defaultPredictionOptions,
-  });
+    options: [...defaultPredictionOptions],
+  };
+}
+
+function StreamPredictionsPanel({
+  isPending,
+  predictions,
+  onCreatePrediction,
+  onClosePrediction,
+  onResolvePrediction,
+}) {
+  const [form, setForm] = useState(createDefaultPredictionForm);
 
   const activePredictions = predictions.filter(
     (prediction) => prediction.status === "active" || !prediction.resolvedAt,
@@ -362,25 +370,18 @@ function StreamPredictionsPanel({
   function submitPrediction(event) {
     event.preventDefault();
 
-    onCreatePrediction?.({
-      title: form.title,
-      description: form.description,
-      payoutMultiplier: form.payoutMultiplier,
-      durationMinutes: form.durationMinutes,
-      minBetPoints: form.minBetPoints,
-      maxBetPoints: form.maxBetPoints,
-      options: form.options,
-    });
-
-    setForm({
-      title: "",
-      description: "",
-      payoutMultiplier: "2",
-      durationMinutes: "2",
-      minBetPoints: "1",
-      maxBetPoints: "",
-      options: defaultPredictionOptions,
-    });
+    onCreatePrediction?.(
+      {
+        title: form.title,
+        description: form.description,
+        payoutMultiplier: form.payoutMultiplier,
+        durationMinutes: form.durationMinutes,
+        minBetPoints: form.minBetPoints,
+        maxBetPoints: form.maxBetPoints,
+        options: form.options,
+      },
+      () => setForm(createDefaultPredictionForm()),
+    );
   }
 
   return (
@@ -559,26 +560,51 @@ function StreamPredictionsPanel({
                       {formatPredictionMultiplier(prediction.payoutMultiplier)}
                     </p>
                     <p className="mt-1 text-xs text-neutral-600">
-                      Cierra {formatPredictionCountdown(prediction.endsAt)}
+                      {prediction.status === "active"
+                        ? `Cierra ${formatPredictionCountdown(prediction.endsAt)}`
+                        : "Apuestas cerradas"}
                     </p>
                   </div>
-                  <span className="rounded-full border border-green-300/25 bg-green-400/10 px-2 py-1 text-[10px] font-black uppercase text-green-200">
-                    {prediction.status}
+                  <span
+                    className={`rounded-full border px-2 py-1 text-[10px] font-black uppercase ${
+                      prediction.status === "active"
+                        ? "border-green-300/25 bg-green-400/10 text-green-200"
+                        : "border-amber-300/25 bg-amber-400/10 text-amber-200"
+                    }`}
+                  >
+                    {prediction.status === "active"
+                      ? "Activa"
+                      : "Apuestas cerradas"}
                   </span>
                 </div>
                 {!prediction.resolvedAt ? (
-                  <div className="mt-3 grid grid-cols-2 gap-2">
-                    {prediction.options.map((option) => (
+                  <div className="mt-3 grid gap-2">
+                    {prediction.status === "active" ? (
                       <button
-                        key={option.id}
                         type="button"
-                        onClick={() => onResolvePrediction?.(prediction.id, option.id)}
+                        onClick={() => onClosePrediction?.(prediction)}
                         disabled={isPending}
-                        className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-xs font-black text-amber-100 transition hover:border-amber-200/45 hover:bg-amber-400/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
                       >
-                        Gana {option.label}
+                        <IconLock size={15} />
+                        Cerrar apuestas
                       </button>
-                    ))}
+                    ) : null}
+                    <div className="grid grid-cols-2 gap-2">
+                      {prediction.options.map((option) => (
+                        <button
+                          key={option.id}
+                          type="button"
+                          onClick={() =>
+                            onResolvePrediction?.(prediction.id, option.id)
+                          }
+                          disabled={isPending}
+                          className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          Gana {option.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 ) : null}
               </div>

@@ -218,17 +218,16 @@ export default function PredictionsPage() {
     () =>
       normalizedPredictions.filter(
         (prediction) =>
-          prediction.status === "active" &&
           !prediction.resolvedAt &&
-          !isBettingOpen(prediction, nowMs),
+          (prediction.status === "closed" ||
+            !isBettingOpen(prediction, nowMs)),
       ),
     [normalizedPredictions, nowMs],
   );
   const closedPredictions = useMemo(
     () =>
       normalizedPredictions.filter(
-        (prediction) =>
-          prediction.status !== "active" || Boolean(prediction.resolvedAt),
+        (prediction) => Boolean(prediction.resolvedAt),
       ),
     [normalizedPredictions],
   );
@@ -664,6 +663,13 @@ function PredictionCard({
     Math.min(availableBetPoints, predictionMaxBetPoints),
   );
   const possiblePayout = betPoints * Number(prediction.payoutMultiplier || 2);
+  const currentBet = prediction.currentUserBet;
+  const currentBetOption = prediction.options.find(
+    (option) => Number(option.id) === Number(currentBet?.optionId),
+  );
+  const currentBetPoints = Number(currentBet?.points || 0);
+  const currentPossiblePayout =
+    currentBetPoints * Number(prediction.payoutMultiplier || 2);
   const maxBetDisabled =
     prediction.hasVoted || bettingClosed || isPending || maxBetAmount < 1;
 
@@ -737,8 +743,15 @@ function PredictionCard({
             </div>
           </div>
 
-          <aside className="flex h-full flex-col rounded-2xl border border-white/10 bg-neutral-950/75 p-4 shadow-inner shadow-black/20">
-            <div className="grid gap-2">
+          {currentBet ? (
+            <ActiveBetTicket
+              betPoints={currentBetPoints}
+              optionLabel={currentBetOption?.label}
+              possiblePayout={currentPossiblePayout}
+            />
+          ) : (
+            <aside className="flex h-full flex-col rounded-2xl border border-white/10 bg-neutral-950/75 p-4 shadow-inner shadow-black/20">
+              <div className="grid gap-2">
               <div className="flex items-center justify-between gap-3">
                 <label
                   htmlFor={`prediction-bet-${prediction.id}`}
@@ -769,9 +782,9 @@ function PredictionCard({
                 className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="100"
               />
-            </div>
+              </div>
 
-            <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3 text-sm">
+              <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3 text-sm">
               <p className="mb-2 flex items-center justify-between gap-3 text-neutral-500">
                 Limites
                 <span className="font-black text-neutral-200">
@@ -798,9 +811,9 @@ function PredictionCard({
                   -{formatNumber(betPoints)} pts
                 </span>
               </p>
-            </div>
+              </div>
 
-            <div className="mt-3 rounded-xl border border-white/10 bg-neutral-900/45 p-3 text-xs leading-5 text-neutral-400">
+              <div className="mt-3 rounded-xl border border-white/10 bg-neutral-900/45 p-3 text-xs leading-5 text-neutral-400">
               <p className="flex items-start gap-2">
                 <IconInfoCircle
                   className="mt-0.5 shrink-0 text-red-200"
@@ -810,29 +823,84 @@ function PredictionCard({
                   ? `Vas con ${selectedOption.label}. Revisa el cierre antes de confirmar.`
                   : "Selecciona una opcion para calcular el pago estimado."}
               </p>
-            </div>
+              </div>
 
-            <button
-              type="button"
-              onClick={onVote}
-              disabled={isPending || prediction.hasVoted || bettingClosed}
-              className="mt-auto inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
-            >
-              {prediction.hasVoted ? (
-                <IconCircleCheck size={18} />
-              ) : (
-                <IconTrophy size={18} />
-              )}
-              {prediction.hasVoted
-                ? "Tu voto esta registrado"
-                : bettingClosed
-                  ? "Apuestas cerradas"
-                  : "Confirmar prediccion"}
-            </button>
-          </aside>
+              <button
+                type="button"
+                onClick={onVote}
+                disabled={isPending || prediction.hasVoted || bettingClosed}
+                className="mt-auto inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:bg-none disabled:text-neutral-500 disabled:shadow-none"
+              >
+                {prediction.hasVoted ? (
+                  <IconCircleCheck size={18} />
+                ) : (
+                  <IconTrophy size={18} />
+                )}
+                {prediction.hasVoted
+                  ? "Tu voto esta registrado"
+                  : bettingClosed
+                    ? "Apuestas cerradas"
+                    : "Confirmar prediccion"}
+              </button>
+            </aside>
+          )}
         </div>
       </div>
     </article>
+  );
+}
+
+function ActiveBetTicket({ betPoints, optionLabel, possiblePayout }) {
+  return (
+    <aside className="flex h-full flex-col rounded-2xl border border-blue-300/25 bg-[linear-gradient(180deg,rgba(59,130,246,0.10),rgba(10,10,10,0.88))] p-4 shadow-inner shadow-black/20">
+      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-blue-300">
+        <IconCircleCheck size={17} />
+        Apuesta registrada
+      </div>
+
+      <div className="mt-4 rounded-xl border border-blue-300/20 bg-black/25 p-3">
+        <p className="text-[11px] font-black uppercase tracking-wide text-neutral-500">
+          Tu opcion
+        </p>
+        <p className="mt-2 text-lg font-black text-white">
+          {optionLabel || "Opcion registrada"}
+        </p>
+      </div>
+
+      <div className="mt-3 grid gap-2">
+        <ActiveBetStat
+          label="Tu apuesta"
+          value={`${formatNumber(betPoints)} pts`}
+        />
+        <ActiveBetStat
+          label="Si ganas"
+          value={`+${formatNumber(possiblePayout, {
+            maximumFractionDigits: 2,
+          })} pts`}
+          tone="success"
+        />
+      </div>
+
+      <p className="mt-auto pt-4 text-xs leading-5 text-neutral-400">
+        Tu ticket queda bloqueado hasta que cierre la prediccion y se publique
+        el resultado.
+      </p>
+    </aside>
+  );
+}
+
+function ActiveBetStat({ label, value, tone = "default" }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl border border-white/10 bg-neutral-950/55 px-3 py-2.5">
+      <span className="text-xs font-semibold text-neutral-500">{label}</span>
+      <strong
+        className={`font-mono text-sm font-black ${
+          tone === "success" ? "text-green-300" : "text-white"
+        }`}
+      >
+        {value}
+      </strong>
+    </div>
   );
 }
 

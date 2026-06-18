@@ -275,6 +275,7 @@ function DashboardActivePanel({ dashboard }) {
           onActivateChest={dashboard.activateStreamChest}
           onActivateChatReward={dashboard.activateStreamChatReward}
           onCreatePrediction={dashboard.submitStreamPrediction}
+          onClosePrediction={dashboard.requestCloseStreamPrediction}
           onResolvePrediction={dashboard.resolveStreamPrediction}
           onDisableHour={dashboard.disableStreamHour}
           predictions={dashboard.predictions}

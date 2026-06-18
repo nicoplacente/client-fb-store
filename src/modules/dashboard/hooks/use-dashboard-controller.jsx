@@ -50,6 +50,7 @@ import {
   updateStreamHour,
 } from "@/modules/stream/libs/stream-api";
 import {
+  closePrediction,
   createPrediction,
   deleteAllPredictionHistory,
   normalizePrediction,
@@ -815,7 +816,7 @@ export default function useDashboardController() {
     });
   }
 
-  function submitStreamPrediction(payload) {
+  function requestCreateStreamPrediction(payload, onSuccess) {
     const options = (payload.options || [])
       .map((option) => String(option || "").trim())
       .filter(Boolean);
@@ -861,22 +862,46 @@ export default function useDashboardController() {
       return;
     }
 
+    const normalizedPayload = {
+      ...payload,
+      title: String(payload.title).trim(),
+      options,
+      payoutMultiplier,
+      durationMinutes,
+      minBetPoints,
+      maxBetPoints,
+      status: "active",
+    };
+    const maximumBetLabel = maxBetPoints === null ? "sin limite" : maxBetPoints;
+
+    setConfirmation({
+      type: "create-stream-prediction",
+      title: "Publicar prediccion",
+      description: `Vas a publicar "${normalizedPayload.title}" para recibir apuestas.`,
+      confirmLabel: "Publicar prediccion",
+      cancelLabel: "Seguir editando",
+      details: [
+        `Duracion: ${durationMinutes} minuto${durationMinutes === 1 ? "" : "s"}.`,
+        `${options.length} opciones · Pago ganador x${payoutMultiplier}.`,
+        `Apuestas: minimo ${minBetPoints} · maximo ${maximumBetLabel}.`,
+      ],
+      target: {
+        payload: normalizedPayload,
+        onSuccess,
+      },
+    });
+  }
+
+  function createStreamPrediction(payload, onSuccess) {
     startTransition(async () => {
       try {
-        const prediction = await createPrediction({
-          ...payload,
-          options,
-          payoutMultiplier,
-          durationMinutes,
-          minBetPoints,
-          maxBetPoints,
-          status: "active",
-        });
+        const prediction = await createPrediction(payload);
 
         setPredictions((current) => [
           normalizePrediction(prediction),
           ...current,
         ]);
+        onSuccess?.();
         toast.success("Prediccion creada");
       } catch {
         toast.error("No se pudo crear la prediccion");
@@ -900,6 +925,41 @@ export default function useDashboardController() {
       } catch {
         toast.error("No se pudo resolver la prediccion");
       }
+    });
+  }
+
+  function closeStreamPrediction(predictionId) {
+    startTransition(async () => {
+      try {
+        const prediction = await closePrediction(predictionId);
+
+        setPredictions((current) =>
+          current.map((item) =>
+            Number(item.id) === Number(predictionId)
+              ? normalizePrediction(prediction)
+              : item,
+          ),
+        );
+        toast.success("Apuestas cerradas");
+      } catch {
+        toast.error("No se pudieron cerrar las apuestas");
+      }
+    });
+  }
+
+  function requestCloseStreamPrediction(prediction) {
+    setConfirmation({
+      type: "close-stream-prediction",
+      title: "Cerrar apuestas",
+      description: `Vas a cerrar las apuestas de "${prediction.title}" antes de que termine el tiempo.`,
+      confirmLabel: "Cerrar apuestas",
+      cancelLabel: "Mantener abierta",
+      details: [
+        "No se aceptaran nuevas apuestas.",
+        "Las apuestas existentes se conservaran.",
+        "Podras elegir la opcion ganadora mas adelante.",
+      ],
+      target: prediction,
     });
   }
 
@@ -1066,6 +1126,19 @@ export default function useDashboardController() {
 
     if (current.type === "delete-predictions-history") {
       deletePredictionsHistory();
+      return;
+    }
+
+    if (current.type === "close-stream-prediction") {
+      closeStreamPrediction(current.target.id);
+      return;
+    }
+
+    if (current.type === "create-stream-prediction") {
+      createStreamPrediction(
+        current.target.payload,
+        current.target.onSuccess,
+      );
     }
   }
 
@@ -1222,7 +1295,8 @@ export default function useDashboardController() {
     saveRewardWheel,
     connectKickModeration,
     disconnectKickModeration,
-    submitStreamPrediction,
+    submitStreamPrediction: requestCreateStreamPrediction,
+    requestCloseStreamPrediction,
     resolveStreamPrediction,
     removePredictionsHistory,
     resetRankingPointsToZero,
