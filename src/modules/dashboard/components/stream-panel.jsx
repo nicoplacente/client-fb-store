@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   IconBolt,
   IconBox,
@@ -548,72 +548,105 @@ function StreamPredictionsPanel({
             </p>
           ) : (
             activePredictions.slice(0, 4).map((prediction) => (
-              <div
+              <StreamPredictionAdminCard
                 key={prediction.id}
-                className="rounded-xl border border-white/10 bg-neutral-900/70 p-3"
-              >
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="font-bold text-white">{prediction.title}</p>
-                    <p className="mt-1 text-xs text-neutral-500">
-                      Pool {formatPoints(prediction.totalPool)} pts · x
-                      {formatPredictionMultiplier(prediction.payoutMultiplier)}
-                    </p>
-                    <p className="mt-1 text-xs text-neutral-600">
-                      {prediction.status === "active"
-                        ? `Cierra ${formatPredictionCountdown(prediction.endsAt)}`
-                        : "Apuestas cerradas"}
-                    </p>
-                  </div>
-                  <span
-                    className={`rounded-full border px-2 py-1 text-[10px] font-black uppercase ${
-                      prediction.status === "active"
-                        ? "border-green-300/25 bg-green-400/10 text-green-200"
-                        : "border-amber-300/25 bg-amber-400/10 text-amber-200"
-                    }`}
-                  >
-                    {prediction.status === "active"
-                      ? "Activa"
-                      : "Apuestas cerradas"}
-                  </span>
-                </div>
-                {!prediction.resolvedAt ? (
-                  <div className="mt-3 grid gap-2">
-                    {prediction.status === "active" ? (
-                      <button
-                        type="button"
-                        onClick={() => onClosePrediction?.(prediction)}
-                        disabled={isPending}
-                        className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-xs font-black text-amber-100 transition hover:border-amber-200/45 hover:bg-amber-400/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                      >
-                        <IconLock size={15} />
-                        Cerrar apuestas
-                      </button>
-                    ) : null}
-                    <div className="grid grid-cols-2 gap-2">
-                      {prediction.options.map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() =>
-                            onResolvePrediction?.(prediction.id, option.id)
-                          }
-                          disabled={isPending}
-                          className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          Gana {option.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </div>
+                prediction={prediction}
+                isPending={isPending}
+                onClose={onClosePrediction}
+                onResolve={onResolvePrediction}
+              />
             ))
           )}
         </div>
       </div>
     </div>
   );
+}
+
+function StreamPredictionAdminCard({
+  prediction,
+  isPending,
+  onClose,
+  onResolve,
+}) {
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  const bettingOpen = isPredictionBettingOpen(prediction, nowMs);
+
+  useEffect(() => {
+    if (!bettingOpen) return undefined;
+
+    const intervalId = window.setInterval(() => {
+      setNowMs(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(intervalId);
+  }, [bettingOpen]);
+
+  return (
+    <div className="rounded-xl border border-white/10 bg-neutral-900/70 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="font-bold text-white">{prediction.title}</p>
+          <p className="mt-1 text-xs text-neutral-500">
+            Pool {formatPoints(prediction.totalPool)} pts · x
+            {formatPredictionMultiplier(prediction.payoutMultiplier)}
+          </p>
+          <p className="mt-1 text-xs text-neutral-600">
+            {bettingOpen
+              ? `Cierra ${formatPredictionCountdown(prediction.endsAt)}`
+              : "Apuestas cerradas"}
+          </p>
+        </div>
+        <span
+          className={`rounded-full border px-2 py-1 text-[10px] font-black uppercase ${
+            bettingOpen
+              ? "border-green-300/25 bg-green-400/10 text-green-200"
+              : "border-amber-300/25 bg-amber-400/10 text-amber-200"
+          }`}
+        >
+          {bettingOpen ? "Activa" : "Apuestas cerradas"}
+        </span>
+      </div>
+
+      {!prediction.resolvedAt ? (
+        <div className="mt-3 grid gap-2">
+          {bettingOpen ? (
+            <button
+              type="button"
+              onClick={() => onClose?.(prediction)}
+              disabled={isPending}
+              className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-amber-300/25 bg-amber-400/10 px-3 py-2 text-xs font-black text-amber-100 transition hover:border-amber-200/45 hover:bg-amber-400/15 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <IconLock size={15} />
+              Cerrar apuestas
+            </button>
+          ) : null}
+          <div className="grid grid-cols-2 gap-2">
+            {prediction.options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onResolve?.(prediction.id, option.id)}
+                disabled={isPending}
+                className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                Gana {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function isPredictionBettingOpen(prediction, nowMs) {
+  if (prediction.status !== "active") return false;
+  if (!prediction.endsAt) return true;
+
+  const endsAtMs = new Date(prediction.endsAt).getTime();
+
+  return !Number.isFinite(endsAtMs) || endsAtMs > nowMs;
 }
 
 function formatPoints(value) {
