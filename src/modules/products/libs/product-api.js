@@ -39,6 +39,7 @@ export async function redeemProduct(
     quantity = 1,
     moderationTargetMode,
     moderationTargetKickId,
+    screamerOptionId,
   } = {},
 ) {
   return apiRequest(`${buildResourceUrl(envConfig.API_PRODUCTS, productId)}/redeem`, {
@@ -53,6 +54,11 @@ export async function redeemProduct(
       ...(moderationTargetKickId
         ? {
             moderationTargetKickId,
+          }
+        : {}),
+      ...(screamerOptionId
+        ? {
+            screamerOptionId,
           }
         : {}),
     },
@@ -220,11 +226,49 @@ export function normalizeProduct(product) {
       60,
       Math.max(5, Number(product.audioMaxDurationSeconds || 15)),
     ),
+    screamerOptions: normalizeScreamerOptions(product),
+    screamerDurationSeconds: Math.min(
+      30,
+      Math.max(2, Number(product.screamerDurationSeconds || 5)),
+    ),
+    screamerVolume: Math.min(
+      1,
+      Math.max(0, Number(product.screamerVolume ?? 1)),
+    ),
     alertEnabled: Boolean(product.alertEnabled),
     alertType: product.alertType || "confetti",
     alertMessage: product.alertMessage || "",
     alertDurationSeconds: Number(product.alertDurationSeconds || 8),
   };
+}
+
+function normalizeScreamerOptions(product) {
+  const options = Array.isArray(product.screamerOptions)
+    ? product.screamerOptions
+    : [];
+  const source = options.length
+    ? options
+    : product.screamerGifUrl && product.screamerAudioUrl
+      ? [
+          {
+            id: `legacy-${product.id}`,
+            name: "Opción 1",
+            gifUrl: product.screamerGifUrl,
+            audioUrl: product.screamerAudioUrl,
+          },
+        ]
+      : [];
+
+  return source
+    .map((option, index) => ({
+      id: option.id || `screamer-option-${index}`,
+      name: String(option.name || `Opción ${index + 1}`).trim(),
+      gifUrl: String(option.gifUrl || "").trim(),
+      audioUrl: String(option.audioUrl || "").trim(),
+      sortOrder: Number(option.sortOrder ?? index),
+    }))
+    .filter((option) => option.name && option.gifUrl && option.audioUrl)
+    .toSorted((a, b) => a.sortOrder - b.sortOrder);
 }
 
 function normalizeAudioSubmission(submission) {

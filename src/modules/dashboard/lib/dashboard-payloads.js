@@ -23,6 +23,22 @@ export function buildProductPayload(productForm) {
       productForm.rewardEffectType === "audio_submission"
         ? Number(productForm.audioMaxDurationSeconds || 15)
         : 15,
+    screamerOptions:
+      productForm.rewardEffectType === "desktop_screamer"
+        ? productForm.screamerOptions.map((option) => ({
+            name: option.name.trim(),
+            gifUrl: option.gifUrl.trim(),
+            audioUrl: option.audioUrl.trim(),
+          }))
+        : [],
+    screamerDurationSeconds:
+      productForm.rewardEffectType === "desktop_screamer"
+        ? Number(productForm.screamerDurationSeconds || 5)
+        : 5,
+    screamerVolume:
+      productForm.rewardEffectType === "desktop_screamer"
+        ? Number(productForm.screamerVolume ?? 1)
+        : 1,
     alertEnabled: false,
     alertType: productForm.alertType || "confetti",
     alertMessage: productForm.alertMessage.trim(),

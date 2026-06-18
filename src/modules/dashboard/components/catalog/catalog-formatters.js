@@ -25,6 +25,10 @@ export function formatProductRewardEffect(product) {
     return "Desbanea al comprador en Kick";
   }
 
+  if (product.rewardEffectType === "desktop_screamer") {
+    return `Screamer de escritorio (${product.screamerDurationSeconds || 5}s)`;
+  }
+
   if (product.rewardEffectType !== "stream_special_hour") return "";
 
   const label = rewardEffectLabels[product.rewardEffectValue] || "Hora especial";

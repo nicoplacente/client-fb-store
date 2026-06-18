@@ -1,4 +1,5 @@
 import { formatDateInput } from "./formatters";
+import { createEmptyScreamerOption } from "./constants";
 
 export function productToForm(product) {
   return {
@@ -25,11 +26,45 @@ export function productToForm(product) {
           ? String(product.rewardEffectDurationMinutes || 10)
           : String(product.rewardEffectDurationMinutes || 60),
     audioMaxDurationSeconds: String(product.audioMaxDurationSeconds || 15),
+    screamerOptions: getScreamerOptions(product),
+    screamerDurationSeconds: String(product.screamerDurationSeconds || 5),
+    screamerVolume: String(product.screamerVolume ?? 1),
     alertEnabled: Boolean(product.alertEnabled),
     alertType: product.alertType || "confetti",
     alertMessage: product.alertMessage || "",
     alertDurationSeconds: String(product.alertDurationSeconds || 8),
   };
+}
+
+function getScreamerOptions(product) {
+  const options = Array.isArray(product.screamerOptions)
+    ? product.screamerOptions
+    : [];
+  const source = options.length
+    ? options
+    : product.screamerGifUrl && product.screamerAudioUrl
+      ? [
+          {
+            name: "Opción 1",
+            gifUrl: product.screamerGifUrl,
+            audioUrl: product.screamerAudioUrl,
+          },
+        ]
+      : [];
+
+  if (!source.length) return [createEmptyScreamerOption()];
+
+  return source.map((option) => ({
+    clientId: option.id
+      ? `screamer-option-${option.id}`
+      : createEmptyScreamerOption().clientId,
+    id: option.id || null,
+    name: option.name || "",
+    gifUrl: option.gifUrl || "",
+    gifFile: null,
+    audioUrl: option.audioUrl || "",
+    audioFile: null,
+  }));
 }
 
 export function creditPackageToForm(creditPackage) {

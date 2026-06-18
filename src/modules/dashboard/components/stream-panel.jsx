@@ -630,7 +630,7 @@ function StreamPredictionAdminCard({
                 disabled={isPending}
                 className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Gana {option.label}
+                Resultado: {option.label}
               </button>
             ))}
           </div>

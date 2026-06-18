@@ -38,6 +38,7 @@ import ProductDetail, {
   WheelPrizes,
 } from "@/modules/market/components/product-detail";
 import ModerationTargetSelector from "@/modules/market/components/moderation-target-selector";
+import ScreamerOptionSelector from "@/modules/market/components/screamer-option-selector";
 import RewardWheel, {
   normalizeRewardWheelSpin,
 } from "@/modules/reward-wheel/components/reward-wheel";
@@ -185,6 +186,7 @@ export default function MarketPage() {
           ? "selected"
           : "",
       moderationTargetKickId: "",
+      screamerOptionId: "",
     });
 
     if (product.rewardEffectType === "kick_timeout_user") {
@@ -255,9 +257,26 @@ export default function MarketPage() {
     );
   }, [moderationTargets]);
 
+  const handleScreamerOptionChange = useCallback((screamerOptionId) => {
+    setPendingAction((current) =>
+      current ? { ...current, screamerOptionId } : current,
+    );
+  }, []);
+
   const handleConfirmAction = useCallback(() => {
     const action = pendingAction;
     if (!action) return;
+
+    if (
+      action.type === "redeem" &&
+      action.item.rewardEffectType === "desktop_screamer" &&
+      !action.item.screamerOptions.some(
+        (option) => String(option.id) === String(action.screamerOptionId),
+      )
+    ) {
+      toast.error("Seleccioná una opción de screamer antes de canjear");
+      return;
+    }
 
     if (wheelResult) {
       setPendingAction(null);
@@ -500,6 +519,9 @@ export default function MarketPage() {
   const isAudioAction =
     pendingAction?.type === "redeem" &&
     pendingAction.item.rewardEffectType === "audio_submission";
+  const isScreamerAction =
+    pendingAction?.type === "redeem" &&
+    pendingAction.item.rewardEffectType === "desktop_screamer";
   const selectedModerationTargetIsValid =
     pendingAction?.moderationTargetMode === "random"
       ? moderationTargets.length > 0
@@ -512,6 +534,11 @@ export default function MarketPage() {
     (moderationTargetsLoading ||
       Boolean(moderationTargetsError) ||
       !selectedModerationTargetIsValid);
+  const screamerConfirmationDisabled =
+    isScreamerAction &&
+    !pendingAction.item.screamerOptions.some(
+      (option) => String(option.id) === String(pendingAction.screamerOptionId),
+    );
 
   return (
     <SectionContainer className="space-y-8">
@@ -574,7 +601,8 @@ export default function MarketPage() {
         confirmDisabled={
           confirmation?.confirmDisabled ||
           wheelRedeeming ||
-          moderationConfirmationDisabled
+          moderationConfirmationDisabled ||
+          screamerConfirmationDisabled
         }
         cancelDisabled={wheelRedeeming}
         onConfirm={handleConfirmAction}
@@ -608,6 +636,12 @@ export default function MarketPage() {
               onTargetChange={handleModerationTargetChange}
               onRetry={() => loadModerationTargets(pendingAction.item.id)}
             />
+          ) : isScreamerAction ? (
+            <ScreamerOptionSelector
+              options={pendingAction.item.screamerOptions}
+              selectedId={pendingAction.screamerOptionId}
+              onSelect={handleScreamerOptionChange}
+            />
           ) : pendingAction?.type === "redeem" &&
             pendingAction.item.rewardEffectType === "reward_wheel" ? (
             <WheelPrizes prizes={pendingAction.item.rewardWheelPrizes} />
@@ -618,6 +652,8 @@ export default function MarketPage() {
             ? "bg-sky-400/[0.02]"
             : isTimeoutAction
               ? "bg-red-500/[0.02]"
+              : isScreamerAction
+                ? "bg-red-500/[0.02]"
               : undefined
         }
       >
@@ -714,6 +750,7 @@ async function confirmProductRedemption({
     quantity,
     moderationTargetMode: action.moderationTargetMode,
     moderationTargetKickId: action.moderationTargetKickId,
+    screamerOptionId: action.screamerOptionId,
   });
 
   if (result?.redemption) {

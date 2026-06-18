@@ -13,3 +13,24 @@ export async function uploadImage(file) {
 
   return data.url || "";
 }
+
+async function uploadMedia(url, fieldName, file) {
+  const formData = new FormData();
+
+  formData.append(fieldName, file);
+
+  const data = await apiRequest(url, {
+    method: "POST",
+    body: formData,
+  });
+
+  return data.url || "";
+}
+
+export function uploadScreamerImage(file) {
+  return uploadMedia(envConfig.API_UPLOAD_SCREAMER_IMAGE, "image", file);
+}
+
+export function uploadScreamerAudio(file) {
+  return uploadMedia(envConfig.API_UPLOAD_SCREAMER_AUDIO, "audio", file);
+}

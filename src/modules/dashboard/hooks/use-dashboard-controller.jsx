@@ -27,7 +27,11 @@ import {
   normalizeGiveaway,
   updateGiveaway,
 } from "@/modules/giveaways/libs/giveaway-api";
-import { uploadImage } from "@/modules/uploads/libs/upload-api";
+import {
+  uploadImage,
+  uploadScreamerAudio,
+  uploadScreamerImage,
+} from "@/modules/uploads/libs/upload-api";
 import {
   createSupportMessage,
   deleteRedemptionTickets,
@@ -326,14 +330,74 @@ export default function useDashboardController() {
       return;
     }
 
+    if (payloadBase.rewardEffectType === "desktop_screamer") {
+      if (!formSnapshot.screamerOptions.length) {
+        toast.error("Agrega al menos una opción para el screamer");
+        return;
+      }
+
+      const incompleteOptionIndex = formSnapshot.screamerOptions.findIndex(
+        (option) =>
+          !option.name.trim() ||
+          (!option.gifFile && !option.gifUrl.trim()) ||
+          (!option.audioFile && !option.audioUrl.trim()),
+      );
+
+      if (incompleteOptionIndex >= 0) {
+        toast.error(
+          `Completa el nombre, la animación y el audio de la opción ${incompleteOptionIndex + 1}`,
+        );
+        return;
+      }
+
+      if (
+        !Number.isFinite(payloadBase.screamerDurationSeconds) ||
+        payloadBase.screamerDurationSeconds < 2 ||
+        payloadBase.screamerDurationSeconds > 30
+      ) {
+        toast.error("La duración del screamer debe estar entre 2 y 30 segundos");
+        return;
+      }
+    }
+
     startTransition(async () => {
       try {
-        const imageUrl = formSnapshot.imageFile
-          ? await uploadImage(formSnapshot.imageFile)
-          : formSnapshot.imageUrl.trim();
+        const [imageUrl, screamerOptions] = await Promise.all([
+          formSnapshot.imageFile
+            ? uploadImage(formSnapshot.imageFile)
+            : formSnapshot.imageUrl.trim(),
+          formSnapshot.rewardEffectType === "desktop_screamer" &&
+          formSnapshot.screamerOptions.length
+            ? Promise.all(
+                formSnapshot.screamerOptions.map(async (option, index) => {
+                  try {
+                    const [gifUrl, audioUrl] = await Promise.all([
+                      option.gifFile
+                        ? uploadScreamerImage(option.gifFile)
+                        : option.gifUrl.trim(),
+                      option.audioFile
+                        ? uploadScreamerAudio(option.audioFile)
+                        : option.audioUrl.trim(),
+                    ]);
+
+                    return {
+                      name: option.name.trim(),
+                      gifUrl,
+                      audioUrl,
+                    };
+                  } catch (error) {
+                    throw new Error(
+                      `No se pudo subir la opción ${index + 1}: ${error.message || "error de archivo"}`,
+                    );
+                  }
+                }),
+              )
+            : [],
+        ]);
         const payload = {
           ...payloadBase,
           imageUrl,
+          screamerOptions,
         };
 
         if (selectedProductId) {
@@ -346,8 +410,8 @@ export default function useDashboardController() {
 
         resetProductForm();
         await loadDashboard();
-      } catch {
-        toast.error("No se pudo guardar el producto");
+      } catch (error) {
+        toast.error(error.message || "No se pudo guardar el producto");
       }
     });
   }

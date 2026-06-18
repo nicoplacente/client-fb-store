@@ -20,6 +20,21 @@ export const dashboardTabs = [
   { id: "danger", label: "Peligro", icon: IconAlertTriangle },
 ];
 
+let screamerOptionSequence = 0;
+
+export function createEmptyScreamerOption() {
+  screamerOptionSequence += 1;
+
+  return {
+    clientId: `screamer-option-${screamerOptionSequence}`,
+    name: "",
+    gifUrl: "",
+    gifFile: null,
+    audioUrl: "",
+    audioFile: null,
+  };
+}
+
 export const emptyProduct = {
   title: "",
   description: "",
@@ -36,6 +51,9 @@ export const emptyProduct = {
   rewardEffectValue: "happy",
   rewardEffectDurationMinutes: "60",
   audioMaxDurationSeconds: "15",
+  screamerOptions: [createEmptyScreamerOption()],
+  screamerDurationSeconds: "5",
+  screamerVolume: "1",
   alertEnabled: false,
   alertType: "confetti",
   alertMessage: "",

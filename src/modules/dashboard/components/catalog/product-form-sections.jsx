@@ -6,11 +6,13 @@ import {
   IconMicrophone,
   IconRestore,
   IconSparkles,
+  IconSkull,
   IconUserCheck,
   IconUserMinus,
   IconWheel,
 } from "@tabler/icons-react";
 import { Field, TextInput } from "../form-controls";
+import ScreamerMediaInput from "./screamer-media-input";
 
 export function FeaturedToggle({ checked, onChange }) {
   return (
@@ -54,6 +56,7 @@ export function RewardEffectFields({ form, setForm }) {
   const isKickUnban = form.rewardEffectType === "kick_unban_self";
   const isAudioSubmission = form.rewardEffectType === "audio_submission";
   const isUnique = form.rewardEffectType === "unique";
+  const isScreamer = form.rewardEffectType === "desktop_screamer";
   const hasProductEvent =
     hasRewardEffect ||
     restoresStreamStreak ||
@@ -61,6 +64,7 @@ export function RewardEffectFields({ form, setForm }) {
     isKickTimeout ||
     isKickUnban ||
     isAudioSubmission ||
+    isScreamer ||
     isUnique;
 
   return (
@@ -210,6 +214,25 @@ export function RewardEffectFields({ form, setForm }) {
             }
           />
           <RewardTypeCard
+            active={isScreamer}
+            icon={<IconSkull size={19} />}
+            title="Screamer de escritorio"
+            description="Muestra una animación con audio sobre todos los monitores."
+            onClick={() =>
+              setForm((current) => ({
+                ...current,
+                rewardEffectType: "desktop_screamer",
+                rewardEffectValue: "",
+                rewardEffectDurationMinutes: "",
+                screamerDurationSeconds:
+                  current.screamerDurationSeconds || "5",
+                screamerVolume: current.screamerVolume || "1",
+                infiniteStock: true,
+                singleUnitPerRedemption: true,
+              }))
+            }
+          />
+          <RewardTypeCard
             active={isUnique}
             icon={<IconUserCheck size={19} />}
             title="Único"
@@ -323,6 +346,62 @@ export function RewardEffectFields({ form, setForm }) {
             Cada canje habilita una sola grabación y admite hasta dos intentos
             si el moderador rechaza el primero. Los audios aprobados ingresan a
             la cola de OBS.
+          </p>
+        </div>
+      ) : null}
+
+      {isScreamer ? (
+        <div className="grid gap-4 rounded-2xl border border-red-300/20 bg-red-500/[0.08] p-4">
+          <ScreamerMediaInput form={form} setForm={setForm} />
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Duración en pantalla">
+              <div className="flex items-center gap-3">
+                <TextInput
+                  type="number"
+                  min="2"
+                  max="30"
+                  step="1"
+                  value={form.screamerDurationSeconds}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      screamerDurationSeconds: event.target.value,
+                    }))
+                  }
+                  className="w-32"
+                  required
+                />
+                <span className="text-sm font-bold text-neutral-400">
+                  segundos
+                </span>
+              </div>
+            </Field>
+            <Field label="Volumen">
+              <div className="flex items-center gap-3">
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.05"
+                  value={form.screamerVolume}
+                  onChange={(event) =>
+                    setForm((current) => ({
+                      ...current,
+                      screamerVolume: event.target.value,
+                    }))
+                  }
+                  className="w-full accent-red-500"
+                  aria-label="Volumen del screamer"
+                />
+                <span className="w-12 text-right text-sm font-bold text-neutral-300">
+                  {Math.round(Number(form.screamerVolume || 0) * 100)}%
+                </span>
+              </div>
+            </Field>
+          </div>
+          <p className="text-sm font-medium leading-6 text-red-100">
+            Requiere que FB Store Screamer esté abierto y conectado. OBS debe
+            usar captura de pantalla para mostrarlo en la transmisión.
           </p>
         </div>
       ) : null}

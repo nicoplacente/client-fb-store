@@ -5,6 +5,7 @@ import {
   IconLockOpen,
   IconMicrophone,
   IconPackage,
+  IconSkull,
   IconSparkles,
   IconUserMinus,
 } from "@tabler/icons-react";
@@ -17,6 +18,7 @@ export default function ProductDetail({ product }) {
   const isKickUnban = product.rewardEffectType === "kick_unban_self";
   const isAudioSubmission =
     product.rewardEffectType === "audio_submission";
+  const isScreamer = product.rewardEffectType === "desktop_screamer";
 
   return (
     <div className="grid content-start gap-5">
@@ -62,6 +64,12 @@ export default function ProductDetail({ product }) {
             <span className="inline-flex items-center gap-1.5 rounded-full border border-sky-300/20 bg-sky-400/10 px-3 py-1 text-xs font-bold text-sky-100">
               <IconMicrophone size={14} />
               Audio de hasta {product.audioMaxDurationSeconds || 15} s
+            </span>
+          ) : null}
+          {isScreamer ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-300/20 bg-red-500/10 px-3 py-1 text-xs font-bold text-red-100">
+              <IconSkull size={14} />
+              {product.screamerOptions.length} {product.screamerOptions.length === 1 ? "screamer" : "screamers"}
             </span>
           ) : null}
         </div>
