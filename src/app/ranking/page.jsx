@@ -121,7 +121,7 @@ function SortableHeader({ label, sortKey, activeSortKey, onSort }) {
   return (
     <button
       type="button"
-      className={`mx-auto inline-flex min-h-8 w-full items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-red-300 sm:text-sm ${
+      className={`mx-auto cursor-pointer inline-flex min-h-8 w-fit items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-red-300 sm:text-sm ${
         isActive ? "text-white" : "text-neutral-300 hover:text-red-100"
       }`}
       aria-pressed={isActive}
