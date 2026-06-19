@@ -64,7 +64,7 @@ export default function StreamPanel({
   if (loading && !streamHour) {
     return (
       <div className="rounded-2xl border border-white/10 bg-neutral-950/75 p-8 text-center text-neutral-400 shadow-xl shadow-black/15">
-        Cargando configuracion de stream...
+        Cargando configuración de stream...
       </div>
     );
   }
@@ -87,180 +87,189 @@ export default function StreamPanel({
       nextCheckAt: null,
     },
   };
-  const nextChestTime = formatSchedulerTime(chestState.chestScheduler.nextCheckAt);
+  const nextChestTime = formatSchedulerTime(
+    chestState.chestScheduler.nextCheckAt,
+  );
 
   return (
     <section className="space-y-5 rounded-2xl border border-white/10 bg-neutral-950/75 p-3 shadow-xl shadow-black/20 ring-1 ring-white/[0.03] sm:p-5">
-        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
-          <div>
-            <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
-              <IconClockCog size={19} />
-              Stream
-            </h2>
-            <p className="mt-2 max-w-2xl text-sm text-neutral-400">
-              Controla bonus de puntos, cofres y recompensas activas durante el stream.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-inner shadow-black/10 lg:min-w-72">
-            <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Activo ahora</p>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <span className="text-xl font-bold text-white">{state.activeLabel}</span>
-              <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-400">
-                {isManual ? "Manual" : "Auto"}
-              </span>
-            </div>
-            <p className="mt-2 text-xs text-neutral-500">
-              Automatico: {state.automaticLabel || "Sin hora especial"}
-            </p>
-          </div>
+      <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-start">
+        <div>
+          <h2 className="inline-flex items-center gap-2 text-lg font-bold text-white">
+            <IconClockCog size={19} />
+            Stream
+          </h2>
+          <p className="mt-2 max-w-2xl text-sm text-neutral-400">
+            Controla bonus de puntos, cofres y recompensas activas durante el
+            stream.
+          </p>
         </div>
+        <div className="rounded-2xl border border-white/10 bg-neutral-900/70 p-4 shadow-inner shadow-black/10 lg:min-w-72">
+          <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+            Activo ahora
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span className="text-xl font-bold text-white">
+              {state.activeLabel}
+            </span>
+            <span className="rounded-full border border-white/10 bg-neutral-950 px-3 py-1 text-xs font-bold text-neutral-400">
+              {isManual ? "Manual" : "Auto"}
+            </span>
+          </div>
+          <p className="mt-2 text-xs text-neutral-500">
+            Automatico: {state.automaticLabel || "Sin hora especial"}
+          </p>
+        </div>
+      </div>
 
-        <AutoDisableToggle
-          checked={autoDisable}
-          expiresAt={state.expiresAt}
-          onChange={setAutoDisable}
-        />
+      <AutoDisableToggle
+        checked={autoDisable}
+        expiresAt={state.expiresAt}
+        onChange={setAutoDisable}
+      />
 
-        <div className="grid gap-3 lg:grid-cols-4">
+      <div className="grid gap-3 lg:grid-cols-4">
+        <button
+          type="button"
+          disabled={isPending}
+          onClick={onDisableHour}
+          className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
+            noEffectActive
+              ? "border-white/25 bg-white/[0.06] text-white"
+              : "border-white/10 bg-neutral-900/70 text-neutral-300"
+          }`}
+        >
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <span className="inline-flex items-center gap-2 font-bold">
+              <IconPower size={18} />
+              Sin efecto activo
+            </span>
+            {noEffectActive ? (
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
+                Activa
+              </span>
+            ) : null}
+          </div>
+          <div className="grid gap-2 text-sm">
+            <span className="inline-flex items-center gap-2">
+              <IconBolt size={16} />
+              x1 watchtime
+            </span>
+            <span className="text-neutral-400">Chat normal</span>
+          </div>
+        </button>
+
+        {state.hours.map((hour) => {
+          const active = isManual && state.active === hour.id;
+
+          return (
+            <button
+              key={hour.id}
+              type="button"
+              disabled={isPending}
+              onClick={() => onActivateHour(hour.id, { autoDisable })}
+              className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
+                active
+                  ? hourStyles[hour.id] ||
+                    "border-red-300/30 bg-red-500/10 text-red-100"
+                  : "border-white/10 bg-neutral-900/70 text-neutral-300"
+              }`}
+            >
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <span className="inline-flex items-center gap-2 font-bold">
+                  <IconSparkles size={18} />
+                  {hour.label}
+                </span>
+                {active ? (
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
+                    Activa
+                  </span>
+                ) : null}
+              </div>
+              <div className="grid gap-2 text-sm">
+                <span className="inline-flex items-center gap-2">
+                  <IconBolt size={16} />
+                  {formatMultiplier(hour.watchtimeMultiplier)} watchtime
+                </span>
+                <span className="text-neutral-400">
+                  {hour.chatMultiplier > 1
+                    ? `${formatMultiplier(hour.chatMultiplier)} chat`
+                    : "Chat normal"}
+                </span>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="grid gap-3 lg:grid-cols-2">
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-amber-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <h3 className="inline-flex items-center gap-2 font-semibold text-white">
+              <IconBox size={18} />
+              Cofres
+            </h3>
+            <p className="mt-1 text-sm text-neutral-500">
+              Automatico cada {chestState.chestScheduler.intervalMinutes}{" "}
+              minutos desde que el stream esta online y activo por{" "}
+              {chestState.chestScheduler.durationSeconds} segundos.
+            </p>
+            {nextChestTime ? (
+              <p className="mt-2 text-sm font-semibold text-amber-200">
+                Proximo cofre automatico: {nextChestTime}.
+              </p>
+            ) : null}
+            {chestState.chest ? (
+              <p className="mt-2 text-sm font-semibold text-green-300">
+                Hay un cofre activo para reclamar.
+              </p>
+            ) : null}
+          </div>
           <button
             type="button"
-            disabled={isPending}
-            onClick={onDisableHour}
-            className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
-              noEffectActive
-                ? "border-white/25 bg-white/[0.06] text-white"
-                : "border-white/10 bg-neutral-900/70 text-neutral-300"
-            }`}
+            onClick={onActivateChest}
+            disabled={isPending || Boolean(chestState.chest)}
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 font-bold">
-                <IconPower size={18} />
-                Sin efecto activo
-              </span>
-              {noEffectActive ? (
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
-                  Activa
-                </span>
-              ) : null}
-            </div>
-            <div className="grid gap-2 text-sm">
-              <span className="inline-flex items-center gap-2">
-                <IconBolt size={16} />
-                x1 watchtime
-              </span>
-              <span className="text-neutral-400">Chat normal</span>
-            </div>
+            <IconBox size={17} />
+            Activar cofre
           </button>
-
-          {state.hours.map((hour) => {
-            const active = isManual && state.active === hour.id;
-
-            return (
-              <button
-                key={hour.id}
-                type="button"
-                disabled={isPending}
-                onClick={() => onActivateHour(hour.id, { autoDisable })}
-                className={`grid cursor-pointer gap-4 rounded-2xl border p-4 text-left shadow-lg shadow-black/10 transition hover:-translate-y-1 hover:border-white/20 focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 ${
-                  active
-                    ? hourStyles[hour.id] || "border-red-300/30 bg-red-500/10 text-red-100"
-                    : "border-white/10 bg-neutral-900/70 text-neutral-300"
-                }`}
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-2 font-bold">
-                    <IconSparkles size={18} />
-                    {hour.label}
-                  </span>
-                  {active ? (
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-bold">
-                      Activa
-                    </span>
-                  ) : null}
-                </div>
-                <div className="grid gap-2 text-sm">
-                  <span className="inline-flex items-center gap-2">
-                    <IconBolt size={16} />
-                    {formatMultiplier(hour.watchtimeMultiplier)} watchtime
-                  </span>
-                  <span className="text-neutral-400">
-                    {hour.chatMultiplier > 1
-                      ? `${formatMultiplier(hour.chatMultiplier)} chat`
-                      : "Chat normal"}
-                  </span>
-                </div>
-              </button>
-            );
-          })}
         </div>
 
-        <div className="grid gap-3 lg:grid-cols-2">
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-amber-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h3 className="inline-flex items-center gap-2 font-semibold text-white">
-                <IconBox size={18} />
-                Cofres
-              </h3>
-              <p className="mt-1 text-sm text-neutral-500">
-                Automatico cada {chestState.chestScheduler.intervalMinutes} minutos desde que el stream esta online y activo por{" "}
-                {chestState.chestScheduler.durationSeconds} segundos.
+        <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-green-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div>
+            <h3 className="inline-flex items-center gap-2 font-semibold text-white">
+              <IconMessageCircle size={18} />
+              Recompensa de Chat
+            </h3>
+            <p className="mt-1 text-sm text-neutral-500">
+              Manual, dura 60 segundos y solo la puede reclamar una persona.
+            </p>
+            {chestState.chatReward ? (
+              <p className="mt-2 text-sm font-semibold text-green-300">
+                Hay una recompensa de chat activa.
               </p>
-              {nextChestTime ? (
-                <p className="mt-2 text-sm font-semibold text-amber-200">
-                  Proximo cofre automatico: {nextChestTime}.
-                </p>
-              ) : null}
-              {chestState.chest ? (
-                <p className="mt-2 text-sm font-semibold text-green-300">
-                  Hay un cofre activo para reclamar.
-                </p>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={onActivateChest}
-              disabled={isPending || Boolean(chestState.chest)}
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-amber-300/30 bg-amber-400/10 px-4 py-3 text-sm font-black text-amber-100 transition hover:-translate-y-0.5 hover:bg-amber-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
-            >
-              <IconBox size={17} />
-              Activar cofre
-            </button>
+            ) : null}
           </div>
-
-          <div className="grid gap-3 rounded-2xl border border-white/10 bg-neutral-900/65 p-4 shadow-lg shadow-black/10 transition hover:border-green-300/20 lg:grid-cols-[1fr_auto] lg:items-center">
-            <div>
-              <h3 className="inline-flex items-center gap-2 font-semibold text-white">
-                <IconMessageCircle size={18} />
-                Recompensa de Chat
-              </h3>
-              <p className="mt-1 text-sm text-neutral-500">
-                Manual, dura 60 segundos y solo la puede reclamar una persona.
-              </p>
-              {chestState.chatReward ? (
-                <p className="mt-2 text-sm font-semibold text-green-300">
-                  Hay una recompensa de chat activa.
-                </p>
-              ) : null}
-            </div>
-            <button
-              type="button"
-              onClick={onActivateChatReward}
-              disabled={isPending || Boolean(chestState.chatReward)}
-              className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
-            >
-              <IconMessageCircle size={17} />
-              Activar recompensa
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={onActivateChatReward}
+            disabled={isPending || Boolean(chestState.chatReward)}
+            className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-green-300/30 bg-green-400/10 px-4 py-3 text-sm font-black text-green-100 transition hover:-translate-y-0.5 hover:bg-green-400/20 focus:outline-none disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-950 disabled:text-neutral-600 lg:w-auto"
+          >
+            <IconMessageCircle size={17} />
+            Activar recompensa
+          </button>
         </div>
+      </div>
 
-        <StreamPredictionsPanel
-          isPending={isPending}
-          predictions={predictions}
-          onCreatePrediction={onCreatePrediction}
-          onClosePrediction={onClosePrediction}
-          onResolvePrediction={onResolvePrediction}
-        />
+      <StreamPredictionsPanel
+        isPending={isPending}
+        predictions={predictions}
+        onCreatePrediction={onCreatePrediction}
+        onClosePrediction={onClosePrediction}
+        onResolvePrediction={onResolvePrediction}
+      />
     </section>
   );
 }
@@ -274,10 +283,11 @@ function AutoDisableToggle({ checked, expiresAt, onChange }) {
         </span>
         <span className="min-w-0">
           <span className="block text-sm font-black text-white">
-            Apagar automaticamente despues de 1 hora
+            Apagar automáticamente después de 1 hora
           </span>
           <span className="mt-0.5 block text-xs font-medium text-neutral-500">
-            Las horas especiales vuelven a puntos normales al terminar el tiempo.
+            Las horas especiales vuelven a puntos normales al terminar el
+            tiempo.
           </span>
           {expiresAt ? (
             <span className="mt-1 block text-xs font-semibold text-red-200/80">
@@ -362,7 +372,9 @@ function StreamPredictionsPanel({
 
       return {
         ...current,
-        options: current.options.filter((_, optionIndex) => optionIndex !== index),
+        options: current.options.filter(
+          (_, optionIndex) => optionIndex !== index,
+        ),
       };
     });
   }
@@ -436,13 +448,13 @@ function StreamPredictionsPanel({
                     durationMinutes: value,
                   }))
                 }
-                aria-label="Duracion de la prediccion en minutos"
+                aria-label="Duración de la predicción en minutos"
               />
             </Field>
           </div>
 
           <div className="grid gap-3 md:grid-cols-2">
-            <Field label="Apuesta minima">
+            <Field label="Apuesta mínima">
               <FormattedNumberInput
                 value={form.minBetPoints}
                 onValueChange={(value) =>
@@ -453,11 +465,11 @@ function StreamPredictionsPanel({
                 }
                 allowDecimals
                 decimalScale={2}
-                aria-label="Apuesta minima en puntos"
+                aria-label="Apuesta mínima en puntos"
               />
             </Field>
 
-            <Field label="Apuesta maxima">
+            <Field label="Apuesta máxima">
               <FormattedNumberInput
                 value={form.maxBetPoints}
                 onValueChange={(value) =>
@@ -466,10 +478,10 @@ function StreamPredictionsPanel({
                     maxBetPoints: value,
                   }))
                 }
-                placeholder="Sin limite"
+                placeholder="Sin límite"
                 allowDecimals
                 decimalScale={2}
-                aria-label="Apuesta maxima en puntos"
+                aria-label="Apuesta máxima en puntos"
               />
             </Field>
           </div>
@@ -484,7 +496,7 @@ function StreamPredictionsPanel({
                 }))
               }
               rows={3}
-              placeholder="Contexto opcional para los viewers."
+              placeholder="Contexto opcional para los usuarios."
             />
           </Field>
 
@@ -507,7 +519,9 @@ function StreamPredictionsPanel({
                 <div key={index} className="flex gap-2">
                   <TextInput
                     value={option}
-                    onChange={(event) => updateOption(index, event.target.value)}
+                    onChange={(event) =>
+                      updateOption(index, event.target.value)
+                    }
                     placeholder={`Opcion ${index + 1}`}
                     required
                     className="flex-1"
@@ -517,7 +531,7 @@ function StreamPredictionsPanel({
                     onClick={() => removeOption(index)}
                     disabled={form.options.length <= 2}
                     className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-xl border border-white/10 bg-neutral-900/80 text-neutral-500 transition hover:border-red-300/30 hover:text-red-100 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                    aria-label={`Quitar opcion ${index + 1}`}
+                    aria-label={`Quitar opción ${index + 1}`}
                   >
                     <IconTrash size={16} />
                   </button>
@@ -532,7 +546,7 @@ function StreamPredictionsPanel({
             className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/20 bg-gradient-to-r from-red-700 to-red-500 px-5 py-3 text-sm font-black text-white shadow-[0_16px_34px_rgba(255,45,45,0.22)] transition hover:-translate-y-0.5 hover:shadow-[0_18px_42px_rgba(255,45,45,0.30)] focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
           >
             <IconDeviceFloppy size={18} />
-            Crear prediccion
+            Crear predicción
           </button>
         </form>
       </div>
@@ -544,18 +558,20 @@ function StreamPredictionsPanel({
         <div className="mt-3 grid gap-3">
           {activePredictions.length === 0 ? (
             <p className="rounded-xl border border-dashed border-white/10 bg-neutral-900/45 p-4 text-sm text-neutral-500">
-              Todavia no hay predicciones publicadas para el stream.
+              Todavía no hay predicciones publicadas para el stream.
             </p>
           ) : (
-            activePredictions.slice(0, 4).map((prediction) => (
-              <StreamPredictionAdminCard
-                key={prediction.id}
-                prediction={prediction}
-                isPending={isPending}
-                onClose={onClosePrediction}
-                onResolve={onResolvePrediction}
-              />
-            ))
+            activePredictions
+              .slice(0, 4)
+              .map((prediction) => (
+                <StreamPredictionAdminCard
+                  key={prediction.id}
+                  prediction={prediction}
+                  isPending={isPending}
+                  onClose={onClosePrediction}
+                  onResolve={onResolvePrediction}
+                />
+              ))
           )}
         </div>
       </div>
@@ -621,14 +637,14 @@ function StreamPredictionAdminCard({
               Cerrar apuestas
             </button>
           ) : null}
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid gap-2">
             {prediction.options.map((option) => (
               <button
                 key={option.id}
                 type="button"
                 onClick={() => onResolve?.(prediction.id, option.id)}
                 disabled={isPending}
-                className="cursor-pointer rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-green-300/30 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                className="cursor-pointer rounded-lg border border-amber-300/20 bg-black/35 px-3 py-2 text-xs font-bold text-neutral-300 transition hover:border-amber-300/45 hover:bg-amber-300/10 hover:text-white focus:outline-none disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Resultado: {option.label}
               </button>

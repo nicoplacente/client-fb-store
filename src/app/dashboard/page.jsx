@@ -2,6 +2,7 @@
 
 import SectionContainer from "@/modules/ui/section-container";
 import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
+import { IconDownload } from "@tabler/icons-react";
 import {
   CreditPackagesPanel,
   GiveawaysPanel,
@@ -98,16 +99,23 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-wide text-red-300/80">
-            Administracion
+            Administración
           </p>
           <h1 className="mt-2 text-3xl font-bold text-white sm:text-4xl">
             Dashboard
           </h1>
           <p className="mt-3 max-w-2xl text-neutral-400">
-            Gestiona catalogo, sorteos, canjes, consultas y herramientas del
+            Gestiona catálogo, sorteos, canjes, consultas y herramientas del
             stream desde un solo panel.
           </p>
         </div>
+        <button
+          type="button"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/25 bg-red-500/10 px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-300/45 hover:bg-red-500/15 focus:outline-none sm:w-fit"
+        >
+          <IconDownload size={18} />
+          Descargar StreamScream
+        </button>
       </div>
     </div>
   );

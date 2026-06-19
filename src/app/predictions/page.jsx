@@ -43,36 +43,12 @@ import {
 
 const optionAccents = [
   {
-    border: "border-blue-400/70",
-    softBorder: "border-blue-400/35",
-    hoverBorder: "hover:border-blue-400/35",
-    text: "text-blue-300",
-    bg: "bg-blue-400/10",
-    line: "bg-blue-400",
-  },
-  {
-    border: "border-pink-400/70",
-    softBorder: "border-pink-400/35",
-    hoverBorder: "hover:border-pink-400/35",
-    text: "text-pink-300",
-    bg: "bg-pink-400/10",
-    line: "bg-pink-400",
-  },
-  {
-    border: "border-amber-300/70",
-    softBorder: "border-amber-300/35",
-    hoverBorder: "hover:border-amber-300/35",
+    border: "border-amber-300/65",
+    softBorder: "border-amber-300/20",
+    hoverBorder: "hover:border-amber-300/45",
     text: "text-amber-200",
-    bg: "bg-amber-300/10",
+    bg: "bg-amber-300/10 shadow-[inset_0_0_0_1px_rgba(252,211,77,0.08)]",
     line: "bg-amber-300",
-  },
-  {
-    border: "border-green-300/70",
-    softBorder: "border-green-300/35",
-    hoverBorder: "hover:border-green-300/35",
-    text: "text-green-200",
-    bg: "bg-green-300/10",
-    line: "bg-green-300",
   },
 ];
 
@@ -100,11 +76,12 @@ function groupIntegerDigits(value) {
 function normalizePointsInput(value) {
   const cleanValue = String(value ?? "").replace(/[^\d.,]/g, "");
 
-  if (!cleanValue) return {
-    integerValue: "",
-    decimalValue: "",
-    hasDecimalSeparator: false,
-  };
+  if (!cleanValue)
+    return {
+      integerValue: "",
+      decimalValue: "",
+      hasDecimalSeparator: false,
+    };
 
   const decimalSeparatorIndex = getPointsDecimalSeparatorIndex(cleanValue);
   const hasDecimalSeparator = decimalSeparatorIndex !== -1;
@@ -151,9 +128,7 @@ function formatPointsInputValue(value) {
 
   if (!Number.isFinite(number) || number <= 0) return "";
 
-  return formatPointsInput(
-    String(number).replace(".", ","),
-  );
+  return formatPointsInput(String(number).replace(".", ","));
 }
 
 function normalizePointsInteger(value) {
@@ -175,10 +150,7 @@ function getPointsDecimalSeparatorIndex(value) {
     .replace(/\D/g, "").length;
 
   if (separator === ",") return separatorIndex;
-  if (
-    value.endsWith(".") ||
-    (decimalsLength > 0 && decimalsLength <= 2)
-  ) {
+  if (value.endsWith(".") || (decimalsLength > 0 && decimalsLength <= 2)) {
     return separatorIndex;
   }
 
@@ -219,15 +191,14 @@ export default function PredictionsPage() {
       normalizedPredictions.filter(
         (prediction) =>
           !prediction.resolvedAt &&
-          (prediction.status === "closed" ||
-            !isBettingOpen(prediction, nowMs)),
+          (prediction.status === "closed" || !isBettingOpen(prediction, nowMs)),
       ),
     [normalizedPredictions, nowMs],
   );
   const closedPredictions = useMemo(
     () =>
-      normalizedPredictions.filter(
-        (prediction) => Boolean(prediction.resolvedAt),
+      normalizedPredictions.filter((prediction) =>
+        Boolean(prediction.resolvedAt),
       ),
     [normalizedPredictions],
   );
@@ -302,12 +273,12 @@ export default function PredictionsPage() {
     const points = parsePointsInput(betAmounts[prediction.id]);
 
     if (!user) {
-      toast.error("Inicia sesion para votar");
+      toast.error("Iniciá sesión para votar");
       return;
     }
 
     if (!optionId) {
-      toast.error("Elegí una opcion");
+      toast.error("Elegí una opción");
       return;
     }
 
@@ -317,12 +288,12 @@ export default function PredictionsPage() {
     }
 
     if (points < Number(prediction.minBetPoints || 1)) {
-      toast.error(`La apuesta minima es de ${prediction.minBetPoints} puntos`);
+      toast.error(`La apuesta mínima es de ${prediction.minBetPoints} puntos`);
       return;
     }
 
     if (prediction.maxBetPoints && points > Number(prediction.maxBetPoints)) {
-      toast.error(`La apuesta maxima es de ${prediction.maxBetPoints} puntos`);
+      toast.error(`La apuesta máxima es de ${prediction.maxBetPoints} puntos`);
       return;
     }
 
@@ -344,7 +315,7 @@ export default function PredictionsPage() {
         setAvailablePoints(nextPoints);
         emitKickPointsUpdated(nextPoints);
         await Promise.resolve(refreshUser?.()).catch(() => {});
-        toast.success("Prediccion registrada");
+        toast.success("Predicción registrada");
       } catch (err) {
         toast.error(getErrorMessage(err, "No se pudo votar"));
         await loadAvailablePoints();
@@ -354,7 +325,7 @@ export default function PredictionsPage() {
 
   function handleDeleteHistoryItem(prediction) {
     if (!user) {
-      toast.error("Inicia sesion para borrar historial");
+      toast.error("Iniciá sesión para borrar historial");
       return;
     }
 
@@ -371,7 +342,7 @@ export default function PredictionsPage() {
               : item,
           ),
         );
-        toast.success("Prediccion eliminada del historial");
+        toast.success("Predicción eliminada del historial");
       } catch (err) {
         toast.error(getErrorMessage(err, "No se pudo borrar el historial"));
       }
@@ -380,7 +351,7 @@ export default function PredictionsPage() {
 
   function handleClearHistory() {
     if (!user) {
-      toast.error("Inicia sesion para borrar historial");
+      toast.error("Iniciá sesión para borrar historial");
       return;
     }
 
@@ -388,7 +359,7 @@ export default function PredictionsPage() {
 
     if (
       !window.confirm(
-        "¿Borrar todo tu historial de predicciones? Los resultados publicos se conservan.",
+        "¿Borrar todo tu historial de predicciones? Los resultados públicos se conservan.",
       )
     ) {
       return;
@@ -492,7 +463,7 @@ function PredictionsHero({
     {
       label: "En vivo",
       value: formatNumber(activeCount),
-      detail: activeCount === 1 ? "prediccion activa" : "predicciones activas",
+      detail: activeCount === 1 ? "predicción activa" : "predicciones activas",
       icon: IconTargetArrow,
     },
     {
@@ -510,9 +481,9 @@ function PredictionsHero({
     },
   ];
   const steps = [
-    ["Elegí", "Lee el contexto y marca una opcion."],
-    ["Apostá", "Define puntos dentro de los limites."],
-    ["Cobra", "Si aciertas, recibis el multiplicador."],
+    ["Elegí", "Leé el contexto y marcá una opción."],
+    ["Apostá", "Definí puntos dentro de los límites."],
+    ["Cobrá", "Si acertás, recibís el multiplicador."],
   ];
 
   return (
@@ -649,10 +620,7 @@ function PredictionCard({
   const bettingClosed = prediction.endsAt
     ? getRemainingMs(prediction.endsAt) <= 0
     : false;
-  const availableBetPoints = Math.max(
-    0,
-    Number(availablePoints || 0),
-  );
+  const availableBetPoints = Math.max(0, Number(availablePoints || 0));
   const rawPredictionMaxBetPoints = Number(prediction.maxBetPoints);
   const predictionMaxBetPoints =
     Number.isFinite(rawPredictionMaxBetPoints) && rawPredictionMaxBetPoints > 0
@@ -683,7 +651,7 @@ function PredictionCard({
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
               <span className="size-2 animate-pulse rounded-full bg-green-400" />
-              Prediccion activa
+              Predicción activa
             </div>
             <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-xs font-black uppercase tracking-wide text-neutral-300">
               <IconClock size={15} />
@@ -723,7 +691,7 @@ function PredictionCard({
             <div className="mb-3 flex items-center justify-between gap-3 text-xs font-black uppercase tracking-wide text-neutral-500">
               <span className="inline-flex items-center gap-2">
                 <IconChartLine size={15} />
-                Pool por opcion
+                Pool por opción
               </span>
               <span className="rounded-full border border-green-300/20 bg-green-400/10 px-2.5 py-1 text-green-200">
                 {formatMultiplier(prediction.payoutMultiplier)}
@@ -752,77 +720,77 @@ function PredictionCard({
           ) : (
             <aside className="flex h-full flex-col rounded-2xl border border-white/10 bg-neutral-950/75 p-4 shadow-inner shadow-black/20">
               <div className="grid gap-2">
-              <div className="flex items-center justify-between gap-3">
-                <label
-                  htmlFor={`prediction-bet-${prediction.id}`}
-                  className="text-sm font-semibold text-neutral-300"
-                >
-                  Puntos a apostar
-                </label>
-                <button
-                  type="button"
-                  onClick={() =>
-                    onBetChange(formatPointsInputValue(maxBetAmount))
+                <div className="flex items-center justify-between gap-3">
+                  <label
+                    htmlFor={`prediction-bet-${prediction.id}`}
+                    className="text-sm font-semibold text-neutral-300"
+                  >
+                    Puntos a apostar
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onBetChange(formatPointsInputValue(maxBetAmount))
+                    }
+                    disabled={maxBetDisabled}
+                    className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-lg border border-red-300/25 bg-red-500/10 px-3 text-[11px] font-black uppercase tracking-wide text-red-100 transition hover:border-red-200/45 hover:bg-red-500/20 focus:outline-none  disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:text-neutral-600"
+                  >
+                    Max
+                  </button>
+                </div>
+                <input
+                  id={`prediction-bet-${prediction.id}`}
+                  type="text"
+                  inputMode="decimal"
+                  value={betAmount}
+                  onChange={(event) =>
+                    onBetChange(formatPointsInput(event.target.value))
                   }
-                  disabled={maxBetDisabled}
-                  className="inline-flex min-h-8 cursor-pointer items-center justify-center rounded-lg border border-red-300/25 bg-red-500/10 px-3 text-[11px] font-black uppercase tracking-wide text-red-100 transition hover:border-red-200/45 hover:bg-red-500/20 focus:outline-none  disabled:cursor-not-allowed disabled:border-white/10 disabled:bg-neutral-900 disabled:text-neutral-600"
-                >
-                  Max
-                </button>
-              </div>
-              <input
-                id={`prediction-bet-${prediction.id}`}
-                type="text"
-                inputMode="decimal"
-                value={betAmount}
-                onChange={(event) =>
-                  onBetChange(formatPointsInput(event.target.value))
-                }
-                disabled={prediction.hasVoted || bettingClosed}
-                className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
-                placeholder="100"
-              />
+                  disabled={prediction.hasVoted || bettingClosed}
+                  className="min-h-12 rounded-xl border border-white/10 bg-neutral-950 px-3 py-2.5 font-mono text-white shadow-inner shadow-black/10 outline-none transition placeholder:text-neutral-600 hover:border-red-300/25 focus:border-red-300/60 disabled:cursor-not-allowed disabled:opacity-60"
+                  placeholder="100"
+                />
               </div>
 
               <div className="mt-3 rounded-xl border border-white/10 bg-black/25 p-3 text-sm">
-              <p className="mb-2 flex items-center justify-between gap-3 text-neutral-500">
-                Limites
-                <span className="font-black text-neutral-200">
-                  {formatNumber(prediction.minBetPoints)} -{" "}
-                  {prediction.maxBetPoints
-                    ? formatNumber(prediction.maxBetPoints)
-                    : "sin max."}{" "}
-                  pts
-                </span>
-              </p>
-              <p className="flex items-center justify-between gap-3 text-neutral-500">
-                Si ganas
-                <span className="font-black text-green-300">
-                  +
-                  {formatNumber(possiblePayout, {
-                    maximumFractionDigits: 2,
-                  })}{" "}
-                  pts
-                </span>
-              </p>
-              <p className="mt-2 flex items-center justify-between gap-3 text-neutral-500">
-                Si perdes
-                <span className="font-black text-red-300">
-                  -{formatNumber(betPoints)} pts
-                </span>
-              </p>
+                <p className="mb-2 flex items-center justify-between gap-3 text-neutral-500">
+                  Limites
+                  <span className="font-black text-neutral-200">
+                    {formatNumber(prediction.minBetPoints)} -{" "}
+                    {prediction.maxBetPoints
+                      ? formatNumber(prediction.maxBetPoints)
+                      : "sin max."}{" "}
+                    pts
+                  </span>
+                </p>
+                <p className="flex items-center justify-between gap-3 text-neutral-500">
+                  Si ganas
+                  <span className="font-black text-green-300">
+                    +
+                    {formatNumber(possiblePayout, {
+                      maximumFractionDigits: 2,
+                    })}{" "}
+                    pts
+                  </span>
+                </p>
+                <p className="mt-2 flex items-center justify-between gap-3 text-neutral-500">
+                  Si perdes
+                  <span className="font-black text-red-300">
+                    -{formatNumber(betPoints)} pts
+                  </span>
+                </p>
               </div>
 
               <div className="mt-3 rounded-xl border border-white/10 bg-neutral-900/45 p-3 text-xs leading-5 text-neutral-400">
-              <p className="flex items-start gap-2">
-                <IconInfoCircle
-                  className="mt-0.5 shrink-0 text-red-200"
-                  size={16}
-                />
-                {selectedOption
-                  ? `Vas con ${selectedOption.label}. Revisa el cierre antes de confirmar.`
-                  : "Selecciona una opcion para calcular el pago estimado."}
-              </p>
+                <p className="flex items-start gap-2">
+                  <IconInfoCircle
+                    className="mt-0.5 shrink-0 text-red-200"
+                    size={16}
+                  />
+                  {selectedOption
+                    ? `Vas con ${selectedOption.label}. Revisá el cierre antes de confirmar.`
+                    : "Seleccioná una opción para calcular el pago estimado."}
+                </p>
               </div>
 
               <button
@@ -837,10 +805,10 @@ function PredictionCard({
                   <IconTrophy size={18} />
                 )}
                 {prediction.hasVoted
-                  ? "Tu voto esta registrado"
+                  ? "Tu voto está registrado"
                   : bettingClosed
                     ? "Apuestas cerradas"
-                    : "Confirmar prediccion"}
+                    : "Confirmar predicción"}
               </button>
             </aside>
           )}
@@ -852,18 +820,18 @@ function PredictionCard({
 
 function ActiveBetTicket({ betPoints, optionLabel, possiblePayout }) {
   return (
-    <aside className="flex h-full flex-col rounded-2xl border border-blue-300/25 bg-[linear-gradient(180deg,rgba(59,130,246,0.10),rgba(10,10,10,0.88))] p-4 shadow-inner shadow-black/20">
-      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-blue-300">
+    <aside className="flex h-full flex-col rounded-2xl border border-amber-300/35 bg-[linear-gradient(180deg,rgba(120,83,18,0.42),rgba(10,10,10,0.9))] p-4 shadow-inner shadow-black/20">
+      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wide text-amber-200">
         <IconCircleCheck size={17} />
         Apuesta registrada
       </div>
 
-      <div className="mt-4 rounded-xl border border-blue-300/20 bg-black/25 p-3">
+      <div className="mt-4 rounded-xl border border-amber-300/25 bg-amber-300/10 p-3">
         <p className="text-[11px] font-black uppercase tracking-wide text-neutral-500">
-          Tu opcion
+          Tu opción
         </p>
         <p className="mt-2 text-lg font-black text-white">
-          {optionLabel || "Opcion registrada"}
+          {optionLabel || "Opción registrada"}
         </p>
       </div>
 
@@ -882,7 +850,7 @@ function ActiveBetTicket({ betPoints, optionLabel, possiblePayout }) {
       </div>
 
       <p className="mt-auto pt-4 text-xs leading-5 text-neutral-400">
-        Tu ticket queda bloqueado hasta que cierre la prediccion y se publique
+        Tu ticket queda bloqueado hasta que cierre la predicción y se publique
         el resultado.
       </p>
     </aside>
@@ -934,7 +902,7 @@ function WaitingResultPredictionCard({ prediction }) {
       <div className="relative flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs font-black uppercase tracking-wide text-green-300">
           <span className="size-2 rounded-full bg-green-400" />
-          Prediccion cerrada
+          Predicción cerrada
         </div>
         <div className="flex flex-wrap items-center gap-2 rounded-full border border-amber-300/25 bg-amber-400/10 px-3 py-1.5 text-xs font-black uppercase tracking-wide text-amber-200">
           <span className="size-2 animate-pulse rounded-full bg-amber-300" />
@@ -947,7 +915,7 @@ function WaitingResultPredictionCard({ prediction }) {
       </h2>
       <p className="relative mt-2 max-w-3xl text-sm leading-6 text-neutral-400">
         Las apuestas ya cerraron. El resultado se acredita cuando el admin
-        define la opcion ganadora.
+        define la opción ganadora.
       </p>
 
       <div className="relative mt-5 grid overflow-hidden rounded-2xl border border-white/10 bg-neutral-950/60 sm:grid-cols-4">
@@ -969,7 +937,7 @@ function WaitingResultPredictionCard({ prediction }) {
         />
       </div>
 
-      <div className="relative mt-5 grid gap-3 md:grid-cols-2">
+      <div className="relative mt-5 grid gap-3">
         {prediction.options.map((option, index) => (
           <WaitingOptionCard
             key={option.id}
@@ -983,11 +951,11 @@ function WaitingResultPredictionCard({ prediction }) {
       <div className="relative mt-5 flex flex-col gap-3 rounded-2xl border border-amber-300/35 bg-amber-400/10 px-4 py-3 text-sm text-amber-100 sm:flex-row sm:items-center sm:justify-between">
         <span className="inline-flex items-center gap-2 font-black uppercase tracking-wide">
           <IconClock size={17} />
-          Ticket en revision
+          Ticket en revisión
         </span>
         <span className="text-xs font-semibold uppercase tracking-wide text-amber-200/80">
           {selectedOption
-            ? `Tu opcion: ${selectedOption.label}`
+            ? `Tu opción: ${selectedOption.label}`
             : "Sin apuesta registrada"}
         </span>
       </div>
@@ -1011,28 +979,30 @@ function WaitingStat({ label, value }) {
 function WaitingOptionCard({ option, accent, selected }) {
   return (
     <div
-      className={`rounded-2xl border bg-neutral-950/55 p-4 transition ${
-        selected ? `${accent.border} ${accent.bg}` : accent.softBorder
+      className={`rounded-2xl border p-3 transition sm:p-4 ${
+        selected
+          ? `${accent.border} ${accent.bg}`
+          : `${accent.softBorder} bg-black/45`
       }`}
     >
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="font-black text-white">{option.label}</p>
-          <p className={`mt-3 font-mono text-5xl text-current ${accent.text}`}>
+          <p className={`mt-2 font-mono text-4xl text-current ${accent.text}`}>
             {formatNumber(option.percent)}
             <span className="ml-1 text-base">%</span>
           </p>
         </div>
         {selected ? (
           <span
-            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
+            className={`inline-flex items-center gap-1 rounded-full border bg-black/30 px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
           >
             <IconCircleCheck size={13} />
-            Tu eleccion
+            Tu elección
           </span>
         ) : null}
       </div>
-      <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+      <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-neutral-600">
         {formatNumber(option.totalPoints)} pts · {formatNumber(option.players)}{" "}
         jugadores
       </p>
@@ -1103,37 +1073,37 @@ function PredictionOption({ option, accent, selected, locked, onSelect }) {
       type="button"
       onClick={onSelect}
       disabled={locked}
-      className={`group/option cursor-pointer rounded-2xl border bg-neutral-950/55 p-4 text-left transition hover:-translate-y-0.5 hover:bg-neutral-900/70 focus:outline-none disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
+      className={`group/option cursor-pointer rounded-xl border p-3 text-left transition hover:-translate-y-0.5 hover:bg-neutral-950/80 focus:outline-none disabled:cursor-not-allowed disabled:hover:translate-y-0 ${
         selected || option.isUserChoice
           ? `${accent.border} ${accent.bg}`
-          : `border-white/10 ${accent.hoverBorder}`
+          : `${accent.softBorder} ${accent.hoverBorder} bg-black/45`
       }`}
     >
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-base font-black text-white">{option.label}</p>
-          <p className="mt-2 font-mono text-4xl font-black text-white">
+          <p className="text-sm font-black text-white">{option.label}</p>
+          <p className="mt-1 font-mono text-3xl font-black text-white">
             {formatNumber(option.percent)}
-            <span className={`ml-1 text-base ${accent.text}`}>%</span>
+            <span className={`ml-1 text-sm ${accent.text}`}>%</span>
           </p>
         </div>
         {(selected || option.isUserChoice) && (
           <span
-            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
+            className={`inline-flex items-center gap-1 rounded-full border bg-black/30 px-2.5 py-1 text-[10px] font-black uppercase ${accent.softBorder} ${accent.text}`}
           >
             <IconCircleCheck size={13} />
-            Tu eleccion
+            Tu elección
           </span>
         )}
       </div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-white/10">
+      <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-white/10">
         <div
           className={`h-full rounded-full ${accent.line} shadow-[0_0_18px_currentColor] transition-all duration-300 ${getPercentWidthClass(
             option.percent,
           )}`}
         />
       </div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-neutral-600">
+      <div className="mt-2 flex flex-wrap items-center justify-between gap-2 text-[11px] font-semibold uppercase tracking-wide text-neutral-600">
         <span>{formatNumber(option.totalPoints)} pts</span>
         <span>{formatNumber(option.players)} jugadores</span>
       </div>
@@ -1174,6 +1144,7 @@ function getPercentWidthClass(percent) {
 
 function ResolvedPredictionCard({ prediction }) {
   const outcome = getPredictionOutcome(prediction);
+  const userChoiceOptionId = prediction.currentUserBet?.optionId;
 
   return (
     <article className="relative overflow-hidden rounded-3xl border border-white/10 bg-[linear-gradient(180deg,rgba(23,23,23,0.92),rgba(10,10,10,0.92))] p-4 shadow-2xl shadow-black/25 ring-1 ring-white/[0.03] sm:p-6">
@@ -1193,13 +1164,14 @@ function ResolvedPredictionCard({ prediction }) {
         {prediction.title}
       </h2>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-2">
+      <div className="mt-6 grid gap-3">
         {prediction.options.map((option, index) => (
           <ResolvedOptionCard
             key={option.id}
             option={option}
             accent={optionAccents[index % optionAccents.length]}
             winner={Number(option.id) === Number(prediction.winningOptionId)}
+            userChoice={Number(option.id) === Number(userChoiceOptionId)}
           />
         ))}
       </div>
@@ -1209,10 +1181,13 @@ function ResolvedPredictionCard({ prediction }) {
   );
 }
 
-function ResolvedOptionCard({ option, accent, winner }) {
+function ResolvedOptionCard({ option, accent, winner, userChoice }) {
+  const lostUserChoice = userChoice && !winner;
   const classes = winner
-    ? "border-green-400/70 bg-green-500/10 text-green-300 shadow-[0_16px_38px_rgba(34,197,94,0.12)]"
-    : `${accent.softBorder} bg-neutral-950/55 ${accent.text}`;
+    ? "border-green-400/70 bg-green-950/60 text-green-300 shadow-[0_16px_38px_rgba(34,197,94,0.12)]"
+    : lostUserChoice
+      ? "border-red-400/70 bg-red-950/60 text-red-300 shadow-[0_16px_38px_rgba(248,113,113,0.10)]"
+      : `${accent.softBorder} bg-black/45 ${accent.text}`;
 
   return (
     <div className={`rounded-2xl border p-4 ${classes}`}>
@@ -1224,10 +1199,16 @@ function ResolvedOptionCard({ option, accent, winner }) {
             <span className="ml-1 text-base">%</span>
           </p>
         </div>
-        {winner ? (
-          <span className="inline-flex items-center gap-1 rounded-full border border-green-300/40 bg-green-400/10 px-3 py-1 text-[10px] font-black uppercase text-green-200">
-            <IconMedal2 size={13} />
-            Ganadora
+        {winner || lostUserChoice ? (
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-3 py-1 text-[10px] font-black uppercase ${
+              winner
+                ? "border-green-300/40 bg-green-400/10 text-green-200"
+                : "border-red-300/40 bg-red-400/10 text-red-200"
+            }`}
+          >
+            {winner ? <IconMedal2 size={13} /> : <IconCircleCheck size={13} />}
+            {winner ? "Ganadora" : "Tu elección"}
           </span>
         ) : null}
       </div>
@@ -1343,7 +1324,7 @@ function PredictionHistory({
           ))}
         </div>
       ) : (
-        <StatePanel text="Todavia no tenes predicciones resueltas." />
+        <StatePanel text="Todavía no tenés predicciones resueltas." />
       )}
     </section>
   );

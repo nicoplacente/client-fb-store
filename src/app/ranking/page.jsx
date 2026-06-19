@@ -7,13 +7,29 @@ import {
   useMemo,
   useState,
 } from "react";
-import { IconAwardFilled, IconCrown } from "@tabler/icons-react";
+import {
+  IconAwardFilled,
+  IconChevronDown,
+  IconCrown,
+} from "@tabler/icons-react";
 import SectionContainer from "@/modules/ui/section-container";
 import { ITEMS_PER_PAGE } from "@/modules/ranking/libs/constants";
 import RankingSearchBar from "@/modules/ranking/components/ranking-searchbar";
 import TH from "@/modules/ranking/ui/th";
 import { formatWatchtime } from "@/modules/profile/lib/profile-utils";
 import { envConfig } from "@/config";
+
+const SORT_OPTIONS = [
+  { key: "watchTimePoints", label: "Watchtime" },
+  { key: "totalPoints", label: "Puntos" },
+  { key: "chests", label: "Cofres" },
+  { key: "streak", label: "Racha" },
+  { key: "totalMessages", label: "Mensajes" },
+  { key: "recChat", label: "Rec. Chat" },
+];
+
+const ACTIVE_METRIC_TEXT_CLASS =
+  "bg-gradient-to-r from-red-500 via-red-300 to-neutral-200 bg-clip-text text-transparent";
 
 function formatExactNumber(value) {
   return Number(value || 0).toLocaleString("es-AR");
@@ -73,10 +89,73 @@ function RankIndicator({ index }) {
   );
 }
 
+function getSortableValue(user, key) {
+  return Number(user[key]) || 0;
+}
+
+function sortRankingByMetric(ranking, sortKey) {
+  return [...ranking].sort((firstUser, secondUser) => {
+    const selectedDifference =
+      getSortableValue(secondUser, sortKey) -
+      getSortableValue(firstUser, sortKey);
+
+    if (selectedDifference !== 0) return selectedDifference;
+
+    const pointsDifference =
+      getSortableValue(secondUser, "totalPoints") -
+      getSortableValue(firstUser, "totalPoints");
+
+    if (pointsDifference !== 0) return pointsDifference;
+
+    return String(firstUser.username || "").localeCompare(
+      String(secondUser.username || ""),
+      "es",
+      { sensitivity: "base" },
+    );
+  });
+}
+
+function SortableHeader({ label, sortKey, activeSortKey, onSort }) {
+  const isActive = sortKey === activeSortKey;
+
+  return (
+    <button
+      type="button"
+      className={`mx-auto inline-flex min-h-8 w-full items-center justify-center gap-1 rounded-md px-2 py-1 text-xs font-semibold transition focus-visible:outline focus-visible:outline-offset-2 focus-visible:outline-red-300 sm:text-sm ${
+        isActive ? "text-white" : "text-neutral-300 hover:text-red-100"
+      }`}
+      aria-pressed={isActive}
+      onClick={() => onSort(sortKey)}
+    >
+      <span
+        className={`whitespace-nowrap ${isActive ? ACTIVE_METRIC_TEXT_CLASS : ""}`}
+      >
+        {label}
+      </span>
+      <IconChevronDown
+        size={14}
+        aria-hidden="true"
+        className={`shrink-0 transition ${
+          isActive ? "text-red-300 opacity-100" : "opacity-40"
+        }`}
+      />
+    </button>
+  );
+}
+
+function MetricValue({ active, children }) {
+  return (
+    <span className={active ? `${ACTIVE_METRIC_TEXT_CLASS} font-semibold` : ""}>
+      {children}
+    </span>
+  );
+}
+
 export default function RankingPage() {
   const [ranking, setRanking] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [sortKey, setSortKey] = useState("totalPoints");
   const deferredSearchTerm = useDeferredValue(searchTerm);
 
   const loadRanking = useCallback(async () => {
@@ -100,7 +179,7 @@ export default function RankingPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [deferredSearchTerm]);
+  }, [deferredSearchTerm, sortKey]);
 
   const filteredRanking = useMemo(() => {
     if (!ranking) return [];
@@ -115,16 +194,21 @@ export default function RankingPage() {
     );
   }, [deferredSearchTerm, ranking]);
 
+  const sortedRanking = useMemo(
+    () => sortRankingByMetric(filteredRanking, sortKey),
+    [filteredRanking, sortKey],
+  );
+
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredRanking.length / ITEMS_PER_PAGE),
+    Math.ceil(sortedRanking.length / ITEMS_PER_PAGE),
   );
 
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedRanking = useMemo(
-    () => filteredRanking.slice(startIndex, endIndex),
-    [endIndex, filteredRanking, startIndex],
+    () => sortedRanking.slice(startIndex, endIndex),
+    [endIndex, sortedRanking, startIndex],
   );
 
   return (
@@ -148,16 +232,19 @@ export default function RankingPage() {
               <TH>
                 <RankingSearchBar value={searchTerm} onSearch={setSearchTerm} />
               </TH>
-              <TH>
-                <span className="whitespace-nowrap">Watchtime</span>
-              </TH>
-              <TH>Puntos</TH>
-              <TH>Cofres</TH>
-              <TH>Racha</TH>
-              <TH>Mensajes</TH>
-              <TH>
-                <span className="whitespace-nowrap">Rec. Chat</span>
-              </TH>
+              {SORT_OPTIONS.map((option) => (
+                <TH
+                  key={option.key}
+                  ariaSort={sortKey === option.key ? "descending" : "none"}
+                >
+                  <SortableHeader
+                    label={option.label}
+                    sortKey={option.key}
+                    activeSortKey={sortKey}
+                    onSort={setSortKey}
+                  />
+                </TH>
+              ))}
             </tr>
           </thead>
           <tbody>
@@ -193,22 +280,34 @@ export default function RankingPage() {
                       </span>
                     </td>
                     <td className="whitespace-nowrap">
-                      {formatWatchtime(watchTimePoints)}
+                      <MetricValue active={sortKey === "watchTimePoints"}>
+                        {formatWatchtime(watchTimePoints)}
+                      </MetricValue>
                     </td>
                     <td>
-                      <RoundedStat value={user.totalPoints} />
+                      <MetricValue active={sortKey === "totalPoints"}>
+                        <RoundedStat value={user.totalPoints} />
+                      </MetricValue>
                     </td>
                     <td>
-                      <RoundedStat value={user.chests} />
+                      <MetricValue active={sortKey === "chests"}>
+                        <RoundedStat value={user.chests} />
+                      </MetricValue>
                     </td>
                     <td>
-                      <RoundedStat value={user.streak} />
+                      <MetricValue active={sortKey === "streak"}>
+                        <RoundedStat value={user.streak} />
+                      </MetricValue>
                     </td>
                     <td>
-                      <RoundedStat value={user.totalMessages} />
+                      <MetricValue active={sortKey === "totalMessages"}>
+                        <RoundedStat value={user.totalMessages} />
+                      </MetricValue>
                     </td>
                     <td>
-                      <RoundedStat value={user.recChat} />
+                      <MetricValue active={sortKey === "recChat"}>
+                        <RoundedStat value={user.recChat} />
+                      </MetricValue>
                     </td>
                   </tr>
                 );

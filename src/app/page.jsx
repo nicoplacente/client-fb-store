@@ -8,11 +8,15 @@ import {
   IconShoppingBag,
   IconSparkles,
   IconTrophy,
+  IconUsers,
 } from "@tabler/icons-react";
 import { createPageMetadata } from "@/modules/seo/metadata";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
+
+const CHROME_EXTENSION_URL =
+  "https://chromewebstore.google.com/detail/bertellitos/aeghpachelnjfcckdhdgeegpacgbnpng?hl=es-419";
 
 export const metadata = createPageMetadata({
   title: {
@@ -32,7 +36,34 @@ export const metadata = createPageMetadata({
   ],
 });
 
-export default function Home() {
+async function getExtensionUsersLabel() {
+  try {
+    const response = await fetch(CHROME_EXTENSION_URL, {
+      cache: "no-store",
+      headers: {
+        "Accept-Language": "es-419,es;q=0.9,en;q=0.8",
+      },
+    });
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const usersMatch = html.match(
+      /(?:^|>)\s*([\d.,]+(?:\s*[kKmM])?)\s*(usuarios?|users?)\b/i,
+    );
+
+    if (!usersMatch?.[1]) return null;
+
+    const count = usersMatch[1].trim();
+    return `${count} ${count === "1" ? "usuario" : "usuarios"}`;
+  } catch {
+    return null;
+  }
+}
+
+export default async function Home() {
+  const extensionUsersLabel = await getExtensionUsersLabel();
+
   return (
     <SectionContainer className="space-y-6 lg:space-y-8">
       <div className="relative overflow-hidden rounded-2xl border border-white/[0.08] bg-[#121212]/90 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.03] sm:p-6 lg:p-8">
@@ -80,24 +111,36 @@ export default function Home() {
               src="https://www.youtube.com/embed/FXDkPYtcOHw"
               title="GANÁ PUNTOS MIRANDO EL STREAM!"
               loading="lazy"
-              frameborder="0"
+              frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerpolicy="strict-origin-when-cross-origin"
-              allowfullscreen
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
             ></iframe>
           </div>
         </div>
       </div>
 
       <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-white/[0.08] bg-[#121212]/88 p-5 shadow-[0_18px_48px_rgba(0,0,0,0.24)] sm:flex-row sm:items-center">
-        <div>
-          <p className="text-xs font-black uppercase text-red-300">Extensión</p>
-          <h2 className="mt-1 text-xl font-black text-white">
-            Sumá la experiencia FrancoBertello Points a tu navegador.
-          </h2>
+        <div className="space-y-3">
+          <div>
+            <p className="text-xs font-black uppercase text-red-300">
+              Extensión
+            </p>
+            <h2 className="mt-1 text-xl font-black text-white">
+              Sumá la experiencia FrancoBertello Points a tu navegador.
+            </h2>
+          </div>
+          <div className="inline-flex items-center gap-2 rounded-lg border border-white/[0.08] bg-black/20 px-3 py-2 text-sm font-bold text-neutral-200">
+            <IconUsers size={18} className="text-red-300" />
+            <span>
+              {extensionUsersLabel
+                ? `${extensionUsersLabel} usando la extensión`
+                : "Usuarios activos en la extensión"}
+            </span>
+          </div>
         </div>
         <a
-          href="https://chromewebstore.google.com/detail/bertellitos/aeghpachelnjfcckdhdgeegpacgbnpng?hl=es-419"
+          href={CHROME_EXTENSION_URL}
           className="gamer-border-link inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-transparent bg-[#1A1A1A] px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 focus:outline-none sm:w-fit"
           aria-label="Instalar extensión"
           rel="noopener noreferrer"
