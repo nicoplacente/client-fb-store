@@ -122,12 +122,36 @@ export default function ConfirmationDialog({
           className={`overflow-y-auto ${
             aside
               ? secondaryAside
-                ? "grid overflow-x-hidden lg:grid-cols-[minmax(18rem,0.72fr)_minmax(22rem,1fr)_minmax(19rem,0.85fr)]"
-                : "grid lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.18fr)]"
+                ? "grid overflow-x-hidden lg:grid-cols-[minmax(19rem,0.85fr)_minmax(22rem,1fr)_minmax(18rem,0.72fr)]"
+                : "grid lg:grid-cols-[minmax(0,1.18fr)_minmax(0,0.82fr)]"
               : ""
           }`}
         >
-          <div className="p-5 sm:p-6">
+          {secondaryAside ? (
+            <aside
+              className={`p-5 sm:p-6 ${secondaryAsideClassName}`}
+            >
+              {secondaryAside}
+            </aside>
+          ) : null}
+          {aside ? (
+            <aside
+              className={`bg-white/[0.025] p-5 sm:p-6 ${
+                secondaryAside
+                  ? "border-t border-white/10 lg:border-l lg:border-t-0"
+                  : ""
+              }`}
+            >
+              {aside}
+            </aside>
+          ) : null}
+          <div
+            className={`p-5 sm:p-6 ${
+              aside
+                ? "border-t border-white/10 lg:border-l lg:border-t-0"
+                : ""
+            }`}
+          >
             {children ? (
               <div className="rounded-xl border border-white/10 bg-neutral-900/80 p-4">
                 {children}
@@ -154,18 +178,6 @@ export default function ConfirmationDialog({
               </button>
             </div>
           </div>
-          {aside ? (
-            <aside className="border-t border-white/10 bg-white/[0.025] p-5 sm:p-6 lg:border-l lg:border-t-0">
-              {aside}
-            </aside>
-          ) : null}
-          {secondaryAside ? (
-            <aside
-              className={`border-t border-white/10 p-5 sm:p-6 lg:border-l lg:border-t-0 ${secondaryAsideClassName}`}
-            >
-              {secondaryAside}
-            </aside>
-          ) : null}
         </div>
       </div>
     </div>

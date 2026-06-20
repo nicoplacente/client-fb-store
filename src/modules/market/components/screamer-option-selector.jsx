@@ -42,7 +42,7 @@ function ScreamerOptionCard({ option, selected, onSelect }) {
 
   return (
     <label
-      className={`group grid cursor-pointer gap-3 rounded-2xl border p-3 transition focus-within:ring-2 focus-within:ring-red-300/60 ${
+      className={`group relative grid cursor-pointer gap-3 rounded-2xl border p-3 transition focus-within:ring-2 focus-within:ring-red-300/60 ${
         selected
           ? "border-red-300/55 bg-red-500/12 shadow-lg shadow-red-950/20"
           : "border-white/10 bg-neutral-950/70 hover:border-red-300/30 hover:bg-white/[0.03]"
@@ -54,7 +54,7 @@ function ScreamerOptionCard({ option, selected, onSelect }) {
         value={option.id}
         checked={selected}
         onChange={onSelect}
-        className="sr-only"
+        className="sr-only left-3 top-3"
       />
 
       <div className="relative aspect-video overflow-hidden rounded-xl border border-white/10 bg-black">
