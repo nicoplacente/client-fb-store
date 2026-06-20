@@ -109,13 +109,14 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
             stream desde un solo panel.
           </p>
         </div>
-        <button
-          type="button"
+        <a
+          href="/downloads/FB-Store-Screamer.exe"
+          download="FB-Store-Screamer.exe"
           className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/25 bg-red-500/10 px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-300/45 hover:bg-red-500/15 focus:outline-none sm:w-fit"
         >
-          <IconDownload size={18} />
+          <IconDownload aria-hidden="true" size={18} />
           Descargar StreamScream
-        </button>
+        </a>
       </div>
     </div>
   );
