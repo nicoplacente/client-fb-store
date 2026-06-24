@@ -8,21 +8,34 @@ export default function LinkSidebar({
   compact = false,
 }) {
   const isBlueAccent = item.accent === "blue";
+  const isVioletAccent = item.accent === "violet";
 
   const stateClassName = isBlueAccent
     ? isActive
       ? "border-cyan-300/35 bg-cyan-400/12 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
       : "border-transparent text-neutral-400 hover:border-cyan-300/20 hover:bg-cyan-400/[0.055] hover:text-cyan-100"
-    : isActive
-      ? "border-red-300/35 bg-red-500/14 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
-      : "border-transparent text-neutral-400 hover:border-white/10 hover:bg-white/[0.045] hover:text-neutral-100";
+    : isVioletAccent
+      ? isActive
+        ? "border-[#9b4dff]/35 bg-[#9b4dff]/15 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+        : "border-transparent text-neutral-400 hover:border-[#9b4dff]/20 hover:bg-[#9b4dff]/[0.055] hover:text-[#e9d8ff]"
+      : isActive
+        ? "border-red-300/35 bg-red-500/14 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.08)]"
+        : "border-transparent text-neutral-400 hover:border-white/10 hover:bg-white/[0.045] hover:text-neutral-100";
 
-  const indicatorClassName = isBlueAccent ? "bg-cyan-300" : "bg-red-300";
+  const indicatorClassName = isBlueAccent
+    ? "bg-cyan-300"
+    : isVioletAccent
+      ? "bg-[#9b4dff]"
+      : "bg-red-300";
 
   const iconClassName = isBlueAccent
     ? isActive
       ? "text-cyan-100"
       : "text-cyan-200/70 group-hover:text-cyan-100"
+    : isVioletAccent
+      ? isActive
+        ? "bg-[#9b4dff]/15 text-[#f2e8ff]"
+        : "bg-[#9b4dff]/10 text-[#cfb7ff] group-hover:text-[#f2e8ff]"
     : isActive
       ? "bg-red-400/15 text-red-100"
       : "bg-white/[0.035] text-neutral-400 group-hover:text-neutral-100";

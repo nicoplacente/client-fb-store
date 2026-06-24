@@ -1,5 +1,8 @@
 "use client";
-import { legalMenuItems, menuItems } from "@/modules/sidebar/libs/menu-items";
+import {
+  legalMenuItems,
+  menuItems,
+} from "@/modules/sidebar/libs/menu-items";
 import { IconPin, IconPower } from "@tabler/icons-react";
 import { usePathname } from "next/navigation";
 import useAppContext from "@/context/use-app-context";

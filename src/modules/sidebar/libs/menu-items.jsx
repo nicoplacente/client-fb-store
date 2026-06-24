@@ -30,6 +30,13 @@ export const menuItems = [
     external: true,
     accent: "blue",
   },
+  {
+    name: "StreamCore",
+    imageSrc: "/streamcore.webp",
+    href: "https://streamcore.codeluxe.tech/",
+    external: true,
+    accent: "violet",
+  },
 ];
 
 export const legalMenuItems = [
