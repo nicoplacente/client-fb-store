@@ -45,6 +45,35 @@ function formatHeaderNumber(value) {
   return String(number);
 }
 
+const generalIconClassNames =
+  "border-white/10 bg-neutral-900/70 text-neutral-300";
+
+function getAccentHoverClasses(accent) {
+  if (accent === "blue") {
+    return {
+      link: `${generalIconClassNames} hover:border-cyan-300/25 hover:text-cyan-100`,
+      iconWrapper: "group-hover:bg-cyan-400/[0.055]",
+      image:
+        "group-hover:[filter:brightness(1.05)_drop-shadow(0_0_8px_#22d3ee)]",
+    };
+  }
+
+  if (accent === "violet") {
+    return {
+      link: `${generalIconClassNames} hover:border-[#9b4dff]/25 hover:text-[#f2e8ff]`,
+      iconWrapper: "group-hover:bg-[#9b4dff]/[0.055]",
+      image:
+        "group-hover:[filter:brightness(1.05)_drop-shadow(0_0_8px_#9b4dff)]",
+    };
+  }
+
+  return {
+    link: `  ${generalIconClassNames} hover:border-white/20 hover:text-white`,
+    iconWrapper: "bg-white/5 group-hover:bg-white/[0.045]",
+    image: "group-hover:[filter:brightness(1.05)_drop-shadow(0_0_8px_#ffffff)]",
+  };
+}
+
 export default function Header() {
   const { user, logout } = useAppContext(AuthContext);
   const pathname = usePathname();
@@ -333,7 +362,9 @@ function MobileHeaderMenu({
         className="absolute left-3 right-3 top-3 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-xl border border-white/10 bg-neutral-950 p-4 shadow-2xl shadow-black/70 [animation:mobile-menu-panel-in_220ms_cubic-bezier(0.22,1,0.36,1)] sm:left-6 sm:right-6 sm:top-5 sm:p-5 md:left-auto md:w-[420px]"
       >
         <div className="flex items-center justify-end">
-          <h2 id={titleId} className="sr-only">Menú principal</h2>
+          <h2 id={titleId} className="sr-only">
+            Menú principal
+          </h2>
           <button
             ref={closeButtonRef}
             type="button"
@@ -402,6 +433,7 @@ function MobileHeaderMenu({
         <nav className="mt-5 grid gap-2">
           {visibleMenuItems.map((item) => {
             const active = pathname === item.href;
+            const accentClasses = getAccentHoverClasses(item.accent);
 
             return (
               <Link
@@ -409,19 +441,19 @@ function MobileHeaderMenu({
                 href={item.href}
                 target={item.external ? "_blank" : undefined}
                 rel={item.external ? "noopener" : undefined}
-                className={`flex items-center gap-3 rounded-lg border px-3 py-3 text-sm font-semibold transition ${
+                className={`group flex items-center gap-3 rounded-lg border px-3 py-3 text-sm font-semibold transition ${
                   active
                     ? item.accent === "blue"
                       ? "border-cyan-300/40 bg-cyan-400/15 text-white"
                       : "border-red-400/40 bg-red-500/15 text-white"
-                    : item.accent === "blue"
-                      ? "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-cyan-300/25 hover:text-cyan-100"
-                      : "border-white/10 bg-neutral-900/70 text-neutral-300 hover:border-white/20 hover:text-white"
+                    : accentClasses.link
                 }`}
               >
                 <span
                   className={`inline-flex size-9 items-center justify-center ${
-                    item.imageSrc ? "" : "rounded-md bg-white/5"
+                    item.imageSrc
+                      ? accentClasses.iconWrapper
+                      : "rounded-md bg-white/5"
                   }`}
                 >
                   {item.imageSrc ? (
@@ -430,7 +462,7 @@ function MobileHeaderMenu({
                       alt=""
                       width={36}
                       height={36}
-                      className="size-8 object-contain"
+                      className={`size-8 object-contain transition-[filter,transform] duration-200 ${accentClasses.image}`}
                     />
                   ) : (
                     item.icon

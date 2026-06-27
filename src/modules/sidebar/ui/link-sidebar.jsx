@@ -35,10 +35,10 @@ export default function LinkSidebar({
     : isVioletAccent
       ? isActive
         ? "bg-[#9b4dff]/15 text-[#f2e8ff]"
-        : "bg-[#9b4dff]/10 text-[#cfb7ff] group-hover:text-[#f2e8ff]"
-    : isActive
-      ? "bg-red-400/15 text-red-100"
-      : "bg-white/[0.035] text-neutral-400 group-hover:text-neutral-100";
+        : "text-[#cfb7ff] group-hover:text-[#f2e8ff]"
+      : isActive
+        ? "bg-red-400/15 text-red-100"
+        : "bg-white/[0.035] text-neutral-400 group-hover:text-neutral-100";
 
   return (
     <Link
