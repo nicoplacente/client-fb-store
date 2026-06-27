@@ -18,10 +18,14 @@ function ensureApiUrl(value) {
 const rawServerUrl = process.env.NEXT_PUBLIC_SERVER_URL;
 const SERVER_URL = ensureApiUrl(rawServerUrl);
 const SOCKET_URL = normalizeUrl(SERVER_URL).replace(/\/api$/, "");
+const STREAMSCREAM_DOWNLOAD_URL =
+  normalizeUrl(process.env.NEXT_PUBLIC_STREAMSCREAM_DOWNLOAD_URL) ||
+  "https://github.com/NTiago-s/overflow-screamer-app/releases/latest/download/StreamScream-Overlay.exe";
 
 export const envConfig = {
   SERVER_URL,
   SOCKET_URL,
+  STREAMSCREAM_DOWNLOAD_URL,
   CHAT_POPUP_URL: "https://kick.com/popout/francobertello74-verify/chat",
   API_MY_RANKING: `${SERVER_URL}/ranking/me`,
   API_RANKING: `${SERVER_URL}/ranking`,

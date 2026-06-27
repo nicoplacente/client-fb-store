@@ -2,6 +2,7 @@
 
 import SectionContainer from "@/modules/ui/section-container";
 import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
+import { envConfig } from "@/config";
 import { IconDownload } from "@tabler/icons-react";
 import {
   CreditPackagesPanel,
@@ -110,8 +111,8 @@ function DashboardHeader({ loading, isPending, onRefresh }) {
           </p>
         </div>
         <a
-          href="/downloads/FB-Store-Screamer.exe"
-          download="FB-Store-Screamer.exe"
+          href={envConfig.STREAMSCREAM_DOWNLOAD_URL}
+          rel="nofollow noopener noreferrer"
           className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-red-300/25 bg-red-500/10 px-5 py-3 text-sm font-black text-red-100 transition hover:-translate-y-0.5 hover:border-red-300/45 hover:bg-red-500/15 focus:outline-none sm:w-fit"
         >
           <IconDownload aria-hidden="true" size={18} />

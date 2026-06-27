@@ -16,6 +16,14 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+Para apuntar la tienda y la descarga de StreamScream Overlay a los servicios
+correctos, configura:
+
+```env
+NEXT_PUBLIC_SERVER_URL=http://localhost:3001
+NEXT_PUBLIC_STREAMSCREAM_DOWNLOAD_URL=https://github.com/NTiago-s/overflow-screamer-app/releases/latest/download/StreamScream-Overlay.exe
+```
+
 You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
