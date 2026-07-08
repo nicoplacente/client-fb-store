@@ -76,9 +76,7 @@ export default function UserProfileModal({ user, fallbackUsername, open, onClose
           <ProfileValue label="Email" value={user.email} icon={<IconMail size={15} />} />
           <ProfileValue label="Instagram" value={user.instagram} icon={<IconBrandInstagram size={15} />} />
           <ProfileValue label="Twitter/X" value={user.twitter} icon={<IconBrandX size={15} />} />
-          <div className="sm:col-span-2">
             <ProfileValue label="Discord" value={user.discord} icon={<IconBrandDiscord size={15} />} />
-          </div>
         </div>
       </div>
     </div>
