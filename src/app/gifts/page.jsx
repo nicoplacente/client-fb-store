@@ -19,6 +19,7 @@ import {
 import { toast } from "sonner";
 import SectionContainer from "@/modules/ui/section-container";
 import SpotlightCard, { SpotlightGroup } from "@/modules/ui/spotlight-card";
+import ConfirmationDialog from "@/modules/ui/confirmation-dialog";
 import { AuthContext } from "@/context/auth-context/auth-context";
 import useAppContext from "@/context/use-app-context";
 import {
@@ -49,13 +50,98 @@ function hasStarted(value) {
   return Number.isNaN(date.getTime()) || date <= new Date();
 }
 
+function getGiveawayState(giveaway) {
+  const started = hasStarted(giveaway.startsAt);
+  const isFinalized =
+    giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+  const isActive = giveaway.status === "active" && started && !isFinalized;
+  const canJoin = isActive && !giveaway.hasJoined;
+
+  if (isFinalized) {
+    return {
+      started,
+      isFinalized,
+      isActive: false,
+      canJoin: false,
+      badgeLabel: "Finalizado",
+      badgeClassName:
+        "border-white/10 bg-white/5 text-neutral-200 shadow-inner shadow-black/20",
+      participationLabel: giveaway.hasJoined ? "Participaste" : "Cerrado",
+      participationClassName: giveaway.hasJoined
+        ? "border-amber-300/25 bg-amber-400/10 text-amber-100 shadow-inner shadow-amber-950/20"
+        : "border-white/10 bg-white/5 text-neutral-300 shadow-inner shadow-black/20",
+      scheduleLabel: "Finalizó",
+      scheduleDate: giveaway.finalizedAt || giveaway.endsAt,
+     
+      primaryActionLabel: "Sorteo finalizado",
+    };
+  }
+
+  if (!started) {
+    return {
+      started,
+      isFinalized: false,
+      isActive: false,
+      canJoin: false,
+      badgeLabel: "Próximamente",
+      badgeClassName:
+        "border-sky-300/25 bg-sky-400/10 text-sky-100 shadow-inner shadow-sky-950/20",
+      participationLabel: "Aún no abre",
+      participationClassName:
+        "border-sky-300/25 bg-sky-400/10 text-sky-100 shadow-inner shadow-sky-950/20",
+      scheduleLabel: "Comienza",
+      scheduleDate: giveaway.startsAt,
+      primaryActionLabel: "Todavía no disponible",
+    };
+  }
+
+  if (giveaway.hasJoined) {
+    return {
+      started,
+      isFinalized: false,
+      isActive: true,
+      canJoin: false,
+      badgeLabel: "Activo",
+      badgeClassName:
+        "border-green-300/25 bg-green-400/10 text-green-100 shadow-inner shadow-green-950/20",
+      participationLabel: "Participando",
+      participationClassName:
+        "border-green-300/25 bg-green-400/10 text-green-200 shadow-inner shadow-green-950/20",
+      scheduleLabel: "Cierra",
+      scheduleDate: giveaway.endsAt,
+      primaryActionLabel: "Ya participas",
+    };
+  }
+
+  return {
+    started,
+    isFinalized: false,
+    isActive: true,
+    canJoin: true,
+    badgeLabel: "Activo",
+    badgeClassName:
+      "border-green-300/25 bg-green-400/10 text-green-100 shadow-inner shadow-green-950/20",
+    participationLabel: "Disponible",
+    participationClassName:
+      "border-emerald-300/25 bg-emerald-400/10 text-emerald-100 shadow-inner shadow-emerald-950/20",
+    scheduleLabel: "Cierra",
+    scheduleDate: giveaway.endsAt,
+    primaryActionLabel:
+      giveaway.entryCost > 0
+        ? `Participar - ${formatNumber(giveaway.entryCost)} creditos`
+        : "Participar gratis",
+  };
+}
+
 export default function GiftsPage() {
-  const { refreshUser } = useAppContext(AuthContext);
+  const { user, refreshUser } = useAppContext(AuthContext);
   const [giveaways, setGiveaways] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [resultGiveaway, setResultGiveaway] = useState(null);
+  const [pendingGiveaway, setPendingGiveaway] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const availableCredits = Number(user?.credits || 0);
 
   const normalizedGiveaways = useMemo(
     () => giveaways.map(normalizeGiveaway).filter((giveaway) => giveaway.id),
@@ -80,7 +166,22 @@ export default function GiftsPage() {
     loadGiveaways();
   }, [loadGiveaways]);
 
-  function handleJoin(giveaway) {
+  function handleRequestJoin(giveaway) {
+    if (isPending) return;
+    setPendingGiveaway(giveaway);
+  }
+
+  function handleCancelJoin() {
+    if (isPending) return;
+    setPendingGiveaway(null);
+  }
+
+  function handleConfirmJoin() {
+    const giveaway = pendingGiveaway;
+
+    if (!giveaway) return;
+    setPendingGiveaway(null);
+
     startTransition(async () => {
       try {
         const result = await joinGiveaway(giveaway.id);
@@ -146,11 +247,36 @@ export default function GiftsPage() {
               index={index}
               onOpenResult={setResultGiveaway}
               isPending={isPending}
-              onJoin={handleJoin}
+              onJoin={handleRequestJoin}
             />
           ))}
         </SpotlightGroup>
       )}
+
+      <ConfirmationDialog
+        open={Boolean(pendingGiveaway)}
+        title="Confirmar participacion"
+        description={
+          pendingGiveaway
+            ? getJoinConfirmationDescription(pendingGiveaway, availableCredits)
+            : ""
+        }
+        confirmLabel="Participar"
+        confirmDisabled={!canJoinGiveaway(pendingGiveaway, availableCredits)}
+        cancelDisabled={isPending}
+        onConfirm={handleConfirmJoin}
+        onCancel={handleCancelJoin}
+        aside={
+          pendingGiveaway ? <GiveawayDetail giveaway={pendingGiveaway} /> : null
+        }
+      >
+        {pendingGiveaway ? (
+          <GiveawayJoinSummary
+            giveaway={pendingGiveaway}
+            availableCredits={availableCredits}
+          />
+        ) : null}
+      </ConfirmationDialog>
 
       {resultGiveaway ? (
         <GiveawayResultModal
@@ -201,25 +327,11 @@ function GiveawayCard({
   onJoin,
   index = 0,
 }) {
-  const started = hasStarted(giveaway.startsAt);
-  const isFinalized =
-    giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
-  const canJoin =
-    giveaway.status === "active" &&
-    started &&
-    !isFinalized &&
-    !giveaway.hasJoined;
+  const state = getGiveawayState(giveaway);
   const entryLabel =
     giveaway.entryCost > 0
       ? `${formatNumber(giveaway.entryCost)} creditos`
       : "Gratis";
-  const statusLabel = !started
-    ? "Proximamente"
-    : isFinalized
-      ? "Finalizado"
-      : giveaway.status === "active"
-        ? "Activo"
-        : giveaway.status;
 
   return (
     <SpotlightCard
@@ -229,9 +341,11 @@ function GiveawayCard({
       className="group flex min-h-[410px] flex-col items-center rounded-[15px] p-5 text-center"
     >
       <div className="relative flex h-40 w-full items-center justify-center overflow-hidden rounded-xl bg-black/20 sm:h-44">
-        {/* <span className="absolute left-3 top-3 z-10 rounded-full border border-white/10 bg-neutral-950/75 px-3 py-1 text-xs font-bold text-neutral-200 shadow-lg shadow-black/20 backdrop-blur">
-          {statusLabel}
-        </span> */}
+        <span
+          className={`absolute left-3 top-3 z-10 rounded-full border px-3 py-1 text-xs font-bold shadow-lg shadow-black/20 backdrop-blur ${state.badgeClassName}`}
+        >
+          {state.badgeLabel}
+        </span>
         {giveaway.imageUrl ? (
           <img
             src={giveaway.imageUrl}
@@ -252,11 +366,11 @@ function GiveawayCard({
             <h2 className="line-clamp-2 text-lg font-black leading-tight text-white">
               {giveaway.title}
             </h2>
-            {giveaway.hasJoined ? (
-              <span className="rounded-full border border-green-300/25 bg-green-400/10 px-3 py-1 text-xs font-bold text-green-200 shadow-inner shadow-green-950/20">
-                Participando
-              </span>
-            ) : null}
+            <span
+              className={`rounded-full border px-3 py-1 text-xs font-bold ${state.participationClassName}`}
+            >
+              {state.participationLabel}
+            </span>
           </div>
           <p className="mx-auto mt-3 line-clamp-2 min-h-10 max-w-[16rem] text-sm font-semibold leading-5 text-neutral-500">
             {giveaway.description}
@@ -274,9 +388,7 @@ function GiveawayCard({
 
             <p className="inline-flex items-center justify-center gap-2 text-xs text-neutral-600">
               <IconCalendarDue size={15} />
-              {started
-                ? formatDate(giveaway.endsAt)
-                : formatDate(giveaway.startsAt)}
+              {state.scheduleLabel} {formatDate(state.scheduleDate)}
             </p>
           </div>
           <p className="flex items-center justify-center gap-2 text-2xl font-black text-amber-300">
@@ -287,22 +399,14 @@ function GiveawayCard({
 
         <div className="grid w-full gap-2">
           <button
-            disabled={isPending || !canJoin}
+            disabled={isPending || !state.canJoin}
             onClick={() => onJoin(giveaway)}
             aria-label={`Participar en el sorteo ${giveaway.title}`}
             data-spotlight-cta
             className="spotlight-cta inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/10 px-5 py-3 text-xs font-black focus:outline-none disabled:cursor-not-allowed disabled:bg-neutral-900 disabled:text-neutral-500 disabled:shadow-none"
           >
             <IconGift size={18} />
-            {giveaway.hasJoined
-              ? "Ya participas"
-              : canJoin
-                ? giveaway.entryCost > 0
-                  ? `Participar - ${entryLabel}`
-                  : "Participar gratis"
-                : isFinalized
-                  ? "Sorteo finalizado"
-                  : "Todavia no disponible"}
+            {state.primaryActionLabel}
           </button>
 
           <button
@@ -312,12 +416,145 @@ function GiveawayCard({
             className="inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-[10px] border border-white/15 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(13,13,13,0.72))] px-5 py-3 text-xs font-black text-neutral-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] transition hover:-translate-y-0.5 hover:border-amber-200/45 hover:bg-[linear-gradient(135deg,rgba(251,191,36,0.18),rgba(13,13,13,0.78))] hover:text-white focus:outline-none"
           >
             <IconTrophy size={17} />
-            {isFinalized ? "Ver resultado" : "Resultado pendiente"}
+            {state.isFinalized ? "Ver resultado" : "Resultado pendiente"}
           </button>
         </div>
       </div>
     </SpotlightCard>
   );
+}
+
+function GiveawayDetail({ giveaway }) {
+  return (
+    <div className="grid gap-4">
+      <div className="relative flex h-48 w-full items-center justify-center overflow-hidden rounded-2xl border border-white/10 bg-black/20">
+        {giveaway.imageUrl ? (
+          <img
+            src={giveaway.imageUrl}
+            alt={`Imagen del sorteo ${giveaway.title}`}
+            className="max-h-full max-w-full object-contain"
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-red-300/70">
+            <IconGift size={56} />
+          </div>
+        )}
+      </div>
+
+      <div className="grid gap-3 text-sm text-neutral-300">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-wide text-red-300/80">
+            Sorteo
+          </p>
+          <h3 className="mt-2 text-xl font-black text-white">
+            {giveaway.title}
+          </h3>
+        </div>
+        {giveaway.description ? (
+          <p className="leading-6 text-neutral-400">{giveaway.description}</p>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function GiveawayJoinSummary({ giveaway, availableCredits }) {
+  const entryCost = Number(giveaway.entryCost || 0);
+  const hasEnoughCredits = availableCredits >= entryCost;
+
+  return (
+    <div className="grid gap-3 text-sm text-neutral-300">
+      <SummaryRow label="Sorteo" value={giveaway.title} />
+      <SummaryRow
+        label="Costo de participacion"
+        value={entryCost > 0 ? formatNumber(entryCost) : "Gratis"}
+        valueClassName={entryCost > 0 ? "text-amber-200" : "text-green-300"}
+        icon={entryCost > 0 ? <CreditsIcon /> : null}
+      />
+      <SummaryRow
+        label="Participantes actuales"
+        value={formatNumber(giveaway.participants)}
+      />
+      <SummaryRow
+        label="Tu saldo"
+        value={formatNumber(availableCredits)}
+        valueClassName={hasEnoughCredits ? "text-green-300" : "text-red-300"}
+        icon={<CreditsIcon />}
+      />
+      <SummaryRow
+        label="Estado"
+        value={
+          hasEnoughCredits
+            ? entryCost > 0
+              ? "Se descontaran creditos al confirmar"
+              : "Participacion gratuita"
+            : "Créditos insuficientes"
+        }
+        valueClassName={hasEnoughCredits ? "text-white" : "text-red-300"}
+      />
+    </div>
+  );
+}
+
+function SummaryRow({ label, value, valueClassName = "text-white", icon }) {
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <span className="text-neutral-400">{label}</span>
+      <span
+        className={`inline-flex items-center gap-1.5 text-right font-black ${valueClassName}`}
+      >
+        {icon}
+        <span>{value}</span>
+      </span>
+    </div>
+  );
+}
+
+function CreditsIcon() {
+  return <Image src={coins} alt="Creditos" className="size-4 shrink-0" />;
+}
+
+function canJoinGiveaway(giveaway, availableCredits) {
+  if (!giveaway) return false;
+
+  const started = hasStarted(giveaway.startsAt);
+  const isFinalized =
+    giveaway.status === "closed" || Boolean(giveaway.finalizedAt);
+
+  if (
+    giveaway.status !== "active" ||
+    !started ||
+    isFinalized ||
+    giveaway.hasJoined
+  ) {
+    return false;
+  }
+
+  return availableCredits >= Number(giveaway.entryCost || 0);
+}
+
+function getJoinConfirmationDescription(giveaway, availableCredits) {
+  const entryCost = Number(giveaway.entryCost || 0);
+
+  if (!canJoinGiveaway(giveaway, availableCredits)) {
+    if (giveaway?.hasJoined) {
+      return "Ya estas participando en este sorteo.";
+    }
+
+    if (availableCredits < entryCost) {
+      return "No tenes creditos suficientes para participar en este sorteo.";
+    }
+
+    return "Este sorteo no esta disponible para participar en este momento.";
+  }
+
+  if (entryCost > 0) {
+    return `Se descontaran ${formatNumber(entryCost)} creditos de tu cuenta para registrar tu participacion.`;
+  }
+
+  return "Tu participacion se registrara al confirmar.";
 }
 
 function GiveawayResultModal({ giveaway, onClose }) {
